@@ -6,8 +6,8 @@ import nmc_met_map.QPF as draw_QPF
 import nmc_met_map.elements as draw_elements
 import nmc_met_map.crossection as draw_crossection
 
+draw_crossection.Crosssection_Wind_Theta_e_Qv(model='GRAPES_GFS',day_back=1)
 draw_crossection.Crosssection_Wind_Theta_e_RH(model='GRAPES_GFS',day_back=1)
-draw_crossection.Crosssection_Wind_Theta_e_Qv(model='ECMWF',day_back=1)
 draw_crossection.Crosssection_Wind_Theta_e_absv(model='ECMWF',day_back=1)
 draw_elements.low_level_wind(model='ECMWF',day_back=1)
 draw_elements.mslp_gust10m(model='ECMWF',day_back=1)

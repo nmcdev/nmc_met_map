@@ -332,13 +332,13 @@ def Crosssection_Wind_Theta_e_Qv(
 
     rh,pressure = xr.broadcast(cross_rh['data'],cross_t['level'])
 
-    Qv = mpcalc.specific_humidity_from_dewpoint(cross_Td['data'].values*units.celsius,
+    Qv = mpcalc.specific_humidity_from_dewpoint(cross_Td,
                 pressure)
 
-    cross_Qv = xr.DataArray(np.array(Qv),
+    cross_Qv = xr.DataArray(np.array(Qv)*1000.,
                     coords=cross_rh['data'].coords,
                     dims=cross_rh['data'].dims,
-                    attrs={'units': Qv.units})
+                    attrs={'units': units('g/kg')})
 
     Theta_e=mpcalc.equivalent_potential_temperature(pressure,
                                                 cross_t['data'].values*units.celsius, 

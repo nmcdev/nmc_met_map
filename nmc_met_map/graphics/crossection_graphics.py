@@ -209,7 +209,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
-    Qv_contour = ax.contourf(cross_Qv['lon'], cross_Qv['level'], cross_Qv['data'],
+    Qv_contour = ax.contourf(cross_Qv['lon'], cross_Qv['level'], cross_Qv.values,
                             levels=np.arange(0, 20, 2), cmap='YlGnBu')
     Qv_colorbar = fig.colorbar(Qv_contour)
 
@@ -253,7 +253,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     ax.set_title('相当位温, 绝对湿度, 水平风场', loc='right', fontsize=25)
     ax.set_ylabel('Pressure (hPa)')
     ax.set_xlabel('Longitude')
-    Qv_colorbar.set_label('Specific Humidity')
+    Qv_colorbar.set_label('Specific Humidity (g/kg)')
 
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
