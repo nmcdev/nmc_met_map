@@ -278,4 +278,106 @@ def draw_Crosssection_Wind_Theta_e_Qv(
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
-        plt.show()                 
+        plt.show()
+
+def draw_Time_Crossection_rh_uv_t(
+                    rh_2D=None, u_2D=None, v_2D=None,TMP_2D=None,
+                    output_dir=None):        
+    # # 画图
+    # Define the figure object and primary axes
+    fig = plt.figure(1, figsize=(16., 9.))
+    ax = plt.axes()
+
+    utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
+
+    # Plot RH using contourf
+    rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
+                            levels=np.arange(0, 105, 5), cmap='RdBu')
+    rh_colorbar = fig.colorbar(rh_contour)
+    rh_colorbar.set_label('相对湿度（%）',size=15)
+
+    ax.barbs(u_2D['time'].values, u_2D['level'].values,
+            np.squeeze(u_2D['data'].values.swapaxes(1,0)),
+            np.squeeze(v_2D['data'].values.swapaxes(1,0)), color='k')
+
+    TMP_contour = ax.contour(TMP_2D['time'].values, TMP_2D['level'].values,  np.squeeze(TMP_2D['data'].values.swapaxes(1,0)),
+                            levels=np.arange(-40, 40, 5), colors='#F4511E', linewidths=2)
+    TMP_contour.clabel(TMP_contour.levels[1::2], fontsize=15, colors='#F4511E', inline=1,
+                        inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)
+
+    xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
+    ax.xaxis.set_major_formatter(xstklbls)
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+        label.set_fontsize(15)
+        label.set_horizontalalignment('right')
+
+    for label in ax.get_yticklabels():
+        label.set_fontsize(15)
+            
+    ax.set_yscale('symlog')
+    ax.set_ylabel('高度 （hPa）', fontsize=15)
+    ax.set_yticklabels(np.arange(1000, 50, -100))
+    ax.set_yticks(np.arange(1000, 50, -100))
+    ax.set_ylim(rh_2D['level'].values.max(), rh_2D['level'].values.min())
+    ax.set_xlim([rh_2D['time'].values[0], rh_2D['time'].values[-1]])
+
+    #出图——————————————————————————————————————————————————————————
+    if(output_dir != None ):
+        plt.savefig(output_dir+'时间剖面产品_起报时间_'+
+        str(rh_2D['forecast_reference_time'].values)[0:13]+
+        '_预报时效_'+str(t_range[0])+'_至_'+str(t_range[1])
+        +'.png', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()                                  
+
+def draw_Time_Crossection_rh_uv_theta_e(
+                    rh_2D=None, u_2D=None, v_2D=None,theta_e_2D=None,
+                    output_dir=None):        
+    # # 画图
+    # Define the figure object and primary axes
+    fig = plt.figure(1, figsize=(16., 9.))
+    ax = plt.axes()
+
+    utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
+
+    # Plot RH using contourf
+    rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
+                            levels=np.arange(0, 105, 5), cmap='RdBu')
+    rh_colorbar = fig.colorbar(rh_contour)
+    rh_colorbar.set_label('相对湿度（%）',size=15)
+
+    ax.barbs(u_2D['time'].values, u_2D['level'].values,
+            np.squeeze(u_2D['data'].values.swapaxes(1,0)),
+            np.squeeze(v_2D['data'].values.swapaxes(1,0)), color='k')
+
+    TMP_contour = ax.contour(theta_e_2D['time'].values, theta_e_2D['level'].values,  np.squeeze(theta_e_2D.values.swapaxes(1,0)),
+                            levels=np.arange(250, 450, 5), colors='#F4511E', linewidths=2)
+    TMP_contour.clabel(TMP_contour.levels[1::2], fontsize=15, colors='#F4511E', inline=1,
+                        inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)
+
+    xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
+    ax.xaxis.set_major_formatter(xstklbls)
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+        label.set_fontsize(15)
+        label.set_horizontalalignment('right')
+
+    for label in ax.get_yticklabels():
+        label.set_fontsize(15)
+            
+    ax.set_yscale('symlog')
+    ax.set_ylabel('高度 （hPa）', fontsize=15)
+    ax.set_yticklabels(np.arange(1000, 50, -100))
+    ax.set_yticks(np.arange(1000, 50, -100))
+    ax.set_ylim(rh_2D['level'].values.max(), rh_2D['level'].values.min())
+    ax.set_xlim([rh_2D['time'].values[0], rh_2D['time'].values[-1]])
+
+    #出图——————————————————————————————————————————————————————————
+    if(output_dir != None ):
+        plt.savefig(output_dir+'时间剖面产品_起报时间_'+
+        str(rh_2D['forecast_reference_time'].values)[0:13]+
+        '_预报时效_'+str(t_range[0])+'_至_'+str(t_range[1])
+        +'.png', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()                                          

@@ -355,3 +355,117 @@ def Crosssection_Wind_Theta_e_Qv(
                     h_pos=h_pos,st_point=st_point,ed_point=ed_point,
                     levels=levels,map_extent=map_extent,
                     output_dir=output_dir)
+
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+import math
+import os
+import xarray as xr
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from nmc_met_publish_map.source.utility import add_logo_extra,add_public_title,add_logo_extra_in_axes,add_public_title_sta
+import locale
+import sys
+import metpy.calc as mpcalc
+from metpy.units import units
+import astropy.units as unt
+from nmc_met_io.retrieve_micaps_server import get_model_points,get_model_3D_grids,get_latest_initTime
+
+
+def Time_Crossection_rh_uv_t(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
+    t_gap=3,t_range=[0,48],output_dir=None):
+    #if(sys.platform[0:3] == 'win'):
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')
+
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
+
+    # # 度数据
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl='')
+
+    initTime = get_latest_initTime(directory[0:-1]+"850")
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    TMP_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='')
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    u_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    u_2D=u_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='')
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    v_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    v_2D=v_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='')
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    rh_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    rh_2D=rh_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+    rh_2D.attrs['model']=model
+
+    crossection_graphics.draw_Time_Crossection_rh_uv_t(
+                    rh_2D=rh_2D, u_2D=u_2D, v_2D=v_2D,TMP_2D=TMP_2D,
+                    output_dir=output_dir)
+
+
+def Time_Crossection_rh_uv_theta_e(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
+    t_gap=3,t_range=[0,48],output_dir=None):
+    #if(sys.platform[0:3] == 'win'):
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')
+
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
+
+    # # 度数据
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl='')
+
+    initTime = get_latest_initTime(directory[0:-1]+"850")
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    TMP_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='')
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    u_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    u_2D=u_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='')
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    v_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    v_2D=v_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+
+    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='')
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    rh_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    rh_2D=rh_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+    rh_2D.attrs['model']=model
+
+    Td_2D = mpcalc.dewpoint_rh(TMP_2D['data'].values*units.celsius,
+                rh_2D['data'].values* units.percent)
+
+    rh,pressure = xr.broadcast(rh_2D['data'],rh_2D['level'])
+
+    Theta_e=mpcalc.equivalent_potential_temperature(pressure,
+                                                TMP_2D['data'].values*units.celsius, 
+                                                Td_2D)
+
+    theta_e_2D = xr.DataArray(np.array(Theta_e),
+                        coords=rh_2D['data'].coords,
+                        dims=rh_2D['data'].dims,
+                        attrs={'units': Theta_e.units})
+
+    crossection_graphics.draw_Time_Crossection_rh_uv_theta_e(
+                    rh_2D=rh_2D, u_2D=u_2D, v_2D=v_2D,theta_e_2D=theta_e_2D,
+                    output_dir=output_dir)
