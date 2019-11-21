@@ -2,19 +2,11 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-from nmc_met_graphics.plot.china_map import add_china_map_2cartopy
-from nmc_met_graphics.cmap.cm import guide_cmaps
-from nmc_met_graphics.plot.util import add_model_title
 import nmc_met_map.lib.utility as utl
 from datetime import datetime, timedelta
 import pandas as pd
 import locale
 import sys
-from matplotlib.colors import BoundaryNorm,ListedColormap
-import nmc_met_graphics.cmap.ctables as dk_ctables
 
 def draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=None,Td2m=None,AT=None,u10m=None,v10m=None,u100m=None,v100m=None,
@@ -285,5 +277,81 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         plt.savefig(output_dir+model+'模式_'+
         datetime(y_s[model],m_s[model],d_s[model],h_s[model]).strftime("%Y%m%d%H")+
         '00'+'.jpg', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
+import metpy.calc as mpcalc
+from metpy.cbook import get_test_data
+from metpy.plots import  SkewT
+from metpy.units import units
+
+def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=None,
+    fcst_info=None,output_dir=None):
+    fig = plt.figure(figsize=(9, 9))
+    skew = SkewT(fig, rotation=45)
+
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+
+    # Plot the data using normal plotting functions, in this case using
+    # log scaling in Y, as dictated by the typical meteorological plot.
+    skew.plot(p, T, 'r')
+    skew.plot(p, Td, 'g')
+    skew.plot_barbs(p, u, v)
+    skew.ax.set_ylim(1000, 100)
+    skew.ax.set_xlim(-40, 60)
+
+    # Calculate LCL height and plot as black dot. Because `p`'s first value is
+    # ~1000 mb and its last value is ~250 mb, the `0` index is selected for
+    # `p`, `T`, and `Td` to lift the parcel from the surface. If `p` was inverted,
+    # i.e. start from low value, 250 mb, to a high value, 1000 mb, the `-1` index
+    # should be selected.
+    lcl_pressure, lcl_temperature = mpcalc.lcl(p[0], T[0], Td[0])
+    skew.plot(lcl_pressure, lcl_temperature, 'ko', markerfacecolor='black')
+
+    # Calculate full parcel profile and add to plot as black line
+    prof = mpcalc.parcel_profile(p, T[0], Td[0]).to('degC')
+    skew.plot(p, prof, 'k', linewidth=2)
+
+    # Shade areas of CAPE and CIN
+    skew.shade_cin(p, T, prof)
+    skew.shade_cape(p, T, prof)
+
+    # An example of a slanted line at constant T -- in this case the 0
+    # isotherm
+    skew.ax.axvline(0, color='c', linestyle='--', linewidth=2)
+
+    # Add the relevant special lines
+    skew.plot_dry_adiabats()
+    skew.plot_moist_adiabats()
+    skew.plot_mixing_lines()
+
+    #forecast information
+    bax=plt.axes([0.12,0.88,.25,.07],facecolor='#FFFFFFCC')
+    bax.axis('off')
+    bax.axis([0, 10, 0, 10])
+
+    initial_time = pd.to_datetime(
+        str(fcst_info['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')
+    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 5.0,'['+str(fcst_info.attrs['model'])+']'+'模式时间剖面',size=11)
+    plt.text(2.5, 2.5,'预报点: '+str(fcst_info.attrs['points']['lon'])+
+        ', '+str(fcst_info.attrs['points']['lat']),size=11)
+    plt.text(2.5, 0.5,'www.nmc.cn',size=11)
+    utl.add_logo_extra_in_axes(pos=[0.1,0.88,.07,.07],which='nmc', size='Xlarge')
+
+    # Show the plot
+    if(output_dir != None ):
+        plt.savefig(output_dir+'时间剖面产品_起报时间_'+
+        str(fcst_info['forecast_reference_time'].values)[0:13]+
+        '_预报时效_'+str(int(fcst_info.attrs['forecast_period'].values))
+        +'.png', dpi=200,bbox_inches='tight')
     else:
         plt.show()

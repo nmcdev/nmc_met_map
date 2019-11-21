@@ -282,7 +282,10 @@ def draw_Crosssection_Wind_Theta_e_Qv(
 
 def draw_Time_Crossection_rh_uv_t(
                     rh_2D=None, u_2D=None, v_2D=None,TMP_2D=None,
-                    output_dir=None):        
+                    t_range=None,output_dir=None):   
+
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）                         
     # # 画图
     # Define the figure object and primary axes
     fig = plt.figure(1, figsize=(16., 9.))
@@ -350,7 +353,10 @@ def draw_Time_Crossection_rh_uv_t(
 
 def draw_Time_Crossection_rh_uv_theta_e(
                     rh_2D=None, u_2D=None, v_2D=None,theta_e_2D=None,
-                    output_dir=None):        
+                    t_range=None,output_dir=None):        
+
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）                    
     # # 画图
     # Define the figure object and primary axes
     fig = plt.figure(1, figsize=(16., 9.))

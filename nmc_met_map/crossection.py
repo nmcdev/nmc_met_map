@@ -376,13 +376,6 @@ from nmc_met_io.retrieve_micaps_server import get_model_points,get_model_3D_grid
 def Time_Crossection_rh_uv_t(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
     t_gap=3,t_range=[0,48],output_dir=None):
-    #if(sys.platform[0:3] == 'win'):
-    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
-    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
-    if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
-    if(sys.platform[0:3] == 'win'):        
-        locale.setlocale(locale.LC_CTYPE, 'chinese')
 
     fhours = np.arange(t_range[0], t_range[1], t_gap)
 
@@ -477,4 +470,4 @@ def Time_Crossection_rh_uv_theta_e(model='ECMWF',points={'lon':[116.3833], 'lat'
 
     crossection_graphics.draw_Time_Crossection_rh_uv_theta_e(
                     rh_2D=rh_2D, u_2D=u_2D, v_2D=v_2D,theta_e_2D=theta_e_2D,
-                    output_dir=output_dir)
+                    t_range=t_range,output_dir=output_dir)

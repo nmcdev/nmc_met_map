@@ -6,7 +6,9 @@ import nmc_met_map.QPF as draw_QPF
 import nmc_met_map.elements as draw_elements
 import nmc_met_map.crossection as draw_crossection
 import nmc_met_map.sta as draw_sta
-draw_sta.Station_Synthetical_Forecast_From_Cassandra(t_range=[1,7],model='NCEP_GFS')
+
+draw_sta.sta_SkewT()
+draw_sta.Station_Synthetical_Forecast_From_Cassandra(initTime=['19112020','19112008'])
 draw_crossection.Time_Crossection_rh_uv_t()    
 draw_crossection.Time_Crossection_rh_uv_theta_e()
 draw_crossection.Crosssection_Wind_Theta_e_Qv(model='GRAPES_GFS',day_back=1)
