@@ -288,11 +288,9 @@ def draw_Time_Crossection_rh_uv_t(
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
 
-    utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
-
     # Plot RH using contourf
     rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
-                            levels=np.arange(0, 105, 5), cmap='RdBu')
+                            levels=np.arange(0, 106, 5), cmap='RdBu')
     rh_colorbar = fig.colorbar(rh_contour)
     rh_colorbar.set_label('相对湿度（%）',size=15)
 
@@ -301,7 +299,7 @@ def draw_Time_Crossection_rh_uv_t(
             np.squeeze(v_2D['data'].values.swapaxes(1,0)), color='k')
 
     TMP_contour = ax.contour(TMP_2D['time'].values, TMP_2D['level'].values,  np.squeeze(TMP_2D['data'].values.swapaxes(1,0)),
-                            levels=np.arange(-40, 40, 5), colors='#F4511E', linewidths=2)
+                            levels=np.arange(-100, 40, 5), colors='#F4511E', linewidths=2)
     TMP_contour.clabel(TMP_contour.levels[1::2], fontsize=15, colors='#F4511E', inline=1,
                         inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)
 
@@ -322,6 +320,25 @@ def draw_Time_Crossection_rh_uv_t(
     ax.set_ylim(rh_2D['level'].values.max(), rh_2D['level'].values.min())
     ax.set_xlim([rh_2D['time'].values[0], rh_2D['time'].values[-1]])
 
+    #forecast information
+    bax=plt.axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
+    bax.axis('off')
+    bax.axis([0, 10, 0, 10])
+
+    initial_time = pd.to_datetime(
+        str(rh_2D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')
+    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 5.0,'['+str(rh_2D.attrs['model'])+']'+'模式时间剖面',size=11)
+    plt.text(2.5, 2.5,'预报点: '+str(rh_2D.attrs['points']['lon'])+
+        ', '+str(rh_2D.attrs['points']['lat']),size=11)
+    plt.text(2.5, 0.5,'www.nmc.cn',size=11)
+    utl.add_logo_extra_in_axes(pos=[0.1,0.88,.07,.07],which='nmc', size='Xlarge')
+    ax.set_title('温度, 相对湿度, 水平风', loc='right', fontsize=23)
+
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):
         plt.savefig(output_dir+'时间剖面产品_起报时间_'+
@@ -339,11 +356,11 @@ def draw_Time_Crossection_rh_uv_theta_e(
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
 
-    utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
+ #   utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
 
     # Plot RH using contourf
     rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
-                            levels=np.arange(0, 105, 5), cmap='RdBu')
+                            levels=np.arange(0, 106, 5), cmap='RdBu')
     rh_colorbar = fig.colorbar(rh_contour)
     rh_colorbar.set_label('相对湿度（%）',size=15)
 
@@ -372,6 +389,25 @@ def draw_Time_Crossection_rh_uv_theta_e(
     ax.set_yticks(np.arange(1000, 50, -100))
     ax.set_ylim(rh_2D['level'].values.max(), rh_2D['level'].values.min())
     ax.set_xlim([rh_2D['time'].values[0], rh_2D['time'].values[-1]])
+
+    #forecast information
+    bax=plt.axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
+    bax.axis('off')
+    bax.axis([0, 10, 0, 10])
+
+    initial_time = pd.to_datetime(
+        str(rh_2D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')
+    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 5.0,'['+str(rh_2D.attrs['model'])+']'+'模式时间剖面',size=11)
+    plt.text(2.5, 2.5,'预报点: '+str(rh_2D.attrs['points']['lon'])+
+        ', '+str(rh_2D.attrs['points']['lat']),size=11)
+    plt.text(2.5, 0.5,'www.nmc.cn',size=11)
+    utl.add_logo_extra_in_axes(pos=[0.1,0.88,.07,.07],which='nmc', size='Xlarge')
+    ax.set_title('相当位温, 相对湿度, 水平风', loc='right', fontsize=23)
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):

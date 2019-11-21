@@ -386,29 +386,33 @@ def Time_Crossection_rh_uv_t(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9
 
     fhours = np.arange(t_range[0], t_range[1], t_gap)
 
-    # # 度数据
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl='')
+    try:
+        data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
+                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
+                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=''),
+                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='')]
+    except KeyError:
+        raise ValueError('Can not find all directories needed')
 
-    initTime = get_latest_initTime(directory[0:-1]+"850")
+    # # 度数据
+    initTime = get_latest_initTime(data_dir[0][0:-1]+"850")
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    TMP_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    TMP_4D=get_model_3D_grids(directory=data_dir[0][0:-1],filenames=filenames,levels=levels, allExists=False)
     TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
 
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='')
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    u_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    u_4D=get_model_3D_grids(directory=data_dir[1][0:-1],filenames=filenames,levels=levels, allExists=False)
     u_2D=u_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
 
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='')
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    v_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    v_4D=get_model_3D_grids(directory=data_dir[2][0:-1],filenames=filenames,levels=levels, allExists=False)
     v_2D=v_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
 
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='')
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    rh_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    rh_4D=get_model_3D_grids(directory=data_dir[3][0:-1],filenames=filenames,levels=levels, allExists=False)
     rh_2D=rh_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
     rh_2D.attrs['model']=model
+    rh_2D.attrs['points']=points
 
     crossection_graphics.draw_Time_Crossection_rh_uv_t(
                     rh_2D=rh_2D, u_2D=u_2D, v_2D=v_2D,TMP_2D=TMP_2D,
@@ -428,29 +432,34 @@ def Time_Crossection_rh_uv_theta_e(model='ECMWF',points={'lon':[116.3833], 'lat'
 
     fhours = np.arange(t_range[0], t_range[1], t_gap)
 
-    # # 度数据
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl='')
+    # 读数据
 
-    initTime = get_latest_initTime(directory[0:-1]+"850")
+    try:
+        data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
+                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
+                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=''),
+                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='')]
+    except KeyError:
+        raise ValueError('Can not find all directories needed')
+
+    initTime = get_latest_initTime(data_dir[0][0:-1]+"850")
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    TMP_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    TMP_4D=get_model_3D_grids(directory=data_dir[0][0:-1],filenames=filenames,levels=levels, allExists=False)
     TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
 
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='')
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    u_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    u_4D=get_model_3D_grids(directory=data_dir[1][0:-1],filenames=filenames,levels=levels, allExists=False)
     u_2D=u_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
 
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='')
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    v_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    v_4D=get_model_3D_grids(directory=data_dir[2][0:-1],filenames=filenames,levels=levels, allExists=False)
     v_2D=v_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
 
-    directory=utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='')
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
-    rh_4D=get_model_3D_grids(directory=directory[0:-1],filenames=filenames,levels=levels, allExists=False)
+    rh_4D=get_model_3D_grids(directory=data_dir[3][0:-1],filenames=filenames,levels=levels, allExists=False)
     rh_2D=rh_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
     rh_2D.attrs['model']=model
+    rh_2D.attrs['points']=points
 
     Td_2D = mpcalc.dewpoint_rh(TMP_2D['data'].values*units.celsius,
                 rh_2D['data'].values* units.percent)

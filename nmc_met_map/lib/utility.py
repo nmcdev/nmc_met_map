@@ -572,15 +572,12 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'RH':'ECMWF_HR/RH/',
                     'SPFH':'ECMWF_HR/SPFH/',
                     'TMP':'ECMWF_HR/TMP/',
-                    'WVFL':None,
-                    'THETAE':None
                     },
             'GRAPES_GFS':{
                     'HGT':'GRAPES_GFS/HGT/',
                     'UGRD':'GRAPES_GFS/UGRD/',
                     'VGRD':'GRAPES_GFS/VGRD/',
                     'IR':'GRAPES_GFS/INFRARED_BRIGHTNESS_TEMPERATURE/',
-                    'VVEL':None,
                     'RH':'GRAPES_GFS/RH/',
                     'SPFH':'GRAPES_GFS/SPFH/',
                     'TMP':'GRAPES_GFS/TMP/',
@@ -591,13 +588,9 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'HGT':'NCEP_GFS/HGT/',
                     'UGRD':'NCEP_GFS/UGRD/',
                     'VGRD':'NCEP_GFS/VGRD/',
-                    'IR':None,
                     'VVEL':'NCEP_GFS/VVEL/',
                     'RH':'NCEP_GFS/RH/',
-                    'SPFH':None,
                     'TMP':'NCEP_GFS/TMP/',
-                    'WVFL':None,
-                    'THETAE':None
                     },
             'OBS':{            
                     'PLOT':'UPPER_AIR/PLOT/'
@@ -623,7 +616,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     '10M_GUST_6H':'ECMWF_HR/10_METRE_WIND_GUST_IN_THE_LAST_6_HOURS/',
                     'LCDC':'ECMWF_HR/LCDC/',
                     'TCDC':'ECMWF_HR/TCDC/',
-                    'T2m':'ECMWF_HR/TMP_2M/'
+                    'T2m':'ECMWF_HR/TMP_2M/',
+                    'Td2m':'ECMWF_HR/DPT_2M/'
                     },
             'GRAPES_GFS':{
                     'u10m':'GRAPES_GFS/UGRD/10M_ABOVE_GROUND/',
@@ -637,8 +631,9 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'SNOW06':'GRAPES_GFS/SNOW06/',
                     'SNOW24':'GRAPES_GFS/SNOW024/',
                     'TCWV':'GRAPES_GFS/PWAT/ENTIRE_ATMOSPHERE/',
-                    '10M_GUST_3H':None,
-                    'T2m':'GRAPES_GFS/TMP/2M_ABOVE_GROUND/'
+                    'T2m':'GRAPES_GFS/TMP/2M_ABOVE_GROUND/',
+                    'rh2m':'GRAPES_GFS/RH/2M_ABOVE_GROUND/',
+                    'Td2m':'GRAPES_GFS/DPT/2M_ABOVE_GROUND/'
                     },
             'NCEP_GFS':{
                     'u10m':'NCEP_GFS/UGRD/10M_ABOVE_GROUND/',
@@ -649,8 +644,9 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'RAIN06':'NCEP_GFS/RAIN06/',
                     'RAINC06':'NCEP_GFS/RAINC06/',
                     'TCWV':'NCEP_GFS/PWAT/ENTIRE_ATMOSPHERE/',
-                    '10M_GUST':None,
-                    'T2m':'NCEP_GFS/TMP/2M_ABOVE_GROUND/'
+                    'T2m':'NCEP_GFS/TMP/2M_ABOVE_GROUND/',
+                    'rh2m':'NCEP_GFS/RH/2M_ABOVE_GROUND/',
+                    'Td2m':'NCEP_GFS/DPT/2M_ABOVE_GROUND/'
                     },
 
             'OBS':{
