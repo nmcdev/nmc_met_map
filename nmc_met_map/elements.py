@@ -21,7 +21,7 @@ def T2m_all_type(initial_time=None, fhour=24, day_back=0,model='SCMOC',Var_plot=
 
     # micaps data directory
     try:
-        data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name=Var_plot)]
+        data_dir = [utl.Cassandra_dir(data_type='surface',data_source=model,var_name=Var_plot)]
     except KeyError:
         raise ValueError('Can not find all directories needed')
 

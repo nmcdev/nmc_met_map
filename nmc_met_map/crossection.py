@@ -116,7 +116,7 @@ def Crosssection_Wind_Theta_e_absv(
 
     crossection_graphics.draw_Crosssection_Wind_Theta_e_absv(
                     cross_absv3d=cross_absv3d, cross_Theta_e=cross_Theta_e, cross_u=cross_u,
-                    cross_v=cross_v,cross_rh=cross_rh,gh=gh,
+                    cross_v=cross_v,gh=gh,
                     h_pos=h_pos,st_point=st_point,ed_point=ed_point,
                     levels=levels,map_extent=map_extent,
                     output_dir=output_dir)
