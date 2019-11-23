@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 import pandas as pd
 import locale
 import sys
+import metpy.calc as mpcalc
+from metpy.plots import  SkewT
 
 def draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=None,Td2m=None,AT=None,u10m=None,v10m=None,u100m=None,v100m=None,
@@ -280,13 +282,6 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     else:
         plt.show()
 
-import matplotlib.pyplot as plt
-import pandas as pd
-
-import metpy.calc as mpcalc
-from metpy.cbook import get_test_data
-from metpy.plots import  SkewT
-from metpy.units import units
 
 def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=None,
     fcst_info=None,output_dir=None):

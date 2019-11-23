@@ -1,4 +1,4 @@
-import nmc_met_map.circulation as draw_circulation
+import nmc_met_map.synoptic as draw_synoptic
 import nmc_met_map.dynamic as draw_dynamic
 import nmc_met_map.moisture as draw_moisture
 import nmc_met_map.thermal as draw_thermal
@@ -6,7 +6,10 @@ import nmc_met_map.QPF as draw_QPF
 import nmc_met_map.elements as draw_elements
 import nmc_met_map.crossection as draw_crossection
 import nmc_met_map.sta as draw_sta
+import nmc_met_map.isentropic as draw_isentropic
 
+draw_isentropic.isentropic_uv()
+draw_synoptic.PV_Div_uv()
 draw_crossection.Crosssection_Wind_Theta_e_Qv(model='GRAPES_GFS',day_back=1)
 draw_crossection.Crosssection_Wind_Theta_e_RH(model='GRAPES_GFS',day_back=1)
 draw_crossection.Crosssection_Wind_Theta_e_absv(model='ECMWF',day_back=1)
