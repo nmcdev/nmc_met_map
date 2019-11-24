@@ -11,13 +11,6 @@ import metpy.calc as mpcalc
 from metpy.units import units
 import xarray as xr
 
-from datetime import datetime, timedelta
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-import matplotlib.pyplot as plt
-import metpy.calc
-from netCDF4 import num2date
-
 def isentropic_uv(initial_time=None, fhour=6, day_back=0,model='ECMWF',
     isentlev=310,
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
@@ -25,7 +18,6 @@ def isentropic_uv(initial_time=None, fhour=6, day_back=0,model='ECMWF',
     Global=False,
     south_China_sea=True,area = '全国',city=False,output_dir=None
      ):
-    # micaps data directory
     # micaps data directory
     try:
         data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl=''),
@@ -58,12 +50,6 @@ def isentropic_uv(initial_time=None, fhour=6, day_back=0,model='ECMWF',
     t=get_model_3D_grid(directory=data_dir[3][0:-1],filename=filename,levels=levels, allExists=False)
     if t is None:
         return
-
-    # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
-    else:
-        filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
 
     lats = np.squeeze(rh['lat'].values)
     lons = np.squeeze(rh['lon'].values)

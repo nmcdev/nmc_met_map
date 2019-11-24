@@ -633,7 +633,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'TCWV':'GRAPES_GFS/PWAT/ENTIRE_ATMOSPHERE/',
                     'T2m':'GRAPES_GFS/TMP/2M_ABOVE_GROUND/',
                     'rh2m':'GRAPES_GFS/RH/2M_ABOVE_GROUND/',
-                    'Td2m':'GRAPES_GFS/DPT/2M_ABOVE_GROUND/'
+                    'Td2m':'GRAPES_GFS/DPT/2M_ABOVE_GROUND/',
+                    'BLI':'GRAPES_GFS/BLI/'
                     },
             'NCEP_GFS':{
                     'u10m':'NCEP_GFS/UGRD/10M_ABOVE_GROUND/',
@@ -646,7 +647,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'TCWV':'NCEP_GFS/PWAT/ENTIRE_ATMOSPHERE/',
                     'T2m':'NCEP_GFS/TMP/2M_ABOVE_GROUND/',
                     'rh2m':'NCEP_GFS/RH/2M_ABOVE_GROUND/',
-                    'Td2m':'NCEP_GFS/DPT/2M_ABOVE_GROUND/'
+                    'Td2m':'NCEP_GFS/DPT/2M_ABOVE_GROUND/',
+                    'BLI':'NCEP_GFS/BLI/'
                     },
 
             'OBS':{

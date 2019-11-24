@@ -7,7 +7,9 @@ import nmc_met_map.elements as draw_elements
 import nmc_met_map.crossection as draw_crossection
 import nmc_met_map.sta as draw_sta
 import nmc_met_map.isentropic as draw_isentropic
+import nmc_met_map.synthetical as draw_synthetical
 
+draw_synthetical.Miller_Composite_Chart()
 draw_isentropic.isentropic_uv()
 draw_synoptic.PV_Div_uv()
 draw_crossection.Crosssection_Wind_Theta_e_Qv(model='GRAPES_GFS',day_back=1)
