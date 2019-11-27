@@ -16,6 +16,7 @@ import locale
 import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
+from scipy.ndimage import gaussian_filter
 
 def draw_gh_rain(gh=None, rain=None,atime=24,
                     map_extent=(50, 150, 0, 65),
@@ -66,6 +67,7 @@ def draw_gh_rain(gh=None, rain=None,atime=24,
     if rain is not None:
         x, y = np.meshgrid(rain['lon'], rain['lat'])
         z=np.squeeze(rain['data'])
+        z[z<0.1]=np.nan
         cmap,norm=dk_ctables.cm_qpf_nws(atime=atime)
         cmap.set_under(color=[0,0,0,0],alpha=0.0)
         plots['rain'] = ax.pcolormesh(
@@ -219,8 +221,9 @@ def draw_mslp_rain_snow(
     if mslp is not None:
         x, y = np.meshgrid(mslp['lon'], mslp['lat'])
         clevs_mslp = np.arange(900, 1100,2.5)
+        z=gaussian_filter(np.squeeze(mslp['data']), 5)
         plots['mslp'] = ax.contour(
-            x, y, np.squeeze(mslp['data']), clevs_mslp, colors='black',
+            x, y, z, clevs_mslp, colors='black',
             linewidths=2, transform=datacrs, zorder=110)
         plt.clabel(plots['mslp'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 

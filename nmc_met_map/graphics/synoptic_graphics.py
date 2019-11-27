@@ -222,16 +222,17 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
     if wsp is not None:
         x, y = np.meshgrid(wsp['lon'], wsp['lat'])
         z=np.squeeze(wsp['data'])
-
         clevs_wsp = [12, 15, 18,21, 24, 27,30]
         colors = ["#FFF59D", "#FFEE58", "#FFCA28", "#FFC107","#FF9800", "#FB8C00",'#E64A19','#BF360C'] # #RRGGBBAA
         cmap=ListedColormap(colors, 'wsp')
-        cmap.set_under(color=[0,0,0,0],alpha=0.0)
+        idx_nan=np.where(z < clevs_wsp[0])
+        z[idx_nan]=np.nan
+        cmap.set_under(color=[1,1,1,0],alpha=0.0)
         norm = BoundaryNorm(clevs_wsp, ncolors=cmap.N, clip=False)
 
         plots['wsp'] = ax.pcolormesh(
             x, y, z, norm=norm,
-            cmap=cmap, zorder=100,transform=datacrs,alpha=0.5)
+            cmap=cmap, zorder=10,transform=datacrs,alpha=0.5)
 
     # draw -hPa wind bards
     if uv is not None:

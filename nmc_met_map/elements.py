@@ -11,7 +11,7 @@ from metpy.units import units
 import metpy.calc as mpcalc
 import xarray as xr
 
-def T2m_all_type(initial_time=None, fhour=24, day_back=0,model='SCMOC',Var_plot='Tmn_2m',
+def T2m_all_type(initial_time=None, fhour=24, day_back=0,model='中央台指导预报',Var_plot='Tmn_2m',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):

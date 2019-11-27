@@ -19,6 +19,7 @@ import locale
 import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
+from scipy.ndimage import gaussian_filter
 
 def draw_gh_uv_VVEL(gh=None, uv=None, VVEL=None,
                     map_extent=(50, 150, 0, 65),
@@ -74,11 +75,13 @@ def draw_gh_uv_VVEL(gh=None, uv=None, VVEL=None,
             -30, -20, -10, -5, -2.5, -1, -0.5,
             0.5, 1, 2.5, 5, 10, 20, 30]
 
+        z=gaussian_filter(np.squeeze(VVEL['data']/10.), 5)
+
         cmap,norm=dk_ctables.cm_vertical_velocity_nws(pos=clevs_VVEL)
         #cmap.set_under(color=[0,0,0,0],alpha=0.0)
 
         plots['VVEL'] = ax.pcolormesh(
-            x, y, np.squeeze(VVEL['data']/10.), norm=norm,
+            x, y,z, norm=norm,
             cmap=cmap,zorder=10, transform=datacrs,alpha=0.5)
 
     # draw -hPa wind bards

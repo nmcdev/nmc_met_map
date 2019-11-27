@@ -476,6 +476,9 @@ def draw_gh_uv_wvfl(gh=None, uv=None, wvfl=None,
         x, y = np.meshgrid(wvfl['lon'], wvfl['lat'])
         z=np.squeeze(wvfl['data'])/10.
         #pos=[0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 22]
+        idx_nan=np.where(z <5)
+        z[idx_nan]=np.nan
+
         cmap, norm=gy_ctables.wvfl_ctable()
 
         cmap.set_under(color=[0,0,0,0],alpha=0.0)

@@ -179,7 +179,6 @@ def gh_uv_wsp(initial_time=None, fhour=6, day_back=0,model='ECMWF',
     idx_y2 = np.where((u.coords['lat'].values > map_extent[2]-delt_y) & 
         (u.coords['lat'].values < map_extent[3]+delt_y))
 #- to solve the problem of labels on all the contours
-
     gh = {'lon': gh.coords['lon'].values[idx_x1],
              'lat': gh.coords['lat'].values[idx_y1],
              'data': gh['data'].values[0,0,idx_y1[0][0]:(idx_y1[0][-1]+1),idx_x1[0][0]:(idx_x1[0][-1]+1)],
@@ -196,6 +195,7 @@ def gh_uv_wsp(initial_time=None, fhour=6, day_back=0,model='ECMWF',
             'lat': u.coords['lat'].values[idx_y2],
              'data': np.squeeze((u['data'].values[0,0,idx_y2[0][0]:(idx_y2[0][-1]+1),idx_x2[0][0]:(idx_x2[0][-1]+1)])**2+
              (v['data'].values[0,0,idx_y2[0][0]:(idx_y2[0][-1]+1),idx_x2[0][0]:(idx_x2[0][-1]+1)])**2)**0.5}
+
 
     synoptic_graphics.draw_gh_uv_wsp(
         wsp=wsp, gh=gh, uv=uv,
@@ -294,7 +294,6 @@ def gh_uv_r6(initial_time=None, fhour=6, day_back=0,model='ECMWF',
 
 
 def PV_Div_uv(initial_time=None, fhour=6, day_back=0,model='ECMWF',
-    gh_lev='500',uv_lev='850',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,100],lvl_ana=250,
     Global=False,

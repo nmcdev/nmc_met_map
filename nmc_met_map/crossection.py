@@ -3,10 +3,15 @@ import numpy as np
 import xarray as xr
 import metpy.calc as mpcalc
 from metpy.interpolate import cross_section
-from nmc_met_io.retrieve_micaps_server import get_model_3D_grid,get_model_grid
+from nmc_met_io.retrieve_micaps_server import get_model_3D_grid,get_model_grid,get_model_3D_grids,get_latest_initTime,get_model_points
 from nmc_met_map.graphics import crossection_graphics
 import nmc_met_map.lib.utility as utl
 from metpy.units import units
+import pandas as pd
+import math
+import os
+import sys
+
 def Crosssection_Wind_Theta_e_absv(
     initial_time=None, fhour=24,
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
@@ -356,24 +361,7 @@ def Crosssection_Wind_Theta_e_Qv(
                     levels=levels,map_extent=map_extent,
                     output_dir=output_dir)
 
-import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
-import math
-import os
-import xarray as xr
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from nmc_met_publish_map.source.utility import add_logo_extra,add_public_title,add_logo_extra_in_axes,add_public_title_sta
-import locale
-import sys
-import metpy.calc as mpcalc
-from metpy.units import units
-import astropy.units as unt
-from nmc_met_io.retrieve_micaps_server import get_model_points,get_model_3D_grids,get_latest_initTime
-
-
-def Time_Crossection_rh_uv_t(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
+def Time_Crossection_rh_uv_t(initTime=None,model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
     t_gap=3,t_range=[0,48],output_dir=None):
 
@@ -387,8 +375,9 @@ def Time_Crossection_rh_uv_t(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9
     except KeyError:
         raise ValueError('Can not find all directories needed')
 
-    # # 度数据
-    initTime = get_latest_initTime(data_dir[0][0:-1]+"850")
+    # # 读数据
+    if(initTime == None):
+        initTime = get_latest_initTime(data_dir[0][0:-1]+"850")
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
     TMP_4D=get_model_3D_grids(directory=data_dir[0][0:-1],filenames=filenames,levels=levels, allExists=False)
     TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
@@ -412,17 +401,10 @@ def Time_Crossection_rh_uv_t(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9
                     output_dir=output_dir)
 
 
-def Time_Crossection_rh_uv_theta_e(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
+def Time_Crossection_rh_uv_theta_e(initTime=None,model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
     t_gap=3,t_range=[0,48],output_dir=None):
-    #if(sys.platform[0:3] == 'win'):
-    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
-    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
-    if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
-    if(sys.platform[0:3] == 'win'):        
-        locale.setlocale(locale.LC_CTYPE, 'chinese')
-
+  
     fhours = np.arange(t_range[0], t_range[1], t_gap)
 
     # 读数据
@@ -434,8 +416,9 @@ def Time_Crossection_rh_uv_theta_e(model='ECMWF',points={'lon':[116.3833], 'lat'
                     utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='')]
     except KeyError:
         raise ValueError('Can not find all directories needed')
-
-    initTime = get_latest_initTime(data_dir[0][0:-1]+"850")
+    
+    if(initTime==None):
+        initTime = get_latest_initTime(data_dir[0][0:-1]+"850")
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
     TMP_4D=get_model_3D_grids(directory=data_dir[0][0:-1],filenames=filenames,levels=levels, allExists=False)
     TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))

@@ -31,7 +31,6 @@ from scipy.ndimage import gaussian_filter
 from nmc_met_map.graphics import synthetical_graphics
 
 def Miller_Composite_Chart(initial_time=None, fhour=24, day_back=0,model='GRAPES_GFS',
-    gh_lev='500',uv_lev='850',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     Global=False,
     south_China_sea=True,area = '全国',city=False,output_dir=None

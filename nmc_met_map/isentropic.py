@@ -67,12 +67,6 @@ def isentropic_uv(initial_time=None, fhour=6, day_back=0,model='ECMWF',
 
     isentprs, isentrh, isentu, isentv = isent_anal
 
-    print(isentprs.shape)
-    print(isentrh.shape)
-    print(isentu.shape)
-    print(isentv.shape)
-
-
     # prepare data
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)

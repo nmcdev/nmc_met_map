@@ -10,6 +10,7 @@ import nmc_met_map.lib.utility as utl
 from metpy.units import units
 import metpy.calc as mpcalc
 import xarray as xr
+import copy
 
 def gh_rain(initial_time=None, fhour=24, day_back=0,model='ECMWF',
     gh_lev='500',atime=6,
@@ -81,9 +82,11 @@ def gh_rain(initial_time=None, fhour=24, day_back=0,model='ECMWF',
              'model':model,
              'fhour':fhour,
              'init_time':init_time}
+
     rain = {'lon': rain.coords['lon'].values[idx_x2],
             'lat': rain.coords['lat'].values[idx_y2],
-             'data': rain['data'].values[0,idx_y2[0][0]:(idx_y2[0][-1]+1),idx_x2[0][0]:(idx_x2[0][-1]+1)]}
+             'data': copy.deepcopy(rain['data'].values[0,idx_y2[0][0]:(idx_y2[0][-1]+1),idx_x2[0][0]:(idx_x2[0][-1]+1)])
+             }
 
     QPF_graphics.draw_gh_rain(
         rain=rain, gh=gh,atime=atime,

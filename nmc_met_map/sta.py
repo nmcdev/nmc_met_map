@@ -21,14 +21,11 @@ from metpy.units import units
 def Station_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
         output_dir=None,
-        output_head_name=None, # 'SEVP_NMC_RFFC_SCMOC_EME_ASH_LNO_P9_'
-        output_tail_name=None, #07203  or 24003
         t_range=[1,29],
         t_gap=3,
         points={'lon':[116.3833], 'lat':[39.9]},
         initTime=None,
-        draw_VIS=False,
-        data_src='SC' # 'SC' or 'SM'
+        draw_VIS=True,
             ):
 
     #+get all the directories needed
@@ -167,7 +164,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
     sta_graphics.draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=t2m,Td2m=Td2m,AT=AT,u10m=u10m,v10m=v10m,u100m=u100m,v100m=v100m,
             gust10m=gust10m,wsp10m=wsp10m,wsp100m=wsp100m,r03=r03,TCDC=TCDC,LCDC=LCDC,
-            draw_VIS=True,VIS=VIS,
+            draw_VIS=draw_VIS,VIS=VIS,
             time_all=time_all,
             model=model,points=points,
             y_s=y_s,m_s=m_s,d_s=d_s,h_s=h_s,
@@ -184,7 +181,7 @@ from metpy.units import units
 
 def sta_SkewT(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,150,100],
-    t_gap=3,fhour=3,output_dir=None):
+    fhour=3,output_dir=None):
 
     try:
         data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),

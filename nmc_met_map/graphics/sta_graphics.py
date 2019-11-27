@@ -336,7 +336,7 @@ def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
-    plt.text(2.5, 5.0,'['+str(fcst_info.attrs['model'])+']'+'模式时间剖面',size=11)
+    plt.text(2.5, 5.0,'['+str(fcst_info.attrs['model'])+'] '+str(int(fcst_info['forecast_period'].values[0]))+'小时预报探空',size=11)
     plt.text(2.5, 2.5,'预报点: '+str(fcst_info.attrs['points']['lon'])+
         ', '+str(fcst_info.attrs['points']['lat']),size=11)
     plt.text(2.5, 0.5,'www.nmc.cn',size=11)

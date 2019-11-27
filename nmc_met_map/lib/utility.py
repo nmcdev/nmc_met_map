@@ -657,7 +657,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                 'CREF':'RADARMOSAIC/CREF/'
                     },
 
-            'SCMOC':{
+            '中央台指导预报':{
                     'u10m':'NWFD_SCMOC/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SCMOC/VGRD/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SCMOC/RAIN24/',
@@ -669,7 +669,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'VIS':'NWFD_SCMOC/VIS_SURFACE/',
                     'rh2m':'NWFD_SCMOC/RH/2M_ABOVE_GROUND/'
                     },
-            'SMERGE':{
+            '国省反馈预报':{
                     'u10m':'NWFD_SMERGE/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SMERGE/VGRD/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SMERGE/RAIN24/',

@@ -16,6 +16,7 @@ import locale
 import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
+from scipy.ndimage import gaussian_filter
 
 def draw_T_2m(T_2m=None,
             map_extent=(50, 150, 0, 65),
@@ -71,9 +72,10 @@ def draw_T_2m(T_2m=None,
             cmap=cmap, zorder=100,transform=datacrs,alpha=0.5, vmin=-45, vmax=45)
 
         clevs_zero = 0
+        z=gaussian_filter(z,5)
         plots['T_2m_zero'] = ax.contour(
             x, y, z, clevs_zero, colors='red',
-            linewidths=1, transform=datacrs, zorder=110)
+            linewidths=2, transform=datacrs, zorder=110)
 
     # grid lines
     gl = ax.gridlines(
@@ -201,8 +203,9 @@ def draw_T2m_mslp_uv10m(t2m=None, mslp=None, uv10m=None,
     if mslp is not None:
         x, y = np.meshgrid(mslp['lon'], mslp['lat'])
         clevs_mslp = np.arange(900, 1100,2.5)
+        z=gaussian_filter(np.squeeze(mslp['data']),5)
         plots['mslp'] = ax.contour(
-            x, y, np.squeeze(mslp['data']), clevs_mslp, colors='black',
+            x, y, z, clevs_mslp, colors='black',
             linewidths=2, transform=datacrs, zorder=110)
         plt.clabel(plots['mslp'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 
@@ -323,8 +326,9 @@ def draw_mslp_gust10m(gust=None, mslp=None,
     if mslp is not None:
         x, y = np.meshgrid(mslp['lon'], mslp['lat'])
         clevs_mslp = np.arange(900, 1100,2.5)
+        z=gaussian_filter(np.squeeze(mslp['data']),5)
         plots['mslp'] = ax.contour(
-            x, y, np.squeeze(mslp['data']), clevs_mslp, colors='black',
+            x, y, z, clevs_mslp, colors='black',
             linewidths=1, transform=datacrs, zorder=110)
         plt.clabel(plots['mslp'], inline=1, fontsize=15, fmt='%.0f',colors='black')
 
