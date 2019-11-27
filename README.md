@@ -4,11 +4,9 @@ Other required packages:
 
 - numpy
 - matplotlib
-- basemap
 - pandas
 - cartopy
 - cfgrib
-- magics
 - metpy
 - nmc_met_io          请预先安装, 见https://github.com/nmcdev/nmc_met_io
 - nmc_met_graphics    请预先安装, 见https://github.com/nmcdev/nmc_met_graphics
