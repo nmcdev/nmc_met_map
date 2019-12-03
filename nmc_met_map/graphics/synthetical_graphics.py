@@ -116,17 +116,17 @@ def draw_Miller_Composite_Chart(fcst_info=None,
     # 300-hPa wind barbs
     jet300 = ax.barbs(x[skip_300], y[skip_300], u_300[skip_300].m, v_300[skip_300].m, length=6,
                     transform=ccrs.PlateCarree(),
-                    color='green', zorder=10, label='300-hPa Jet Core Winds (kt)')
+                    color='green', zorder=10, label='300-hPa Jet Core Winds (m/s)')
 
     # 500-hPa wind barbs
     jet500 = ax.barbs(x[skip_500], y[skip_500], u_500[skip_500].m, v_500[skip_500].m, length=6,
                     transform=ccrs.PlateCarree(),
-                    color='blue', zorder=9, label='500-hPa Jet Core Winds (kt)')
+                    color='blue', zorder=9, label='500-hPa Jet Core Winds (m/s)')
 
     # 850-hPa wind barbs
     jet850 = ax.barbs(x[skip_850], y[skip_850], u_850[skip_850].m, v_850[skip_850].m, length=6,
                     transform=ccrs.PlateCarree(),
-                    color='k', zorder=8, label='850-hPa Jet Core Winds (kt)')
+                    color='k', zorder=8, label='850-hPa Jet Core Winds (m/s)')
 
     # grid lines
     gl = ax.gridlines(

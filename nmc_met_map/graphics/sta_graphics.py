@@ -27,21 +27,23 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')       
 
+    initial_time1=pd.to_datetime(str(t2m['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initial_time2=pd.to_datetime(str(VIS['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+
     # draw figure
     fig=plt.figure(figsize=(12,16))
-    t_rang=[1,28]
     # draw main figure
     #温度————————————————————————————————————————————————
     ax = plt.axes([0.05,0.83,.94,.15])
-    utl.add_public_title_sta(title=model+'模式预报 ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=datetime(y_s[model],m_s[model],d_s[model],h_s[model]), fontsize=23)
+    utl.add_public_title_sta(title=model+'模式预报 ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
 
     for ifhour in t2m['forecast_period'].values:
         if (ifhour == t2m['forecast_period'].values[0] ):
-            t2m_t=(datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+            t2m_t=(initial_time1
                 +timedelta(hours=ifhour))
         else:
             t2m_t=np.append(t2m_t,
-                            (datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+                            (initial_time1
                             +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -69,9 +71,9 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
     ax.xaxis.set_minor_locator(miloc)
     ax.grid(axis='x', which='minor')
-#    plt.xlim([time84_p3[t_rang[0]],time84_p3[t_rang[1]]])
     plt.xlim(time_all[0],time_all[-1])
-    plt.ylim([Td2m[t_rang[0]:t_rang[1]].min(),AT.max()+2])
+    plt.ylim(min([np.array(Td2m).min(),AT.values.min(),t2m['data'].values.min()]),
+        max([np.array(Td2m).max(),AT.values.max(),t2m['data'].values.max()]))
     ax.legend(fontsize=10,loc='upper right')
     ax.set_ylabel('2米温度 体感温度\n'+'2米露点温度 ($^\circ$C)', fontsize=15)
     
@@ -80,44 +82,39 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.66,.94,.15])
     for ifhour in u10m['forecast_period'].values:
         if (ifhour == u10m['forecast_period'].values[0] ):
-            uv10m_t=(datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+            uv10m_t=(initial_time1
                 +timedelta(hours=ifhour))
         else:
             uv10m_t=np.append(uv10m_t,
-                            (datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+                            (initial_time1
                             +timedelta(hours=ifhour)))
 
     for ifhour in u100m['forecast_period'].values:
         if (ifhour == u100m['forecast_period'].values[0] ):
-            uv100m_t=(datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+            uv100m_t=(initial_time1
                 +timedelta(hours=ifhour))
         else:
             uv100m_t=np.append(uv100m_t,
-                            (datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+                            (initial_time1
                             +timedelta(hours=ifhour)))
             
-#    gust10m=pd.read_csv(dir_all['gust10m03']+last_file[model])
     for ifhour in gust10m['forecast_period'].values:
         if (ifhour == gust10m['forecast_period'].values[0] ):
-            gust10m_t=(datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+            gust10m_t=(initial_time1
                 +timedelta(hours=ifhour))
         else:
             gust10m_t=np.append(gust10m_t,
-                            (datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+                            (initial_time1
                             +timedelta(hours=ifhour)))
 
     ax.plot(uv10m_t, np.squeeze(wsp10m), c='#40C4FF',label='10米风',linewidth=3)
     ax.plot(uv100m_t,np.squeeze(wsp100m),c='#FF6F00',label='100米风',linewidth=3)
     ax.plot(gust10m_t,np.squeeze(gust10m['data']),c='#7C4DFF',label='10米阵风',linewidth=3)
 
-    #barbs_y=np.zeros(t_rang[1])+2
-    #ax.barbs(uv10m_t[t_rang[0]:t_rang[1]], wsp10m[t_rang[0]:t_rang[1]], 
     ax.barbs(uv10m_t[0:-1], wsp10m[0:-1], 
             np.squeeze(u10m['data'])[0:-1], np.squeeze(v10m['data'])[0:-1],
             fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
 
-    #barbs_y=np.zeros(t_rang[1])+6
-    #ax.barbs(uv100m_t[t_rang[0]:t_rang[1]], wsp100m[t_rang[0]:t_rang[1]], 
     ax.barbs(uv100m_t[0:-1], wsp100m[0:-1], 
             np.squeeze(u100m['data'])[0:-1], np.squeeze(v100m['data'])[0:-1],
             fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
@@ -125,7 +122,6 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
     ax.xaxis.set_major_locator(xaxis_intaval)
     ax.set_xticklabels([' '])
-    #plt.xlim([time84_p3[t_rang[0]],time84_p3[t_rang[1]]])
     plt.xlim(time_all[0],time_all[-1])    
     # add legend
     ax.legend(fontsize=10,loc='upper right')
@@ -141,11 +137,11 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.49,.94,.15])
     for ifhour in r03['forecast_period'].values:
         if (ifhour == r03['forecast_period'].values[0] ):
-            r03_t=(datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+            r03_t=(initial_time1
                 +timedelta(hours=ifhour))
         else:
             r03_t=np.append(r03_t,
-                            (datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+                            (initial_time1
                             +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -159,30 +155,28 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
     ax.xaxis.set_minor_locator(miloc)
     ax.grid(axis='x', which='minor')    
-    #plt.xlim([time84_p3[t_rang[0]],time84_p3[t_rang[1]]])
     plt.xlim(time_all[0],time_all[-1])
-    plt.ylim([np.squeeze(r03['data'])[t_rang[0]:t_rang[1]].min(),np.squeeze(r03['data']).max()+2])
-    ax.set_ylabel('3小时累积雨量 (mm)', fontsize=15)
-
+    plt.ylim([np.squeeze(r03['data']).values.min(),np.squeeze(r03['data'].values.max())+2])
+    ax.set_ylabel(str(int(r03['forecast_period'].values[1]-r03['forecast_period'].values[0]))+'小时累积雨量 (mm)', fontsize=15)
     #总量云——————————————————————————————————————
     # draw main figure
     ax = plt.axes([0.05,0.32,.94,.15])
     for ifhour in TCDC['forecast_period'].values:
         if (ifhour == TCDC['forecast_period'].values[0] ):
-            TCDC_t=(datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+            TCDC_t=(initial_time1
                 +timedelta(hours=ifhour))
         else:
             TCDC_t=np.append(TCDC_t,
-                            (datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+                            (initial_time1
                             +timedelta(hours=ifhour)))
     # draw main figure
     for ifhour in LCDC['forecast_period'].values:
         if (ifhour == LCDC['forecast_period'].values[0] ):
-            LCDC_t=(datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+            LCDC_t=(initial_time1
                 +timedelta(hours=ifhour))
         else:
             LCDC_t=np.append(LCDC_t,
-                            (datetime(y_s[model],m_s[model],d_s[model],h_s[model])
+                            (initial_time1
                             +timedelta(hours=ifhour)))
 
     #开启自适应
@@ -198,7 +192,6 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
     ax.xaxis.set_minor_locator(miloc)
     ax.grid(axis='x', which='minor')    
-    #plt.xlim([time84_p3[t_rang[0]],time84_p3[t_rang[1]]])
     plt.xlim(time_all[0],time_all[-1])
     plt.ylim(0,100)
     ax.legend(fontsize=10,loc='upper right')
@@ -216,7 +209,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         ax.axis([0, 10, 0, 10])
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.23,.05,.05],which='nmc', size='Xlarge')
-        ax.text(7.5, 33,(datetime(y_s[model],m_s[model],d_s[model],h_s[model]) - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+        ax.text(7.5, 33,(initial_time1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     if(draw_VIS==True):
         #能见度——————————————————————————————————————
@@ -226,11 +219,11 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         #VIS=pd.read_csv(dir_all['VIS_SC']+last_file[model])
         for ifhour in VIS['forecast_period'].values:
             if (ifhour == VIS['forecast_period'].values[0] ):
-                VIS_t=(datetime(y_s['SCMOC'],m_s['SCMOC'],d_s['SCMOC'],h_s['SCMOC'])
+                VIS_t=(initial_time2
                     +timedelta(hours=ifhour))
             else:
                 VIS_t=np.append(VIS_t,
-                                (datetime(y_s['SCMOC'],m_s['SCMOC'],d_s['SCMOC'],h_s['SCMOC'])
+                                (initial_time2
                                 +timedelta(hours=ifhour)))
 
         #开启自适应
@@ -260,7 +253,6 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
         ax.xaxis.set_minor_locator(miloc)
         ax.grid(axis='x', which='minor')    
-        #plt.xlim([time84_p3[t_rang[0]],time84_p3[t_rang[1]]])
         plt.xlim(time_all[0],time_all[-1])
         plt.ylim(0,25)
         ax.set_ylabel('能见度 （km）', fontsize=15)
@@ -270,14 +262,12 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.06,.05,.05],which='nmc', size='Xlarge')
         ax.text(7.5, 0.1,
-                (datetime(y_s[model],m_s[model],d_s[model],h_s[model]) - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
-
-
+                (initial_time1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):
         plt.savefig(output_dir+model+'模式_'+
-        datetime(y_s[model],m_s[model],d_s[model],h_s[model]).strftime("%Y%m%d%H")+
+        initial_time1.strftime("%Y%m%d%H")+
         '00'+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()
