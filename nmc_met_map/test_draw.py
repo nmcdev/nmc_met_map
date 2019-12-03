@@ -9,10 +9,11 @@ import nmc_met_map.sta as draw_sta
 import nmc_met_map.isentropic as draw_isentropic
 import nmc_met_map.synthetical as draw_synthetical
 
+draw_isentropic.isentropic_uv()
 draw_sta.Station_Synthetical_Forecast_From_Cassandra(points={'lon':[116.3833], 'lat':[19]},t_range=[1,29])
 draw_synoptic.gh_uv_r6(model='NCEP_GFS')
 draw_synthetical.Miller_Composite_Chart()
-draw_isentropic.isentropic_uv()
+
 draw_synoptic.PV_Div_uv()
 draw_crossection.Crosssection_Wind_Theta_e_RH(model='GRAPES_GFS',day_back=1)
 draw_crossection.Crosssection_Wind_Theta_e_absv(model='ECMWF',day_back=1)

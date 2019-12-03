@@ -19,6 +19,7 @@ import locale
 import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
+from scipy.ndimage import gaussian_filter
 
 def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
                     map_extent=(50, 150, 0, 65),
@@ -88,8 +89,9 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     if isentprs is not None:
         x, y = np.meshgrid(isentprs['lon'], isentprs['lat'])
         clevs_isentprs =  np.arange(0, 1000, 25)
+        z=gaussian_filter(np.squeeze(isentprs['data']),5)
         plots['isentprs'] = ax.contour(
-            x, y, np.squeeze(isentprs['data']), clevs_isentprs, colors='black',
+            x, y, z , clevs_isentprs, colors='black',
             linewidths=2, transform=datacrs, zorder=30)
         plt.clabel(plots['isentprs'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 
