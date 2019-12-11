@@ -257,7 +257,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         if(drw_thr == True):
             ax.plot([VIS_t[0],VIS_t[-1]],[5,5],c='#4CAF50',label='能见度一般影响',linewidth=1)
             ax.plot([VIS_t[0],VIS_t[-1]],[3,3],c='#FFEB3B',label='能见度较大影响',linewidth=1)
-            ax.plot([VIS_t[0],VIS_t[-1]],[1,1],c='#F44336',label='能见高影响',linewidth=1)
+            ax.plot([VIS_t[0],VIS_t[-1]],[1,1],c='#F44336',label='能见度高影响',linewidth=1)
             ax.legend(fontsize=10,loc='upper right')
 
         xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
