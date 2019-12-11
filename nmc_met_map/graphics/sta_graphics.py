@@ -13,10 +13,9 @@ from metpy.plots import  SkewT
 def draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=None,Td2m=None,AT=None,u10m=None,v10m=None,u100m=None,v100m=None,
             gust10m=None,wsp10m=None,wsp100m=None,r03=None,TCDC=None,LCDC=None,
-            draw_VIS=False,VIS=None,
+            draw_VIS=False,VIS=None,drw_thr=False,
             time_all=None,
             model=None,points=None,
-            y_s=None,m_s=None,d_s=None,h_s=None,
             output_dir=None):
 
     #if(sys.platform[0:3] == 'win'):
@@ -35,7 +34,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     # draw main figure
     #温度————————————————————————————————————————————————
     ax = plt.axes([0.05,0.83,.94,.15])
-    utl.add_public_title_sta(title=model+'模式预报 ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
+    utl.add_public_title_sta(title=model+'预报 ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
 
     for ifhour in t2m['forecast_period'].values:
         if (ifhour == t2m['forecast_period'].values[0] ):
@@ -110,6 +109,14 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax.plot(uv10m_t, np.squeeze(wsp10m), c='#40C4FF',label='10米风',linewidth=3)
     ax.plot(uv100m_t,np.squeeze(wsp100m),c='#FF6F00',label='100米风',linewidth=3)
     ax.plot(gust10m_t,np.squeeze(gust10m['data']),c='#7C4DFF',label='10米阵风',linewidth=3)
+    if(drw_thr == True):
+        ax.plot([uv10m_t[0],uv10m_t[-1]],[5.5,5.5],c='#4CAE50',label='10米平均风一般影响',linewidth=1)
+        ax.plot([uv10m_t[0],uv10m_t[-1]],[8,8],c='#FFEB3B',label='10米平均风较大影响',linewidth=1)
+        ax.plot([uv10m_t[0],uv10m_t[-1]],[10.8,10.8],c='#F44336',label='10米平均风高影响',linewidth=1)
+
+        ax.plot([gust10m_t[0],gust10m_t[-1]],[10.8,10.8],c='#4CAE50',label='10米阵风一般影响', dashes=[6, 2],linewidth=1)
+        ax.plot([gust10m_t[0],gust10m_t[-1]],[13.9,13.9],c='#FFEB3B',label='10米阵风较大影响', dashes=[6, 2],linewidth=1)
+        ax.plot([gust10m_t[0],gust10m_t[-1]],[17.2,17.2],c='#F44336',label='10米阵风高影响', dashes=[6, 2],linewidth=1)
 
     ax.barbs(uv10m_t[0:-1], wsp10m[0:-1], 
             np.squeeze(u10m['data'])[0:-1], np.squeeze(v10m['data'])[0:-1],
@@ -147,8 +154,12 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
     ax.xaxis.set_major_locator(xaxis_intaval)
     ax.set_xticklabels([' '])
-
     ax.bar(r03_t,np.squeeze(r03['data']),width=0.12,color='#1E88E5')
+
+    if(drw_thr == True):
+        ax.plot([r03_t[0],r03_t[-1]],[3,3],c='#FFEB3B',label='3小时降水较大影响',linewidth=1)
+        ax.plot([r03_t[0],r03_t[-1]],[30,30],c='#F44336',label='3小时降水高影响',linewidth=1)
+        ax.legend(fontsize=10,loc='upper right')
     ax.tick_params(length=10)    
     ax.grid()
     ax.grid(axis='x',c='black')
@@ -242,6 +253,12 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         ax.fill_between(VIS_t, np.squeeze(VIS['data']), 100,facecolor='#FFFFFF')
 
         ax.plot(VIS_t,np.squeeze(VIS['data']))
+        if(drw_thr == True):
+            ax.plot([VIS_t[0],VIS_t[-1]],[5,5],c='#4CAF50',label='能见度一般影响',linewidth=1)
+            ax.plot([VIS_t[0],VIS_t[-1]],[3,3],c='#FFEB3B',label='能见度较大影响',linewidth=1)
+            ax.plot([VIS_t[0],VIS_t[-1]],[1,1],c='#F44336',label='能见高影响',linewidth=1)
+            ax.legend(fontsize=10,loc='upper right')
+
         xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
         ax.xaxis.set_major_formatter(xstklbls)
         for label in ax.get_xticklabels():

@@ -30,6 +30,7 @@ from nmc_met_io import DataBlock_pb2
 from nmc_met_io.config import _get_config_from_rcfile
 import math
 import struct
+from nmc_met_io.retrieve_micaps_server import get_model_grids
 
 def obs_radar_filename(time='none', product_name='CREF'):
     """
@@ -663,7 +664,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                 'CREF':'RADARMOSAIC/CREF/'
                     },
 
-            '中央台指导预报':{
+            '中央台指导':{
                     'u10m':'NWFD_SCMOC/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SCMOC/VGRD/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SCMOC/RAIN24/',
@@ -675,7 +676,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'VIS':'NWFD_SCMOC/VIS_SURFACE/',
                     'rh2m':'NWFD_SCMOC/RH/2M_ABOVE_GROUND/'
                     },
-            '国省反馈预报':{
+            '国省反馈':{
                     'u10m':'NWFD_SMERGE/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SMERGE/VGRD/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SMERGE/RAIN24/',
@@ -758,3 +759,27 @@ if __name__ == '__main__':
     data = s.data
     print(data)
 
+
+def get_model_points_gy(directory, filenames, points, allExists=True):
+    """
+    Retrieve point time series from MICAPS cassandra service.
+    
+    Args:
+        directory (string): the data directory on the service.
+        filenames (list): the list of filenames.
+        points (dict): dictionary, {'lon':[...], 'lat':[...]}.
+
+    Examples:
+    >>> directory = "NWFD_SCMOC/TMP/2M_ABOVE_GROUND"
+    >>> fhours = np.arange(3, 75, 3)
+    >>> filenames = ["19083008."+str(fhour).zfill(3) for fhour in fhours]
+    >>> points = {'lon':[116.3833, 110.0], 'lat':[39.9, 32]}
+    >>> data = get_model_points(dataDir, filenames, points)
+    >>> allExists (boolean): all files should exist, or return None.
+    """
+
+    data = get_model_grids(directory, filenames, allExists=allExists)
+    if data:
+        return data.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+    else:
+        return None
