@@ -30,8 +30,8 @@ def Station_Synthetical_Forecast_From_Cassandra(
         dir_rqd=[ 
                 "ECMWF_HR/10_METRE_WIND_GUST_IN_THE_LAST_3_HOURS/",
                 "ECMWF_HR/10_METRE_WIND_GUST_IN_THE_LAST_6_HOURS/",
-                "ECMWF_HR/LCDC/",
                 "ECMWF_HR/TCDC/",
+                "ECMWF_HR/LCDC/",
                 "ECMWF_HR/UGRD_100M/",
                 "ECMWF_HR/VGRD_100M/",
                 "NWFD_SCMOC/VIS_SURFACE/",
