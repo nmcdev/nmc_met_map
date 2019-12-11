@@ -155,11 +155,11 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax.xaxis.set_major_locator(xaxis_intaval)
     ax.set_xticklabels([' '])
     ax.bar(r03_t,np.squeeze(r03['data']),width=0.12,color='#1E88E5')
-    gap_hour_r03=str(int(r03['forecast_period'].values[1]-r03['forecast_period'].values[0]))
+    gap_hour_r03=int(r03['forecast_period'].values[1]-r03['forecast_period'].values[0])
 
     if(drw_thr == True):
         ax.plot([r03_t[0],r03_t[-1]],[1*gap_hour_r03,1*gap_hour_r03],c='#FFEB3B',label=str(gap_hour_r03)+'小时降水较大影响',linewidth=1)
-        ax.plot([r03_t[0],r03_t[-1]],[1*gap_hour_r03,1*gap_hour_r03],c='#F44336',label=str(gap_hour_r03)+'小时降水高影响',linewidth=1)
+        ax.plot([r03_t[0],r03_t[-1]],[10*gap_hour_r03,10*gap_hour_r03],c='#F44336',label=str(gap_hour_r03)+'小时降水高影响',linewidth=1)
         ax.legend(fontsize=10,loc='upper right')
     ax.tick_params(length=10)    
     ax.grid()
