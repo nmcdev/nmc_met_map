@@ -155,10 +155,11 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax.xaxis.set_major_locator(xaxis_intaval)
     ax.set_xticklabels([' '])
     ax.bar(r03_t,np.squeeze(r03['data']),width=0.12,color='#1E88E5')
+    gap_hour_r03=str(int(r03['forecast_period'].values[1]-r03['forecast_period'].values[0]))
 
     if(drw_thr == True):
-        ax.plot([r03_t[0],r03_t[-1]],[3,3],c='#FFEB3B',label='3小时降水较大影响',linewidth=1)
-        ax.plot([r03_t[0],r03_t[-1]],[30,30],c='#F44336',label='3小时降水高影响',linewidth=1)
+        ax.plot([r03_t[0],r03_t[-1]],[1*gap_hour_r03,1*gap_hour_r03],c='#FFEB3B',label=str(gap_hour_r03)+'小时降水较大影响',linewidth=1)
+        ax.plot([r03_t[0],r03_t[-1]],[1*gap_hour_r03,1*gap_hour_r03],c='#F44336',label=str(gap_hour_r03)+'小时降水高影响',linewidth=1)
         ax.legend(fontsize=10,loc='upper right')
     ax.tick_params(length=10)    
     ax.grid()
@@ -168,7 +169,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax.grid(axis='x', which='minor')    
     plt.xlim(time_all[0],time_all[-1])
     plt.ylim([np.squeeze(r03['data']).values.min(),np.squeeze(r03['data'].values.max())+2])
-    ax.set_ylabel(str(int(r03['forecast_period'].values[1]-r03['forecast_period'].values[0]))+'小时累积雨量 (mm)', fontsize=15)
+    ax.set_ylabel(str(gap_hour_r03)+'小时累积雨量 (mm)', fontsize=15)
     #总量云——————————————————————————————————————
     # draw main figure
     ax = plt.axes([0.05,0.32,.94,.15])
