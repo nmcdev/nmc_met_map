@@ -280,7 +280,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.06,.05,.05],which='nmc', size='Xlarge')
         ax.text(7.5, 0.1,
-                (initial_time1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+                (initial_time2 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):

@@ -796,11 +796,11 @@ def get_model_points_gy(directory, filenames, points, allExists=True,fill_null=F
         grid_x=np.array(data['lon'].values)
         grid_y=np.array(data['lat'].values)
         x,y=np.meshgrid(data['lon'].values, data['lat'].values)
-        idx_x=np.squeeze(np.where((grid_x > points['lon'][0]-5) & (grid_x < points['lon'][0]+5)))
+        idx_x=np.squeeze(np.where((grid_x > points['lon'][0]-6) & (grid_x < points['lon'][0]+6)))
         idx_y=np.squeeze(np.where((grid_y > points['lat'][0]-5) & (grid_y < points['lat'][0]+5)))
         x2,y2=np.meshgrid(grid_x[idx_x[0]:idx_x[-1]], grid_y[idx_y[0]:idx_y[-1]])
-        nx2=len(x2)
-        ny2=len(y2)
+        nx2=len(idx_x)
+        ny2=len(idx_y)
         x=x.reshape(dims[1]*dims[2])
         y=y.reshape(dims[1]*dims[2])
         nt=dims[0]
@@ -808,12 +808,12 @@ def get_model_points_gy(directory, filenames, points, allExists=True,fill_null=F
             temp2=np.squeeze(temp[it,:,:])
             temp2=temp2.reshape(dims[1]*dims[2])
             idx_ok=np.squeeze(np.where((temp2 != Null_value) & 
-                (x < points['lon'][0]+5) & (x > points['lon'][0]-5) &
+                (x < points['lon'][0]+6) & (x > points['lon'][0]-6) &
                 (y < points['lat'][0]+5) & (y > points['lat'][0]-5)))
 
             n_ok=len(idx_ok)
-            data_new=griddata(np.squeeze(np.dstack(([y[idx_ok],x[idx_ok]]))), temp2[idx_ok], (y2,x2), method='nearest')
-            temp[it,idx_y[0]:idx_y[-1],idx_x[0]:idx_x[-1]]=data_new.reshape(1,ny2,nx2)
+            data_new=griddata(np.squeeze(np.dstack(([y[idx_ok],x[idx_ok]]))), temp2[idx_ok], (y2,x2))
+            temp[it,idx_y[0]:idx_y[-1],idx_x[0]:idx_x[-1]]=data_new.reshape(1,ny2-1,nx2-1)
 
         data['data'].values=temp
         

@@ -9,7 +9,7 @@ import nmc_met_map.sta as draw_sta
 import nmc_met_map.isentropic as draw_isentropic
 import nmc_met_map.synthetical as draw_synthetical
 
-draw_sta.Station_Synthetical_Forecast_From_Cassandra(model='中央台指导',points={'lon':[113.59], 'lat':[22.14]},t_range=[4,20],drw_thr=True)
+draw_sta.Station_Synthetical_Forecast_From_Cassandra(model='中央台指导',points={'lon':[113.59], 'lat':[22.14]},t_range=[4,80],drw_thr=True)
 draw_synoptic.gh_uv_r6(model='NCEP_GFS',area='华中')
 draw_synthetical.Miller_Composite_Chart()
 draw_isentropic.isentropic_uv()
