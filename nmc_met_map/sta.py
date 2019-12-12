@@ -34,7 +34,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
                 "ECMWF_HR/LCDC/",
                 "ECMWF_HR/UGRD_100M/",
                 "ECMWF_HR/VGRD_100M/",
-                "NWFD_SCMOC/VIS_SURFACE/",
+                "NWFD_SCMOC/VIS/",
 
                 utl.Cassandra_dir(
                     data_type='surface',data_source=model,var_name='RAIN03'),
@@ -121,9 +121,9 @@ def Station_Synthetical_Forecast_From_Cassandra(
     else:
         r03=utl.get_model_points_gy(dir_rqd[7], filenames, points,allExists=False)
 
-    fhours = np.arange(t_range[0]*t_gap, 75, t_gap)
+    fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
     filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
-    VIS=utl.get_model_points_gy(dir_rqd[6], filenames, points,allExists=False)     
+    VIS=utl.get_model_points_gy(dir_rqd[6], filenames, points,allExists=False,fill_null=True,Null_value=-0.001)     
 
     if(last_file['SCMOC'] == last_file[model] and t_range[1]*t_gap > 72):
         fhours = np.append(np.arange(3,72,3),np.arange(72, (t_range[1])*t_gap, 6))

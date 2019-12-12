@@ -31,6 +31,8 @@ from nmc_met_io.config import _get_config_from_rcfile
 import math
 import struct
 from nmc_met_io.retrieve_micaps_server import get_model_grids
+from scipy.ndimage import gaussian_filter
+from scipy.interpolate import griddata
 
 def obs_radar_filename(time='none', product_name='CREF'):
     """
@@ -673,7 +675,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'Tmx_2m':'NWFD_SCMOC/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'Tmn_2m':'NWFD_SCMOC/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'T2m':'NWFD_SCMOC/TMP/2M_ABOVE_GROUND/',
-                    'VIS':'NWFD_SCMOC/VIS_SURFACE/',
+                    'VIS':'NWFD_SCMOC/VIS/',
                     'rh2m':'NWFD_SCMOC/RH/2M_ABOVE_GROUND/'
                     },
             '国省反馈':{
@@ -760,7 +762,7 @@ if __name__ == '__main__':
     print(data)
 
 
-def get_model_points_gy(directory, filenames, points, allExists=True):
+def get_model_points_gy(directory, filenames, points, allExists=True,fill_null=False,Null_value=0):
     """
     Retrieve point time series from MICAPS cassandra service.
     
@@ -779,6 +781,42 @@ def get_model_points_gy(directory, filenames, points, allExists=True):
     """
 
     data = get_model_grids(directory, filenames, allExists=allExists)
+    
+    #if(fill_null is True):
+    #    temp=np.array(data['data'].values)
+    #    idx_null=np.where(temp == Null_value)
+    #    #temp[idx_null]=np.nan
+    #    temp2=gaussian_filter(temp,5)
+    #    temp[idx_null]=temp2[idx_null]
+    #    data['data'].values=temp
+
+    if(fill_null is True):
+        temp=np.array(data['data'].values)
+        dims=np.shape(temp)
+        grid_x=np.array(data['lon'].values)
+        grid_y=np.array(data['lat'].values)
+        x,y=np.meshgrid(data['lon'].values, data['lat'].values)
+        idx_x=np.squeeze(np.where((grid_x > points['lon'][0]-5) & (grid_x < points['lon'][0]+5)))
+        idx_y=np.squeeze(np.where((grid_y > points['lat'][0]-5) & (grid_y < points['lat'][0]+5)))
+        x2,y2=np.meshgrid(grid_x[idx_x[0]:idx_x[-1]], grid_y[idx_y[0]:idx_y[-1]])
+        nx2=len(x2)
+        ny2=len(y2)
+        x=x.reshape(dims[1]*dims[2])
+        y=y.reshape(dims[1]*dims[2])
+        nt=dims[0]
+        for it in range(0,nt):
+            temp2=np.squeeze(temp[it,:,:])
+            temp2=temp2.reshape(dims[1]*dims[2])
+            idx_ok=np.squeeze(np.where((temp2 != Null_value) & 
+                (x < points['lon'][0]+5) & (x > points['lon'][0]-5) &
+                (y < points['lat'][0]+5) & (y > points['lat'][0]-5)))
+
+            n_ok=len(idx_ok)
+            data_new=griddata(np.squeeze(np.dstack(([y[idx_ok],x[idx_ok]]))), temp2[idx_ok], (y2,x2), method='nearest')
+            temp[it,idx_y[0]:idx_y[-1],idx_x[0]:idx_x[-1]]=data_new.reshape(1,ny2,nx2)
+
+        data['data'].values=temp
+        
     if data:
         return data.interp(lon=('points', points['lon']), lat=('points', points['lat']))
     else:
