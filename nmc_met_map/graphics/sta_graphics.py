@@ -9,6 +9,7 @@ import locale
 import sys
 import metpy.calc as mpcalc
 from metpy.plots import  SkewT
+import os
 
 def draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=None,Td2m=None,AT=None,u10m=None,v10m=None,u100m=None,v100m=None,
@@ -16,7 +17,10 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
             draw_VIS=False,VIS=None,drw_thr=False,
             time_all=None,
             model=None,points=None,
-            output_dir=None):
+            output_dir=None,extra_info=None,extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' '}):
 
     #if(sys.platform[0:3] == 'win'):
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
@@ -34,7 +38,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     # draw main figure
     #温度————————————————————————————————————————————————
     ax = plt.axes([0.05,0.83,.94,.15])
-    utl.add_public_title_sta(title=model+'预报 ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
 
     for ifhour in t2m['forecast_period'].values:
         if (ifhour == t2m['forecast_period'].values[0] ):
@@ -62,8 +66,8 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax.fill_between(t2m_t, np.squeeze(t2m['data']), 40,facecolor='#FF3D00')
     ax.fill_between(t2m_t, np.squeeze(t2m['data']), 100,facecolor='#FFFFFF')
     ax.plot(t2m_t,np.squeeze(t2m['data']),label='2米温度')
-    ax.plot(t2m_t, np.squeeze(Td2m), dashes=[6, 2],linewidth=4,label='2米露点温度')
-    ax.plot(t2m_t, np.squeeze(AT), dashes=[6, 2],linewidth=3,c='#00796B',label='2米体感温度')
+    ax.plot(t2m_t, np.squeeze(Td2m), dashes=[6, 2],linewidth=4,c='#00796B',label='2米露点温度')
+    ax.plot(t2m_t, np.squeeze(AT), dashes=[6, 2],linewidth=3,c='#FF9933',label='2米体感温度')
     ax.tick_params(length=10)
     ax.grid()
     ax.grid(axis='x',c='black')
@@ -284,9 +288,301 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):
-        plt.savefig(output_dir+model+'模式_'+
+        isExists=os.path.exists(output_dir)
+        if not isExists:
+            os.makedirs(output_dir)
+        plt.savefig(output_dir+extra_info['output_head_name']+
         initial_time1.strftime("%Y%m%d%H")+
-        '00'+'.jpg', dpi=200,bbox_inches='tight')
+        '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()
+
+
+def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
+            TWC=None,AT=None,u10m=None,v10m=None,u100m=None,v100m=None,
+            gust10m=None,wsp10m=None,wsp100m=None,SNOD1=None,SNOD2=None,SDEN=None,SN06=None,
+            draw_VIS=False,VIS=None,drw_thr=False,
+            time_all=None,
+            model=None,points=None,
+            output_dir=None,extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' '}):
+
+    #if(sys.platform[0:3] == 'win'):
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')       
+
+    initial_time1=pd.to_datetime(str(TWC['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initial_time2=pd.to_datetime(str(VIS['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+
+    # draw figure
+    fig=plt.figure(figsize=(12,16))
+    # draw main figure
+    #风寒指数 体感温度————————————————————————————————————————————————
+    ax = plt.axes([0.05,0.83,.94,.15])
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
+
+    for ifhour in TWC['forecast_period'].values:
+        if (ifhour == TWC['forecast_period'].values[0] ):
+            TWC_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            TWC_t=np.append(TWC_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+    #开启自适应
+    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    ax.xaxis.set_major_locator(xaxis_intaval)
+    ax.set_xticklabels([' '])
+    ax.plot(TWC_t,np.squeeze(TWC),label='风寒指数')
+    ax.plot(TWC_t, np.squeeze(AT), c='#00796B',label='2米体感温度')
+    ax.tick_params(length=10)
+    ax.grid()
+    ax.grid(axis='x',c='black')
+    miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
+    ax.xaxis.set_minor_locator(miloc)
+    ax.grid(axis='x', which='minor')
+    plt.xlim(time_all[0],time_all[-1])
+    plt.ylim(min([AT.values.min(),TWC.values.min()]),
+        max([AT.values.max(),TWC.values.max()]))
+    ax.legend(fontsize=10,loc='upper right')
+    ax.set_ylabel('2米体感温度 风寒指数 ($^\circ$C)', fontsize=15)
+    
+                      
+    #10米风——————————————————————————————————————
+    ax = plt.axes([0.05,0.66,.94,.15])
+    for ifhour in u10m['forecast_period'].values:
+        if (ifhour == u10m['forecast_period'].values[0] ):
+            uv10m_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            uv10m_t=np.append(uv10m_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+
+    for ifhour in u100m['forecast_period'].values:
+        if (ifhour == u100m['forecast_period'].values[0] ):
+            uv100m_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            uv100m_t=np.append(uv100m_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+            
+    for ifhour in gust10m['forecast_period'].values:
+        if (ifhour == gust10m['forecast_period'].values[0] ):
+            gust10m_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            gust10m_t=np.append(gust10m_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+
+    ax.plot(uv10m_t, np.squeeze(wsp10m), c='#40C4FF',label='10米风',linewidth=3)
+    ax.plot(uv100m_t,np.squeeze(wsp100m),c='#FF6F00',label='100米风',linewidth=3)
+    ax.plot(gust10m_t,np.squeeze(gust10m['data']),c='#7C4DFF',label='10米阵风',linewidth=3)
+    if(drw_thr == True):
+        ax.plot([uv10m_t[0],uv10m_t[-1]],[5.5,5.5],c='#4CAE50',label='10米平均风一般影响',linewidth=1)
+        ax.plot([uv10m_t[0],uv10m_t[-1]],[8,8],c='#FFEB3B',label='10米平均风较大影响',linewidth=1)
+        ax.plot([uv10m_t[0],uv10m_t[-1]],[10.8,10.8],c='#F44336',label='10米平均风高影响',linewidth=1)
+
+        ax.plot([gust10m_t[0],gust10m_t[-1]],[10.8,10.8],c='#4CAE50',label='10米阵风一般影响', dashes=[6, 2],linewidth=1)
+        ax.plot([gust10m_t[0],gust10m_t[-1]],[13.9,13.9],c='#FFEB3B',label='10米阵风较大影响', dashes=[6, 2],linewidth=1)
+        ax.plot([gust10m_t[0],gust10m_t[-1]],[17.2,17.2],c='#F44336',label='10米阵风高影响', dashes=[6, 2],linewidth=1)
+
+    ax.barbs(uv10m_t[0:-1], wsp10m[0:-1], 
+            np.squeeze(u10m['data'])[0:-1], np.squeeze(v10m['data'])[0:-1],
+            fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
+
+    ax.barbs(uv100m_t[0:-1], wsp100m[0:-1], 
+            np.squeeze(u100m['data'])[0:-1], np.squeeze(v100m['data'])[0:-1],
+            fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
+
+    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    ax.xaxis.set_major_locator(xaxis_intaval)
+    ax.set_xticklabels([' '])
+    plt.xlim(time_all[0],time_all[-1])    
+    # add legend
+    ax.legend(fontsize=10,loc='upper right')
+    ax.tick_params(length=10)    
+    ax.grid()
+    ax.grid(axis='x',c='black')
+    miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
+    ax.xaxis.set_minor_locator(miloc)
+    ax.grid(axis='x', which='minor')    
+    ax.set_ylabel('10米风 100米 风\n'+'风速 (m/s)', fontsize=15)
+    #雪密度——————————————————————————————————————
+    # draw main figure
+    ax = plt.axes([0.05,0.49,.94,.15])
+    for ifhour in SDEN['forecast_period'].values:
+        if (ifhour == SDEN['forecast_period'].values[0] ):
+            SDEN_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            SDEN_t=np.append(SDEN_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+    #开启自适应
+    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    ax.xaxis.set_major_locator(xaxis_intaval)
+    ax.set_xticklabels([' '])
+
+    ax.plot(SDEN_t,np.squeeze(SDEN['data']),color='#1E88E5',label='雪密度')
+    #ax.bar(SDEN_t,np.squeeze(SDEN['data']),width=0.12,color='#1E88E5')
+    gap_hour_SDEN=int(SDEN['forecast_period'].values[1]-SDEN['forecast_period'].values[0])
+
+    if(drw_thr == True):
+        ax.plot([SDEN_t[0],SDEN_t[-1]],[1*gap_hour_SDEN,1*gap_hour_SDEN],c='#FFEB3B',label=str(gap_hour_r03)+'小时降水较大影响',linewidth=1)
+        ax.plot([SDEN_t[0],SDEN_t[-1]],[10*gap_hour_SDEN,10*gap_hour_SDEN],c='#F44336',label=str(gap_hour_r03)+'小时降水高影响',linewidth=1)
+        ax.legend(fontsize=10,loc='upper right')
+    ax.tick_params(length=10)    
+    ax.grid()
+    ax.grid(axis='x',c='black')
+    miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
+    ax.xaxis.set_minor_locator(miloc)
+    ax.grid(axis='x', which='minor')    
+    plt.xlim(time_all[0],time_all[-1])
+    plt.ylim([np.squeeze(SDEN['data']).values.min(),np.squeeze(SDEN['data'].values.max())+2])
+    ax.set_ylabel('雪密度 (kg m-3)', fontsize=15)
+    #积雪深度——————————————————————————————————————
+    # draw main figure
+    ax = plt.axes([0.05,0.32,.94,.15])
+    for ifhour in SNOD1['forecast_period'].values:
+        if (ifhour == SNOD1['forecast_period'].values[0] ):
+            SNOD1_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            SNOD1_t=np.append(SNOD1_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+    # draw main figure
+    for ifhour in SNOD2['forecast_period'].values:
+        if (ifhour == SNOD2['forecast_period'].values[0] ):
+            SNOD2_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            SNOD2_t=np.append(SNOD2_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+
+    for ifhour in SN06['forecast_period'].values:
+        if (ifhour == SN06['forecast_period'].values[0] ):
+            SN06_t=(initial_time1
+                +timedelta(hours=ifhour))
+        else:
+            SN06_t=np.append(SN06_t,
+                            (initial_time1
+                            +timedelta(hours=ifhour)))
+    #开启自适应
+    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    ax.xaxis.set_major_locator(xaxis_intaval)
+    ax.set_xticklabels([' '])
+
+    #ax.bar(SNOD1_t,np.squeeze(SNOD1['data']),width=0.20,color='#82B1FF',label='EC预报积雪深度')
+    #ax.bar(SNOD2_t,np.squeeze(SNOD2['data']),width=0.125,color='#2962FF',label='NCEP预报积雪深度')
+    ax.plot(SNOD1_t,np.squeeze(SNOD1['data']), dashes=[6, 2],color='#4B4B4B',linewidth=3,label='EC预报积雪深度')
+    ax.plot(SNOD2_t,np.squeeze(SNOD2['data']), dashes=[6, 2],color='#969696',linewidth=3,label='NCEP预报积雪深度')
+    ax.plot(SN06_t,np.squeeze(SN06['data']),color='#82B1FF',linewidth=2,label='EC预报降雪量')
+
+    ax.tick_params(length=10)    
+    ax.grid()
+    ax.grid(axis='x',c='black')
+    miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
+    ax.xaxis.set_minor_locator(miloc)
+    ax.grid(axis='x', which='minor')    
+    plt.xlim(time_all[0],time_all[-1])
+    plt.ylim(0,100)
+    ax.legend(fontsize=10,loc='upper right')
+    plt.ylim(min([np.squeeze(SNOD1['data']).values.min(),np.squeeze(SNOD2['data']).values.min()]),
+        max([np.squeeze(SNOD1['data']).values.max(),np.squeeze(SNOD2['data']).values.max()])+5)
+    ax.set_ylabel('积雪深度 (cm)\n'+'6小时降雪量(mm)', fontsize=15)
+
+    if(draw_VIS==False):
+        xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
+        ax.xaxis.set_major_formatter(xstklbls)
+        for label in ax.get_xticklabels():
+            label.set_rotation(30)
+            label.set_horizontalalignment('center')
+        
+        #发布信息————————————————————————————————————————————————
+        ax = plt.axes([0.05,0.08,.94,.05])
+        ax.axis([0, 10, 0, 10])
+        ax.axis('off')
+        utl.add_logo_extra_in_axes(pos=[0.7,0.23,.05,.05],which='nmc', size='Xlarge')
+        ax.text(7.5, 33,(initial_time1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+
+    if(draw_VIS==True):
+        #能见度——————————————————————————————————————
+        # draw main figure
+        ax = plt.axes([0.05,0.15,.94,.15])
+
+        #VIS=pd.read_csv(dir_all['VIS_SC']+last_file[model])
+        for ifhour in VIS['forecast_period'].values:
+            if (ifhour == VIS['forecast_period'].values[0] ):
+                VIS_t=(initial_time2
+                    +timedelta(hours=ifhour))
+            else:
+                VIS_t=np.append(VIS_t,
+                                (initial_time2
+                                +timedelta(hours=ifhour)))
+
+        #开启自适应
+        xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+        ax.xaxis.set_major_locator(xaxis_intaval)
+
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), -100,facecolor='#B3E5FC')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 1,facecolor='#81D4FA')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 3,facecolor='#4FC3F7')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 5,facecolor='#29B6F6')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 10,facecolor='#03A9F4')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 15,facecolor='#039BE5')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 20,facecolor='#0288D1')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 25,facecolor='#0277BD')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 30,facecolor='#01579B')
+        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 100,facecolor='#FFFFFF')
+
+        ax.plot(VIS_t,np.squeeze(VIS['data']))
+        if(drw_thr == True):
+            ax.plot([VIS_t[0],VIS_t[-1]],[5,5],c='#4CAF50',label='能见度一般影响',linewidth=1)
+            ax.plot([VIS_t[0],VIS_t[-1]],[3,3],c='#FFEB3B',label='能见度较大影响',linewidth=1)
+            ax.plot([VIS_t[0],VIS_t[-1]],[1,1],c='#F44336',label='能见度高影响',linewidth=1)
+            ax.legend(fontsize=10,loc='upper right')
+
+        xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
+        ax.xaxis.set_major_formatter(xstklbls)
+        for label in ax.get_xticklabels():
+            label.set_rotation(30)
+            label.set_horizontalalignment('center')
+        ax.tick_params(length=10)
+        ax.grid()
+        ax.grid(axis='x',c='black')
+        miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
+        ax.xaxis.set_minor_locator(miloc)
+        ax.grid(axis='x', which='minor')    
+        plt.xlim(time_all[0],time_all[-1])
+        plt.ylim(0,25)
+        ax.set_ylabel('能见度 （km）', fontsize=15)
+            #发布信息————————————————————————————————————————————————
+        ax = plt.axes([0.05,0.08,.94,.05])
+        ax.axis([0, 10, 0, 10])
+        ax.axis('off')
+        utl.add_logo_extra_in_axes(pos=[0.7,0.06,.05,.05],which='nmc', size='Xlarge')
+        ax.text(7.5, 0.1,
+                (initial_time2 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+
+    #出图——————————————————————————————————————————————————————————
+    if(output_dir != None ):
+        isExists=os.path.exists(output_dir)
+        if not isExists:
+            os.makedirs(output_dir)
+        plt.savefig(output_dir+extra_info['output_head_name']+
+        initial_time1.strftime("%Y%m%d%H")+
+        '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()
 
