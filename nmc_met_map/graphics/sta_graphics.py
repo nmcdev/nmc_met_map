@@ -17,7 +17,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
             draw_VIS=False,VIS=None,drw_thr=False,
             time_all=None,
             model=None,points=None,
-            output_dir=None,extra_info=None,extra_info={
+            output_dir=None,extra_info={
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}):
