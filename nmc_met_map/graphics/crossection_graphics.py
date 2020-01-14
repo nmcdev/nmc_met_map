@@ -292,8 +292,10 @@ def draw_Time_Crossection_rh_uv_t(
     ax = plt.axes()
 
     # Plot RH using contourf
-    rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
-                            levels=np.arange(0, 106, 5), cmap='RdBu')
+    #rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
+                            #levels=np.arange(0, 106, 5), cmap='RdBu')
+    rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),                            
+                            levels=np.arange(0, 100, 5), cmap='YlGnBu',extend='max')
     rh_colorbar = fig.colorbar(rh_contour)
     rh_colorbar.set_label('相对湿度（%）',size=15)
 
@@ -365,8 +367,10 @@ def draw_Time_Crossection_rh_uv_theta_e(
  #   utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
 
     # Plot RH using contourf
+    #rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
+    #                        levels=np.arange(0, 106, 5), cmap='RdBu')
     rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
-                            levels=np.arange(0, 106, 5), cmap='RdBu')
+                            levels=np.arange(0, 100, 5), cmap='YlGnBu',extend='max')
     rh_colorbar = fig.colorbar(rh_contour)
     rh_colorbar.set_label('相对湿度（%）',size=15)
 

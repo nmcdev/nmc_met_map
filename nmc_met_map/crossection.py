@@ -14,7 +14,7 @@ import sys
 
 def Crosssection_Wind_Theta_e_absv(
     initial_time=None, fhour=24,
-    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
     day_back=0,model='ECMWF',
     output_dir=None,
     st_point = [20, 120.0],
@@ -128,7 +128,7 @@ def Crosssection_Wind_Theta_e_absv(
 
 def Crosssection_Wind_Theta_e_RH(
     initial_time=None, fhour=24,
-    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
     day_back=0,model='ECMWF',
     output_dir=None,
     st_point = [20, 120.0],
@@ -242,7 +242,7 @@ def Crosssection_Wind_Theta_e_RH(
 
 def Crosssection_Wind_Theta_e_Qv(
     initial_time=None, fhour=24,
-    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
     day_back=0,model='ECMWF',
     output_dir=None,
     st_point = [20, 120.0],
@@ -362,7 +362,7 @@ def Crosssection_Wind_Theta_e_Qv(
                     output_dir=output_dir)
 
 def Time_Crossection_rh_uv_t(initTime=None,model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
-    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
     t_gap=3,t_range=[0,48],output_dir=None):
 
     fhours = np.arange(t_range[0], t_range[1], t_gap)
@@ -402,7 +402,7 @@ def Time_Crossection_rh_uv_t(initTime=None,model='ECMWF',points={'lon':[116.3833
 
 
 def Time_Crossection_rh_uv_theta_e(initTime=None,model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
-    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200,100],
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
     t_gap=3,t_range=[0,48],output_dir=None):
   
     fhours = np.arange(t_range[0], t_range[1], t_gap)
