@@ -46,8 +46,8 @@ def draw_Crosssection_Wind_Theta_e_absv(
     wind_slc_vert = list(range(0, len(levels), 1))
     wind_slc_horz = slice(5, 100, 5)
     ax.barbs(cross_u['lon'][wind_slc_horz], cross_u['level'][wind_slc_vert],
-            cross_u['t_wind'][wind_slc_vert, wind_slc_horz],    
-            cross_v['n_wind'][wind_slc_vert, wind_slc_horz], color='k')
+            cross_u['t_wind'][wind_slc_vert, wind_slc_horz]*2.5,    
+            cross_v['n_wind'][wind_slc_vert, wind_slc_horz]*2.5, color='k')
     # Adjust the y-axis to be logarithmic
     ax.set_yscale('symlog')
     ax.set_yticklabels(np.arange(levels[0], levels[-1], -100))
@@ -135,8 +135,8 @@ def draw_Crosssection_Wind_Theta_e_RH(
     wind_slc_vert = list(range(0, len(levels), 1))
     wind_slc_horz = slice(5, 100, 5)
     ax.barbs(cross_u['lon'][wind_slc_horz], cross_u['level'][wind_slc_vert],
-            cross_u['t_wind'][wind_slc_vert, wind_slc_horz],    
-            cross_v['n_wind'][wind_slc_vert, wind_slc_horz], color='k')
+            cross_u['t_wind'][wind_slc_vert, wind_slc_horz]*2.5,    
+            cross_v['n_wind'][wind_slc_vert, wind_slc_horz]*2.5, color='k')
     # Adjust the y-axis to be logarithmic
     ax.set_yscale('symlog')
     ax.set_yticklabels(np.arange(levels[0], levels[-1], -100))
@@ -223,8 +223,8 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     wind_slc_vert = list(range(0, len(levels), 1))
     wind_slc_horz = slice(5, 100, 5)
     ax.barbs(cross_u['lon'][wind_slc_horz], cross_u['level'][wind_slc_vert],
-            cross_u['t_wind'][wind_slc_vert, wind_slc_horz],    
-            cross_v['n_wind'][wind_slc_vert, wind_slc_horz], color='k')
+            cross_u['t_wind'][wind_slc_vert, wind_slc_horz]*2.5,    
+            cross_v['n_wind'][wind_slc_vert, wind_slc_horz]*2.5, color='k')
     # Adjust the y-axis to be logarithmic
     ax.set_yscale('symlog')
     ax.set_yticklabels(np.arange(levels[0], levels[-1], -100))
@@ -300,8 +300,8 @@ def draw_Time_Crossection_rh_uv_t(
     rh_colorbar.set_label('相对湿度（%）',size=15)
 
     ax.barbs(u_2D['time'].values, u_2D['level'].values,
-            np.squeeze(u_2D['data'].values.swapaxes(1,0)),
-            np.squeeze(v_2D['data'].values.swapaxes(1,0)), color='k')
+            np.squeeze(u_2D['data'].values.swapaxes(1,0))*2.5,
+            np.squeeze(v_2D['data'].values.swapaxes(1,0))*2.5, color='k')
 
     TMP_contour = ax.contour(TMP_2D['time'].values, TMP_2D['level'].values,  np.squeeze(TMP_2D['data'].values.swapaxes(1,0)),
                             levels=np.arange(-100, 40, 5), colors='#F4511E', linewidths=2)
@@ -375,8 +375,8 @@ def draw_Time_Crossection_rh_uv_theta_e(
     rh_colorbar.set_label('相对湿度（%）',size=15)
 
     ax.barbs(u_2D['time'].values, u_2D['level'].values,
-            np.squeeze(u_2D['data'].values.swapaxes(1,0)),
-            np.squeeze(v_2D['data'].values.swapaxes(1,0)), color='k')
+            np.squeeze(u_2D['data'].values.swapaxes(1,0))*2.5,
+            np.squeeze(v_2D['data'].values.swapaxes(1,0))*2.5, color='k')
 
     TMP_contour = ax.contour(theta_e_2D['time'].values, theta_e_2D['level'].values,  np.squeeze(theta_e_2D.values.swapaxes(1,0)),
                             levels=np.arange(250, 450, 5), colors='#F4511E', linewidths=2)
