@@ -370,7 +370,7 @@ def draw_Time_Crossection_rh_uv_theta_e(
     #rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
     #                        levels=np.arange(0, 106, 5), cmap='RdBu')
     rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
-                            levels=np.arange(0, 100, 5), cmap='YlGnBu',extend='max')
+                            levels=np.arange(50, 100, 5), cmap='YlGnBu',extend='max')
     rh_colorbar = fig.colorbar(rh_contour)
     rh_colorbar.set_label('相对湿度（%）',size=15)
 
