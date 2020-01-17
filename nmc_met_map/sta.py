@@ -471,7 +471,7 @@ def point_wind_time_fcst_according_to_3D_wind(
 
     HGT_4D_sm=HGT_4D['data'].where(mask,drop=True)
     U_4D_sm=U_4D['data'].where(mask,drop=True)
-    V_4D_sm=U_4D['data'].where(mask,drop=True)
+    V_4D_sm=V_4D['data'].where(mask,drop=True)
 
     lon_md=np.squeeze(HGT_4D_sm['lon'].values)
     lat_md=np.squeeze(HGT_4D_sm['lat'].values)
