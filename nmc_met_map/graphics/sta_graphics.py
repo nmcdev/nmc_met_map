@@ -20,7 +20,9 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
             output_dir=None,extra_info={
             'output_head_name':' ',
             'output_tail_name':' ',
-            'point_name':' '}):
+            'point_name':' ',
+            'upper_wind':False,
+            'upper_wind_lev':'800'}):
 
     #if(sys.platform[0:3] == 'win'):
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
@@ -652,5 +654,77 @@ def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=
         str(fcst_info['forecast_reference_time'].values)[0:13]+
         '_预报时效_'+str(int(fcst_info.attrs['forecast_period'].values))
         +'.png', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()
+
+def draw_point_wind(U=None,V=None,
+        model=None,
+        output_dir=None,
+        points=None,
+        time_info=None,
+        extra_info=None):
+
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')       
+
+    initial_time=pd.to_datetime(str(time_info['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+
+    # draw figure
+    fig=plt.figure(figsize=(12,12))
+    # draw main figure    
+    #10米风——————————————————————————————————————
+    ax = plt.axes([0.1,0.2,.8,.7])
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time, fontsize=23)
+    for ifhour in time_info['forecast_period'].values:
+        if (ifhour == time_info['forecast_period'].values[0] ):
+            uv_t=(initial_time
+                +timedelta(hours=ifhour))
+        else:
+            uv_t=np.append(uv_t,
+                            (initial_time
+                            +timedelta(hours=ifhour)))
+
+    wsp=(U**2+V**2)**0.5
+    ax.plot(uv_t, np.squeeze(wsp), c='#40C4FF',linewidth=3)
+    if(extra_info['drw_thr'] == True):
+        ax.plot([uv_t[0],uv_t[-1]],[17,17],c='red',label='警戒风速',linewidth=1)
+
+    ax.barbs(uv_t, wsp,U,V,
+            fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
+
+    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    ax.xaxis.set_major_locator(xaxis_intaval)
+    plt.xlim(uv_t[0],uv_t[-1])    
+    # add legend
+    ax.legend(fontsize=15,loc='upper right')
+    ax.tick_params(length=10)   
+    xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+        label.set_horizontalalignment('center')
+    ax.tick_params(axis='y',labelsize=15)
+    ax.tick_params(axis='x',labelsize=15)
+
+    ax.grid()
+    ax.grid(axis='x',c='black')
+    miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
+    ax.xaxis.set_minor_locator(miloc)
+    ax.grid(axis='x', which='minor')    
+    ax.set_ylabel('风速 (m/s)', fontsize=15)
+
+    utl.add_logo_extra_in_axes(pos=[0.08,0.8,.1,.1],which='nmc', size='Xlarge')
+
+    #出图——————————————————————————————————————————————————————————
+    if(output_dir != None ):
+        isExists=os.path.exists(output_dir)
+        if not isExists:
+            os.makedirs(output_dir)
+        plt.savefig(output_dir+extra_info['output_head_name']+
+        initial_time1.strftime("%Y%m%d%H")+
+        '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()

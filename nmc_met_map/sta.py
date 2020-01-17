@@ -6,7 +6,7 @@ import os
 import xarray as xr
 import metpy.calc as mpcalc
 from metpy.units import units
-from nmc_met_io.retrieve_micaps_server import get_model_points,get_model_3D_grid,get_latest_initTime
+from nmc_met_io.retrieve_micaps_server import get_model_points,get_model_3D_grid,get_latest_initTime,get_model_3D_grids
 import nmc_met_map.lib.utility as utl
 from nmc_met_map.graphics import sta_graphics
 import matplotlib.pyplot as plt
@@ -15,6 +15,7 @@ from metpy.cbook import get_test_data
 from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
 from scipy.stats import norm
+from scipy.interpolate import LinearNDInterpolator
 
 def Station_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
@@ -24,7 +25,10 @@ def Station_Synthetical_Forecast_From_Cassandra(
         points={'lon':[116.3833], 'lat':[39.9]},
         initTime=None,
         draw_VIS=True,drw_thr=False,
-        extra_info=None
+        extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' '}
             ):
 
     #+get all the directories needed
@@ -181,7 +185,10 @@ def Station_Snow_Synthetical_Forecast_From_Cassandra(
         points={'lon':[116.3833], 'lat':[39.9]},
         initTime=None,
         draw_VIS=True,drw_thr=False,
-        extra_info=None
+        extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' '}
             ):
 
     #+get all the directories needed
@@ -422,3 +429,79 @@ def sta_SkewT(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
     sta_graphics.draw_sta_skewT(
         p=p,T=T,Td=Td,wind_speed=wind_speed,wind_dir=wind_dir,u=u,v=v,
         fcst_info=fcst_info)
+
+
+def point_wind_time_fcst_according_to_3D_wind(
+        model='ECMWF',
+        output_dir=None,
+        t_range=[0,60],
+        t_gap=3,
+        points={'lon':[116.3833], 'lat':[39.9], 'altitude':[1351]},
+        initTime=None,
+        extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' ',
+            'drw_thr':True,
+            'levels_for_interp':[1000, 950, 925, 900, 850, 800, 700, 600, 500]}
+            ):
+
+    #+get all the directories needed
+    try:
+        dir_rqd=[utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='')]
+    except KeyError:
+        raise ValueError('Can not find all required directories needed')
+    
+    #-get all the directories needed
+    if(initTime == None):
+        initTime = get_latest_initTime(dir_rqd[0][0:-1]+'/850')
+    directory=dir_rqd[0][0:-1]
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    HGT_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
+    directory=dir_rqd[1][0:-1]
+    U_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
+    directory=dir_rqd[2][0:-1]
+    V_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
+    
+    delt_xy=HGT_4D['lon'].values[1]-HGT_4D['lon'].values[0]
+    mask = (HGT_4D['lon']<(points['lon']+2*delt_xy))&(HGT_4D['lon']>(points['lon']-2*delt_xy))&(HGT_4D['lat']<(points['lat']+2*delt_xy))&(HGT_4D['lat']>(points['lat']-2*delt_xy))
+
+    HGT_4D_sm=HGT_4D['data'].where(mask,drop=True)
+    U_4D_sm=U_4D['data'].where(mask,drop=True)
+    V_4D_sm=U_4D['data'].where(mask,drop=True)
+
+    lon_md=np.squeeze(HGT_4D_sm['lon'].values)
+    lat_md=np.squeeze(HGT_4D_sm['lat'].values)
+    alt_md=np.squeeze(HGT_4D_sm.values*10).flatten()
+    time_md=np.squeeze(HGT_4D_sm['forecast_period'].values)
+
+    coords = np.zeros((len(time_md),len(extra_info['levels_for_interp']),len(lat_md),len(lon_md),4))
+    coords[...,0]=time_md.reshape((len(time_md),1,1,1))
+    coords[...,2] = lat_md.reshape((1,1,len(lat_md),1))
+    coords[...,3] = lon_md.reshape((1,1,1,len(lon_md)))
+    coords = coords.reshape((alt_md.size,4))
+    coords[:,1]=alt_md
+
+    interpolator_U = LinearNDInterpolator(coords,U_4D_sm.values.reshape((U_4D_sm.values.size)))
+    interpolator_V = LinearNDInterpolator(coords,V_4D_sm.values.reshape((V_4D_sm.values.size)))
+
+    coords2 = np.zeros((len(fhours),1,1,1,4))
+    coords2[...,0]=time_md.reshape((len(time_md),1,1,1))
+    coords2[...,1]=points['altitude'][0]
+    coords2[...,2] = points['lat'][0]
+    coords2[...,3] = points['lon'][0]
+
+    U_interped=np.squeeze(interpolator_U(coords2))
+    V_interped=np.squeeze(interpolator_V(coords2))
+    time_info=HGT_4D_sm.coords
+
+    sta_graphics.draw_point_wind(U=U_interped,V=V_interped,
+        model=model,
+        output_dir=output_dir,
+        points=points,
+        time_info=time_info,
+        extra_info=extra_info
+            )        
