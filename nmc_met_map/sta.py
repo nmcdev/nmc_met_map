@@ -488,7 +488,7 @@ def point_wind_time_fcst_according_to_3D_wind(
     interpolator_U = LinearNDInterpolator(coords,U_4D_sm.values.reshape((U_4D_sm.values.size)))
     interpolator_V = LinearNDInterpolator(coords,V_4D_sm.values.reshape((V_4D_sm.values.size)))
 
-    coords2 = np.zeros((len(fhours),1,1,1,4))
+    coords2 = np.zeros((len(time_md),1,1,1,4))
     coords2[...,0]=time_md.reshape((len(time_md),1,1,1))
     coords2[...,1]=points['altitude'][0]
     coords2[...,2] = points['lat'][0]
