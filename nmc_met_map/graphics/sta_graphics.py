@@ -716,7 +716,7 @@ def draw_point_wind(U=None,V=None,
     ax.grid(axis='x', which='minor')    
     ax.set_ylabel('风速 (m/s)', fontsize=15)
 
-    utl.add_logo_extra_in_axes(pos=[0.08,0.8,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[0.1,0.8,.1,.1],which='nmc', size='Xlarge')
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):
