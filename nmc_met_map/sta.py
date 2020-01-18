@@ -6,7 +6,7 @@ import os
 import xarray as xr
 import metpy.calc as mpcalc
 from metpy.units import units
-from nmc_met_io.retrieve_micaps_server import get_model_points,get_model_3D_grid,get_latest_initTime,get_model_3D_grids
+from nmc_met_io.retrieve_micaps_server import get_model_points,get_model_3D_grid,get_latest_initTime,get_model_3D_grids,get_station_data
 import nmc_met_map.lib.utility as utl
 from nmc_met_map.graphics import sta_graphics
 import matplotlib.pyplot as plt
@@ -466,6 +466,21 @@ def point_wind_time_fcst_according_to_3D_wind(
     directory=dir_rqd[2][0:-1]
     V_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
     
+    #obs
+    '''
+    initial_time=pd.to_datetime(str(V_4D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    for ifhour in V_4D['forecast_period'].values:
+        temp=(initial_time+timedelta(hours=ifhour))
+        filenames_obs=temp.strftime("%Y%m%d%H")+'0000.000'
+        if (ifhour == V_4D['forecast_period'].values[0] ):
+            obs_data=get_station_data('SURFACE/PLOT_OLYMPIC/',filename=filenames_obs)
+            sta_obs_data=obs_data.where(obs_data['ID']==651708).dropna()
+        else:
+            obs_data=get_station_data('SURFACE/PLOT_OLYMPIC/',filename=filenames_obs)
+            if(obs_data is not None):
+                temp=obs_data.where(obs_data['ID']==651708).dropna()
+                sta_obs_data.append(temp)
+    '''
     delt_xy=HGT_4D['lon'].values[1]-HGT_4D['lon'].values[0]
     mask = (HGT_4D['lon']<(points['lon']+2*delt_xy))&(HGT_4D['lon']>(points['lon']-2*delt_xy))&(HGT_4D['lat']<(points['lat']+2*delt_xy))&(HGT_4D['lat']>(points['lat']-2*delt_xy))
 
@@ -485,14 +500,15 @@ def point_wind_time_fcst_according_to_3D_wind(
     coords = coords.reshape((alt_md.size,4))
     coords[:,1]=alt_md
 
-    interpolator_U = LinearNDInterpolator(coords,U_4D_sm.values.reshape((U_4D_sm.values.size)))
-    interpolator_V = LinearNDInterpolator(coords,V_4D_sm.values.reshape((V_4D_sm.values.size)))
+    interpolator_U = LinearNDInterpolator(coords,U_4D_sm.values.reshape((U_4D_sm.values.size)),rescale=True)
+    interpolator_V = LinearNDInterpolator(coords,V_4D_sm.values.reshape((V_4D_sm.values.size)),rescale=True)
 
     coords2 = np.zeros((len(time_md),1,1,1,4))
     coords2[...,0]=time_md.reshape((len(time_md),1,1,1))
     coords2[...,1]=points['altitude'][0]
     coords2[...,2] = points['lat'][0]
     coords2[...,3] = points['lon'][0]
+    coords2 = coords2.reshape((time_md.size,4))
 
     U_interped=np.squeeze(interpolator_U(coords2))
     V_interped=np.squeeze(interpolator_V(coords2))
