@@ -691,7 +691,7 @@ def draw_point_wind(U=None,V=None,
     wsp=(U**2+V**2)**0.5
     ax.plot(uv_t, np.squeeze(wsp), c='#40C4FF',linewidth=3)
     if(extra_info['drw_thr'] == True):
-        ax.plot([uv_t[0],uv_t[-1]],[17,17],c='red',label='警戒风速',linewidth=1)
+        ax.plot([uv_t[0],uv_t[-1]],[11,11],c='red',label='警戒风速',linewidth=1)
 
     ax.barbs(uv_t, wsp,U,V,
             fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
