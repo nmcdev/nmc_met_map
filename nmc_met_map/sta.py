@@ -437,7 +437,7 @@ def point_wind_time_fcst_according_to_3D_wind(
         t_range=[0,60],
         t_gap=3,
         points={'lon':[116.3833], 'lat':[39.9], 'altitude':[1351]},
-        initTime=None,
+        initTime=None,draw_obs=True,obs_ID=54511,day_back=0,
         extra_info={
             'output_head_name':' ',
             'output_tail_name':' ',
@@ -457,6 +457,8 @@ def point_wind_time_fcst_according_to_3D_wind(
     #-get all the directories needed
     if(initTime == None):
         initTime = get_latest_initTime(dir_rqd[0][0:-1]+'/850')
+        #initTime=utl.filename_day_back_model(day_back=day_back,fhour=0)[0:8]
+
     directory=dir_rqd[0][0:-1]
     fhours = np.arange(t_range[0], t_range[1], t_gap)
     filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
@@ -467,20 +469,33 @@ def point_wind_time_fcst_according_to_3D_wind(
     V_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
     
     #obs
-    '''
-    initial_time=pd.to_datetime(str(V_4D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    for ifhour in V_4D['forecast_period'].values:
-        temp=(initial_time+timedelta(hours=ifhour))
-        filenames_obs=temp.strftime("%Y%m%d%H")+'0000.000'
-        if (ifhour == V_4D['forecast_period'].values[0] ):
-            obs_data=get_station_data('SURFACE/PLOT_OLYMPIC/',filename=filenames_obs)
-            sta_obs_data=obs_data.where(obs_data['ID']==651708).dropna()
-        else:
-            obs_data=get_station_data('SURFACE/PLOT_OLYMPIC/',filename=filenames_obs)
+    if(draw_obs == True):
+        initial_time=pd.to_datetime(str(V_4D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+        sign=0
+        for ifhour in V_4D['forecast_period'].values:
+            temp=(initial_time+timedelta(hours=ifhour))
+            filenames_obs=temp.strftime("%Y%m%d%H")+'0000.000'
+            try:
+                obs_data=get_station_data('SURFACE/PLOT/',filename=filenames_obs)
+            except:
+                break
+
             if(obs_data is not None):
-                temp=obs_data.where(obs_data['ID']==651708).dropna()
-                sta_obs_data.append(temp)
-    '''
+                temp=obs_data.where(obs_data['ID']==obs_ID).dropna(how='all')
+                if ((ifhour == V_4D['forecast_period'].values[0]) or ((ifhour > V_4D['forecast_period'].values[0]) and (sign==0))):
+                    if(len(temp) > 0):
+                        sta_obs_data=obs_data.where(obs_data['ID']==obs_ID).dropna(how='all').reset_index()
+                        sign=1
+                else:
+                    if(len(temp) > 0):
+                        sta_obs_data=sta_obs_data.append(temp).reset_index()
+            if(obs_data is None):
+                break
+        try:
+            sta_obs_data
+        except:
+            draw_obs=False
+
     delt_xy=HGT_4D['lon'].values[1]-HGT_4D['lon'].values[0]
     mask = (HGT_4D['lon']<(points['lon']+2*delt_xy))&(HGT_4D['lon']>(points['lon']-2*delt_xy))&(HGT_4D['lat']<(points['lat']+2*delt_xy))&(HGT_4D['lat']>(points['lat']-2*delt_xy))
 
@@ -521,3 +536,45 @@ def point_wind_time_fcst_according_to_3D_wind(
         time_info=time_info,
         extra_info=extra_info
             )        
+
+def point_fcst(
+        model='ECMWF',
+        output_dir=None,
+        t_range=[0,60],
+        t_gap=3,
+        points={'lon':[116.3833], 'lat':[39.9], 'altitude':[1351]},
+        initTime=None,day_back=0,
+        extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' '}
+            ):
+
+    #+get all the directories needed
+    try:
+        dir_rqd=[utl.Cassandra_dir(data_type='surface',data_source=model,var_name='T2m'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='u10m'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='v10m'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN'+str(t_gap).zfill(2))]
+    except KeyError:
+        raise ValueError('Can not find all required directories needed')
+    
+    #-get all the directories needed
+    if(initTime == None):
+        initTime = get_latest_initTime(dir_rqd[0])
+        #initTime=utl.filename_day_back_model(day_back=day_back,fhour=0)[0:8]
+
+    directory=dir_rqd[0][0:-1]
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    t2m=utl.get_model_points_gy(dir_rqd[0], filenames, points,allExists=False)
+    u10m=utl.get_model_points_gy(dir_rqd[1], filenames, points,allExists=False)
+    v10m=utl.get_model_points_gy(dir_rqd[2], filenames, points,allExists=False)
+    rn=utl.get_model_points_gy(dir_rqd[3], filenames, points,allExists=False)
+
+    sta_graphics.draw_point_fcst(t2m=t2m,u10m=u10m,v10m=v10m,rn=rn,
+        model=model,
+        output_dir=output_dir,
+        points=points,
+        extra_info=extra_info
+            )                    
