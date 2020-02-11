@@ -14,7 +14,6 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as mpatheffects
 import matplotlib.ticker as mticker
-from nmc_met_map.source.lib.read_micaps_17 import read_micaps_17
 from cartopy.io.shapereader import Reader
 import locale
 import cartopy.feature as cfeature

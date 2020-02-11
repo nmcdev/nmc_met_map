@@ -807,7 +807,7 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
         label=str(int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0]))+'小时降水',alpha=0.5)
     #curve_rn=ax_rn.plot(rn_t, np.squeeze(rn['data'].values), c='#40C4FF',linewidth=3)
     
-    ax_rn.set_ylim(0,np.nanmax(np.append(25,np.squeeze(rn.values))))
+    ax_rn.set_ylim(0,np.nanmax(np.append(10,np.squeeze(rn.values))))
     ###
 
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
