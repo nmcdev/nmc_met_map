@@ -467,7 +467,7 @@ def point_wind_time_fcst_according_to_3D_wind(
     U_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
     directory=dir_rqd[2][0:-1]
     V_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
-    
+
     #obs
     if(draw_obs == True):
         initial_time=pd.to_datetime(str(V_4D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
@@ -577,4 +577,100 @@ def point_fcst(
         output_dir=output_dir,
         points=points,
         extra_info=extra_info
-            )                    
+            )                 
+
+def point_fcst_according_to_3D_field(
+        model='ECMWF',
+        output_dir=None,
+        t_range=[0,60],
+        t_gap=3,
+        points={'lon':[116.3833], 'lat':[39.9], 'altitude':[1351]},
+        initTime=None,obs_ID=54511,day_back=0,
+        extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' ',
+            'drw_thr':True,
+            'levels_for_interp':[1000, 950, 925, 900, 850, 800, 700, 600, 500]}
+            ):
+
+    try:
+        dir_rqd=[utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN'+str(t_gap).zfill(2))]
+    except KeyError:
+        raise ValueError('Can not find all required directories needed')
+    
+    #-get all the directories needed
+    if(initTime == None):
+        initTime = get_latest_initTime(dir_rqd[0][0:-1]+'/850')
+        #initTime=utl.filename_day_back_model(day_back=day_back,fhour=0)[0:8]
+
+    directory=dir_rqd[0][0:-1]
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    HGT_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
+    directory=dir_rqd[1][0:-1]
+    U_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
+    directory=dir_rqd[2][0:-1]
+    V_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
+
+    directory=dir_rqd[3][0:-1]
+    TMP_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
+    
+    rn=utl.get_model_points_gy(dir_rqd[4], filenames, points,allExists=False)
+
+    directory=dir_rqd[3][0:-1]
+    coords_info_2D=utl.get_model_points_gy(directory+str(extra_info['levels_for_interp'][0])+'/',
+                        points=points,filenames=filenames,allExists=False)
+
+    delt_xy=HGT_4D['lon'].values[1]-HGT_4D['lon'].values[0]
+    mask = (HGT_4D['lon']<(points['lon']+2*delt_xy))&(HGT_4D['lon']>(points['lon']-2*delt_xy))&(HGT_4D['lat']<(points['lat']+2*delt_xy))&(HGT_4D['lat']>(points['lat']-2*delt_xy))
+
+    HGT_4D_sm=HGT_4D['data'].where(mask,drop=True)
+    U_4D_sm=U_4D['data'].where(mask,drop=True)
+    V_4D_sm=V_4D['data'].where(mask,drop=True)
+    TMP_4D_sm=U_4D['data'].where(mask,drop=True)
+
+    lon_md=np.squeeze(HGT_4D_sm['lon'].values)
+    lat_md=np.squeeze(HGT_4D_sm['lat'].values)
+    alt_md=np.squeeze(HGT_4D_sm.values*10).flatten()
+    time_md=np.squeeze(HGT_4D_sm['forecast_period'].values)
+
+    coords = np.zeros((len(time_md),len(extra_info['levels_for_interp']),len(lat_md),len(lon_md),4))
+    coords[...,0]=time_md.reshape((len(time_md),1,1,1))
+    coords[...,2] = lat_md.reshape((1,1,len(lat_md),1))
+    coords[...,3] = lon_md.reshape((1,1,1,len(lon_md)))
+    coords = coords.reshape((alt_md.size,4))
+    coords[:,1]=alt_md
+
+    interpolator_U = LinearNDInterpolator(coords,U_4D_sm.values.reshape((U_4D_sm.values.size)),rescale=True)
+    interpolator_V = LinearNDInterpolator(coords,V_4D_sm.values.reshape((V_4D_sm.values.size)),rescale=True)
+    interpolator_TMP = LinearNDInterpolator(coords,TMP_4D_sm.values.reshape((TMP_4D_sm.values.size)),rescale=True)
+
+    coords2 = np.zeros((len(time_md),1,1,1,4))
+    coords2[...,0]=time_md.reshape((len(time_md),1,1,1))
+    coords2[...,1]=points['altitude'][0]
+    coords2[...,2] = points['lat'][0]
+    coords2[...,3] = points['lon'][0]
+    coords2 = coords2.reshape((time_md.size,4))
+
+    U_interped=np.squeeze(interpolator_U(coords2))
+    V_interped=np.squeeze(interpolator_V(coords2))
+    TMP_interped=np.squeeze(interpolator_TMP(coords2))
+
+    U_interped_xr=coords_info_2D.copy()
+    U_interped_xr['data'].values=U_interped.reshape(U_interped.size,1,1)
+    V_interped_xr=coords_info_2D.copy()
+    V_interped_xr['data'].values=V_interped.reshape(V_interped.size,1,1)
+    TMP_interped_xr=coords_info_2D.copy()
+    TMP_interped_xr['data'].values=TMP_interped.reshape(TMP_interped.size,1,1)
+    
+    sta_graphics.draw_point_fcst(t2m=TMP_interped_xr,u10m=U_interped_xr,v10m=V_interped_xr,rn=rn,
+        model=model,
+        output_dir=output_dir,
+        points=points,
+        extra_info=extra_info
+            )        

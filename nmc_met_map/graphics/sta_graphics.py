@@ -830,7 +830,7 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
     ax_rn.axis['right'].label.set_fontsize(15)
     ax_rn.axis['right'].major_ticklabels.set_fontsize(15)
     #10米风——————————————————————————————————————
-    ax_uv = plt.axes([0.1,0.2,.8,.08])
+    ax_uv = plt.axes([0.1,0.16,.8,.12])
     for ifhour in u10m['forecast_period'].values:
         if (ifhour == u10m['forecast_period'].values[0] ):
             uv_t=(initial_time
@@ -845,13 +845,13 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
 
     ax_uv.barbs(uv_t, np.zeros(len(uv_t)),
             np.squeeze(u10m['data'].values),np.squeeze(v10m['data'].values),
-            fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20},length=5,linewidth=1.6)
+            fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20},length=5.8,linewidth=1.5,zorder=100)
     ax_uv.set_ylim(-1,1)
     ax_uv.set_xlim(uv_t[0],uv_t[-1])
     #ax_uv.axis('off')
     ax_uv.set_yticklabels([' '])
     #logo
-    utl.add_logo_extra_in_axes(pos=[0.85,0.02,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[0.87,0.00,.1,.1],which='nmc', size='Xlarge')
 
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
