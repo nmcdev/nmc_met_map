@@ -11,6 +11,7 @@ import pandas as pd
 import math
 import os
 import sys
+from IPython import clear_output
 
 def Crosssection_Wind_Theta_e_absv(
     initial_time=None, fhour=24,
@@ -436,7 +437,7 @@ def Time_Crossection_rh_uv_theta_e(initTime=None,model='ECMWF',points={'lon':[11
     rh_2D=rh_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
     rh_2D.attrs['model']=model
     rh_2D.attrs['points']=points
-
+    clear_output()
     Td_2D = mpcalc.dewpoint_rh(TMP_2D['data'].values*units.celsius,
                 rh_2D['data'].values* units.percent)
 

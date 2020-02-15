@@ -16,6 +16,7 @@ from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
 from scipy.stats import norm
 from scipy.interpolate import LinearNDInterpolator
+from IPython import clear_output
 
 def Station_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
@@ -467,7 +468,7 @@ def point_wind_time_fcst_according_to_3D_wind(
     U_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
     directory=dir_rqd[2][0:-1]
     V_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
-
+    clear_output()
     #obs
     if(draw_obs == True):
         initial_time=pd.to_datetime(str(V_4D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
@@ -571,7 +572,7 @@ def point_fcst(
     u10m=utl.get_model_points_gy(dir_rqd[1], filenames, points,allExists=False)
     v10m=utl.get_model_points_gy(dir_rqd[2], filenames, points,allExists=False)
     rn=utl.get_model_points_gy(dir_rqd[3], filenames, points,allExists=False)
-
+    clear_output()
     sta_graphics.draw_point_fcst(t2m=t2m,u10m=u10m,v10m=v10m,rn=rn,
         model=model,
         output_dir=output_dir,
@@ -626,6 +627,7 @@ def point_fcst_according_to_3D_field(
     coords_info_2D=utl.get_model_points_gy(directory+str(extra_info['levels_for_interp'][0])+'/',
                         points=points,filenames=filenames,allExists=False)
 
+    clear_output()
     delt_xy=HGT_4D['lon'].values[1]-HGT_4D['lon'].values[0]
     mask = (HGT_4D['lon']<(points['lon']+2*delt_xy))&(HGT_4D['lon']>(points['lon']-2*delt_xy))&(HGT_4D['lat']<(points['lat']+2*delt_xy))&(HGT_4D['lat']>(points['lat']-2*delt_xy))
 
