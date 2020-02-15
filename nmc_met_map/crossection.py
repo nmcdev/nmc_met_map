@@ -11,7 +11,7 @@ import pandas as pd
 import math
 import os
 import sys
-from IPython import clear_output
+from IPython.display import clear_output
 
 def Crosssection_Wind_Theta_e_absv(
     initial_time=None, fhour=24,

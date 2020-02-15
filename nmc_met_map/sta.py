@@ -16,7 +16,7 @@ from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
 from scipy.stats import norm
 from scipy.interpolate import LinearNDInterpolator
-from IPython import clear_output
+from IPython.display import clear_output
 
 def Station_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
