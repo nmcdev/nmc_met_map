@@ -624,7 +624,6 @@ def point_fcst_according_to_3D_field(
     coords_info_2D=utl.get_model_points_gy(directory+str(extra_info['levels_for_interp'][0])+'/',
                         points=points,filenames=filenames,allExists=False)
 
-    clear_output()
     delt_xy=HGT_4D['lon'].values[1]-HGT_4D['lon'].values[0]
     mask = (HGT_4D['lon']<(points['lon']+2*delt_xy))&(HGT_4D['lon']>(points['lon']-2*delt_xy))&(HGT_4D['lat']<(points['lat']+2*delt_xy))&(HGT_4D['lat']>(points['lat']-2*delt_xy))
 
