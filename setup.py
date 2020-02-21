@@ -42,7 +42,6 @@ setup(
                       'cartopy>=0.15.1',
                       'nmc_met_graphics>=0.1.0',
                       'nmc_met_io>=0.1.0',
-                      'regionmask>=0.4.0',
                       'metpy >= 0.10.0',
                       'scipy >= 1.2.1',
                       'numba >= 0.43.1',
