@@ -33,6 +33,7 @@ from nmc_met_io.retrieve_micaps_server import get_model_grids
 from scipy.ndimage import gaussian_filter
 from scipy.interpolate import griddata
 import matplotlib as mpl
+import os.path
 
 def obs_radar_filename(time='none', product_name='CREF'):
     """
@@ -626,7 +627,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'LCDC':'ECMWF_HR/LCDC/',
                     'TCDC':'ECMWF_HR/TCDC/',
                     'T2m':'ECMWF_HR/TMP_2M/',
-                    'Td2m':'ECMWF_HR/DPT_2M/'
+                    'Td2m':'ECMWF_HR/DPT_2M/',
+                    'PSFC':'ECMWF_HR/PRES/SURFACE/'
                     },
             'GRAPES_GFS':{
                     'u10m':'GRAPES_GFS/UGRD/10M_ABOVE_GROUND/',
@@ -643,7 +645,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'T2m':'GRAPES_GFS/TMP/2M_ABOVE_GROUND/',
                     'rh2m':'GRAPES_GFS/RH/2M_ABOVE_GROUND/',
                     'Td2m':'GRAPES_GFS/DPT/2M_ABOVE_GROUND/',
-                    'BLI':'GRAPES_GFS/BLI/'
+                    'BLI':'GRAPES_GFS/BLI/',
+                    'PSFC':'GRAPES_GFS/PRES/SURFACE/'
                     },
             'NCEP_GFS':{
                     'u10m':'NCEP_GFS/UGRD/10M_ABOVE_GROUND/',
@@ -657,7 +660,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'T2m':'NCEP_GFS/TMP/2M_ABOVE_GROUND/',
                     'rh2m':'NCEP_GFS/RH/2M_ABOVE_GROUND/',
                     'Td2m':'NCEP_GFS/DPT/2M_ABOVE_GROUND/',
-                    'BLI':'NCEP_GFS/BLI/'
+                    'BLI':'NCEP_GFS/BLI/',
+                    'PSFC':'NCEP_GFS/PRES/SURFACE/'
                     },
 
             'OBS':{
@@ -877,3 +881,55 @@ def gy_cm_rain_nws2(atime=24, pos=None):
         _pos = pos
     cmap, norm = mpl.colors.from_levels_and_colors(_pos, _colors, extend='neither')
     return cmap, norm
+
+def read_micaps_17(fname, limit=None):
+    
+    """
+    Read Micaps 17 type file (general scatter point)
+    此类数据主要用于读站点信息数据
+    :param fname: micaps file name.
+    :param limit: region limit, [min_lat, min_lon, max_lat, max_lon]
+    :return: data, pandas type
+    :Examples:
+    >>> data = read_micaps_3('L:\py_develop\nmc_met_publish_map\nmc_met_publish_map\resource\sta2513.dat')
+    """
+
+    # check file exist
+    if not os.path.isfile(fname):
+        return None
+
+    # read contents
+    try:
+        with open(fname, 'r') as f:
+            #txt = f.read().decode('GBK').replace('\n', ' ').split()
+            txt = f.read().replace('\n', ' ').split()
+    except IOError as err:
+        print("Micaps 17 file error: " + str(err))
+        return None
+
+    # head information
+    head_info = txt[2]
+
+    # date and time
+    nsta = int(txt[3])
+
+    # cut data
+    txt = np.array(txt[4:])
+    txt.shape = [nsta, 7]
+
+    # initial data
+    columns = list(['ID', 'lat', 'lon', 'alt','temp1','temp2','Name'])
+    data = pd.DataFrame(txt, columns=columns)
+
+    # cut the region
+    if limit is not None:
+        data = data[(limit[0] <= data['lat']) & (data['lat'] <= limit[2]) &
+                    (limit[1] <= data['lon']) & (data['lon'] <= limit[3])]
+
+    data['nstation']=nsta
+
+    # check records
+    if len(data) == 0:
+        return None
+    # return
+    return data
