@@ -1,4 +1,4 @@
-# 国家气象中心诊断分析工具(NMC Diagnostic Tool,NMDT)
+# 天气学诊断分析工具(Meteorological Diagnostic Tools, MetDig)
 ## Dependencies
 Other required packages:
 
