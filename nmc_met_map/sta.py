@@ -20,7 +20,7 @@ from scipy.interpolate import LinearNDInterpolator
 def Station_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
         output_dir=None,
-        t_range=[1,29],
+        t_range=[0,84],
         t_gap=3,
         points={'lon':[116.3833], 'lat':[39.9]},
         initTime=None,
@@ -88,12 +88,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
     h_s={model:int(last_file[model][6:8]),
         'SCMOC':int(last_file['SCMOC'][6:8])}
 
-    #if(t_range[1]*t_gap > 72):
-    #    fhours = np.append(np.arange(t_range[0]*t_gap, 72, t_gap),
-    #             np.arange(72, t_range[1]*t_gap, 6))
-    #else:
-    #    fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
-    fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
 
     for ifhour in fhours:
         if (ifhour == fhours[0] ):
@@ -120,34 +115,34 @@ def Station_Synthetical_Forecast_From_Cassandra(
     v10m=utl.get_model_points_gy(dir_rqd[11], filenames, points,allExists=False)
     wsp10m=(u10m['data']**2+v10m['data']**2)**0.5
     AT=1.07*t2m['data'].values+0.2*p_vapor-0.65*wsp10m-2.7      
-    if((t_range[1]-1)*t_gap > 72):
-        fhours = np.arange(6, t_range[1]*t_gap, 6)
+    if((t_range[1]) > 72):
+        fhours = np.arange(6, t_range[1], 6)
         filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         r03=utl.get_model_points_gy(dir_rqd[8], filenames, points,allExists=False)
     else:
         r03=utl.get_model_points_gy(dir_rqd[7], filenames, points,allExists=False)
 
-    fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
     filenames = [last_file['SCMOC']+'.'+str(fhour).zfill(3) for fhour in fhours]
     VIS=utl.get_model_points_gy(dir_rqd[6], filenames, points,allExists=False,fill_null=True,Null_value=-0.001)     
 
-    if(last_file['SCMOC'] == last_file[model] and t_range[1]*t_gap > 72):
-        fhours = np.append(np.arange(3,72,3),np.arange(72, (t_range[1])*t_gap, 6))
+    if(last_file['SCMOC'] == last_file[model] and t_range[1] > 72):
+        fhours = np.append(np.arange(3,72,3),np.arange(72, (t_range[1]), 6))
         filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]            
 
-    if(last_file['SCMOC'] != last_file[model] and t_range[1]*t_gap > 60):
-        fhours = np.append(np.arange(3,60,3),np.arange(60, (t_range[1])*t_gap, 6))
+    if(last_file['SCMOC'] != last_file[model] and t_range[1] > 60):
+        fhours = np.append(np.arange(3,60,3),np.arange(60, (t_range[1]), 6))
         filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
 
-    if(last_file['SCMOC'] != last_file[model] and t_range[1]*t_gap <= 60):
-        fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    if(last_file['SCMOC'] != last_file[model] and t_range[1] <= 60):
+        fhours = np.arange(t_range[0], t_range[1], t_gap)
         filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
 
-    if(last_file['SCMOC'] == last_file[model] and t_range[1]*t_gap <= 72):
-        fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    if(last_file['SCMOC'] == last_file[model] and t_range[1] <= 72):
+        fhours = np.arange(t_range[0], t_range[1], t_gap)
         filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
 
@@ -161,10 +156,10 @@ def Station_Synthetical_Forecast_From_Cassandra(
         gust10m=utl.get_model_points_gy(dir_rqd[0], filenames, points,allExists=False)
     if(fhours[-1] > 120):
         if(last_file['SCMOC'] == last_file[model]):
-            fhours = np.arange(0, t_range[1]*t_gap, 6)
+            fhours = np.arange(0, t_range[1], 6)
             filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         if(last_file['SCMOC'] != last_file[model]):
-            fhours = np.arange(0, t_range[1]*t_gap, 6)
+            fhours = np.arange(0, t_range[1], 6)
             filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
         gust10m=utl.get_model_points_gy(dir_rqd[1], filenames, points,allExists=False)        
         
@@ -180,7 +175,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
 def Station_Snow_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
         output_dir=None,
-        t_range=[1,29],
+        t_range=[0,84],
         t_gap=3,
         points={'lon':[116.3833], 'lat':[39.9]},
         initTime=None,
@@ -246,12 +241,7 @@ def Station_Snow_Synthetical_Forecast_From_Cassandra(
     h_s={model:int(last_file[model][6:8]),
         'SCMOC':int(last_file['SCMOC'][6:8])}
 
-    #if(t_range[1]*t_gap > 72):
-    #    fhours = np.append(np.arange(t_range[0]*t_gap, 72, t_gap),
-    #             np.arange(72, t_range[1]*t_gap, 6))
-    #else:
-    #    fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
-    fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
 
     for ifhour in fhours:
         if (ifhour == fhours[0] ):
@@ -313,27 +303,27 @@ def Station_Snow_Synthetical_Forecast_From_Cassandra(
     #https://en.wikipedia.org/wiki/Wind_chill
     TWC=13.12+0.6215*t2m['data'].values-11.37*(wsp10m**0.16)+0.3965*t2m['data'].values*(wsp10m**0.16)
 
-    fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
     filenames = [last_file['SCMOC']+'.'+str(fhour).zfill(3) for fhour in fhours]
     VIS=utl.get_model_points_gy(dir_rqd[6], filenames, points,allExists=False,fill_null=True,Null_value=-0.001)     
 
-    if(last_file['SCMOC'] == last_file[model] and t_range[1]*t_gap > 72):
-        fhours = np.append(np.arange(3,72,3),np.arange(72, (t_range[1])*t_gap, 6))
+    if(last_file['SCMOC'] == last_file[model] and t_range[1] > 72):
+        fhours = np.append(np.arange(3,72,3),np.arange(72, (t_range[1]), 6))
         filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]            
 
-    if(last_file['SCMOC'] != last_file[model] and t_range[1]*t_gap > 60):
-        fhours = np.append(np.arange(3,60,3),np.arange(60, (t_range[1])*t_gap, 6))
+    if(last_file['SCMOC'] != last_file[model] and t_range[1] > 60):
+        fhours = np.append(np.arange(3,60,3),np.arange(60, (t_range[1]), 6))
         filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
 
-    if(last_file['SCMOC'] != last_file[model] and t_range[1]*t_gap <= 60):
-        fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    if(last_file['SCMOC'] != last_file[model] and t_range[1] <= 60):
+        fhours = np.arange(t_range[0], t_range[1], t_gap)
         filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
 
-    if(last_file['SCMOC'] == last_file[model] and t_range[1]*t_gap <= 72):
-        fhours = np.arange(t_range[0]*t_gap, t_range[1]*t_gap, t_gap)
+    if(last_file['SCMOC'] == last_file[model] and t_range[1] <= 72):
+        fhours = np.arange(t_range[0], t_range[1], t_gap)
         filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
 
@@ -349,10 +339,10 @@ def Station_Snow_Synthetical_Forecast_From_Cassandra(
         gust10m=utl.get_model_points_gy(dir_rqd[0], filenames, points,allExists=False)
     if(fhours[-1] > 120):
         if(last_file['SCMOC'] == last_file[model]):
-            fhours = np.arange(0, t_range[1]*t_gap, 6)
+            fhours = np.arange(0, t_range[1], 6)
             filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         if(last_file['SCMOC'] != last_file[model]):
-            fhours = np.arange(0, t_range[1]*t_gap, 6)
+            fhours = np.arange(0, t_range[1], 6)
             filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
         gust10m=utl.get_model_points_gy(dir_rqd[1], filenames, points,allExists=False)        
         

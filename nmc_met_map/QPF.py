@@ -33,11 +33,11 @@ def gh_rain(initial_time=None, fhour=24, day_back=0,model='ECMWF',
     if(initial_time != None):
         filename = utl.model_filename(initial_time, fhour)
         if(atime > 3):
-            filename_gh=utl.model_filename(initial_time, fhour/2.)
+            filename_gh=utl.model_filename(initial_time, int(fhour-atime/2))
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
         if(atime > 3):
-            filename_gh=utl.filename_day_back_model(day_back=day_back,fhour=fhour/2.)
+            filename_gh=utl.filename_day_back_model(day_back=day_back,fhour=int(fhour-atime/2))
 
     # retrieve data from micaps server
     gh = get_model_grid(data_dir[0], filename=filename_gh)
@@ -115,11 +115,11 @@ def mslp_rain_snow(initial_time=None, fhour=24, day_back=0,model='ECMWF',
     if(initial_time != None):
         filename = utl.model_filename(initial_time, fhour)
         if(atime > 3):
-            filename_mslp=utl.model_filename(initial_time, fhour/2.)
+            filename_mslp=utl.model_filename(initial_time, int(fhour-atime/2))
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
         if(atime > 3):
-            filename_mslp=utl.filename_day_back_model(day_back=day_back,fhour=fhour/2.)
+            filename_mslp=utl.filename_day_back_model(day_back=day_back,fhour=int(fhour-atime/2))
 
     # retrieve data from micaps server
     mslp = get_model_grid(data_dir[0], filename=filename)
