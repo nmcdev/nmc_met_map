@@ -24,3 +24,6 @@ or download the package and install:
   cd nmc_met_map
   python setup.py install
 ```
+
+## 欢迎在Issues留言交流
+https://github.com/nmcdev/nmc_met_map/issues
