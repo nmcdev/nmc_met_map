@@ -34,6 +34,9 @@ from scipy.ndimage import gaussian_filter
 from scipy.interpolate import griddata
 import matplotlib as mpl
 import os.path
+from matplotlib.text import TextPath
+from matplotlib.patches import PathPatch
+from matplotlib.transforms import IdentityTransform
 
 def obs_radar_filename(time='none', product_name='CREF'):
     """
@@ -99,7 +102,7 @@ def add_logo_extra(fig, x=10, y=10, zorder=100,
         raise ValueError('Unknown logo size or selection')
 
     logo = plt.imread(pkg_resources.resource_filename(
-        'nmc_met_publish_map', fpath))
+        'nmc_met_map', fpath))
     return fig.figimage(logo, x, y, zorder=zorder, **kwargs)
 
 def add_logo_extra_in_axes(pos=[0.1,0.1,.2,.4],
@@ -124,7 +127,7 @@ def add_logo_extra_in_axes(pos=[0.1,0.1,.2,.4],
         raise ValueError('Unknown logo size or selection')
 
     logo = plt.imread(pkg_resources.resource_filename(
-        'nmc_met_publish_map', fpath))
+        'nmc_met_map', fpath))
 
     ax = plt.axes(pos)
     ax.imshow(logo,alpha=0.6)
@@ -149,7 +152,7 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
         except KeyError:
             raise ValueError('can not find the file small_city.000 in the resources')
         city = read_micaps_17(pkg_resources.resource_filename(
-            'nmc_met_publish_map', fpath))
+            'nmc_met_map', fpath))
 
         lon=city['lon'].values.astype(np.float)
         lat=city['lat'].values.astype(np.float)
@@ -158,9 +161,9 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
         for i in range(0,len(city_names)):
             if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
             (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
-                    ax.text(lon[i],lat[i],city_names[i], family='SimHei-Bold',ha='right',va='top',size=size-4,color='w',zorder=zorder,**kwargs)
-                    ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
-            ax.scatter(lon[i], lat[i], c='black', s=4, alpha=0.5,zorder=zorder, **kwargs)
+                    #ax.text(lon[i],lat[i],city_names[i], family='SimHei-Bold',ha='right',va='top',size=size-4,color='w',zorder=zorder,**kwargs)
+                ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
+            ax.scatter(lon[i], lat[i], c='black', s=25, alpha=0.5,zorder=zorder, **kwargs)
 #province city
     try:
         fname = 'city_province.000'
@@ -169,7 +172,7 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
         raise ValueError('can not find the file city_province.000 in the resources')
 
     city = read_micaps_17(pkg_resources.resource_filename(
-        'nmc_met_publish_map', fpath))
+        'nmc_met_map', fpath))
 
     lon=city['lon'].values.astype(np.float)/100.
     lat=city['lat'].values.astype(np.float)/100.
@@ -178,17 +181,23 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
      # 步骤一（替换sans-serif字体） #得删除C:\Users\HeyGY\.matplotlib 然后重启vs，刷新该缓存目录获得新的字体
     plt.rcParams['font.sans-serif'] = ['SimHei']     
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
-
     for i in range(0,len(city_names)):
         if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
         (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
             if(city_names[i] != '香港' and city_names[i] != '南京' and city_names[i] != '石家庄' and  city_names[i] != '天津'):
-                ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60.,int(lat[i])+100*(lat[i]-int(lat[i]))/60.,city_names[i], family='SimHei-Bold',ha='right',va='top',size=size,color='w',zorder=zorder,**kwargs)
-                ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60.,int(lat[i])+100*(lat[i]-int(lat[i]))/60.,city_names[i], family='SimHei',ha='right',va='top',size=size,zorder=zorder,**kwargs)
+                r = city_names[i]
+                ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
             else:
-                ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60.,int(lat[i])+100*(lat[i]-int(lat[i]))/60.,city_names[i], family='SimHei-Bold', ha='left',va='top',size=size,color='w', zorder=zorder,**kwargs)
-                ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60.,int(lat[i])+100*(lat[i]-int(lat[i]))/60.,city_names[i], family='SimHei',ha='left',va='top',size=size, zorder=zorder,**kwargs)
-            ax.scatter(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60., c='black', s=5, alpha=0.5, zorder=zorder,**kwargs)
+                ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='left',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
+                #"""带白边字体，字体大小会随着地图范围放大缩小，尚未解决该问题
+                #r = city_names[i]
+                #text_path = TextPath((int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.), r,ha='left',va='top', size=size, **kwargs)
+                #p1 = PathPatch(text_path, ec="w", lw=3, fc="w", **kwargs,visible=True)
+                #p2 = PathPatch(text_path, ec="none", fc="k", **kwargs,visible=True)
+                #ax.add_artist(p1)
+                #ax.add_artist(p2)
+                #"""
+            ax.scatter(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60., c='black', s=25, zorder=zorder,**kwargs)
     return
 
 def add_china_map_2cartopy_public(ax, name='province', facecolor='none',
@@ -211,20 +220,20 @@ def add_china_map_2cartopy_public(ax, name='province', facecolor='none',
 
     # get shape filename
     shpfile = pkg_resources.resource_filename(
-        'nmc_met_publish_map', "/resource/shapefile/" + names[name] + ".shp")
+        'nmc_met_map', "/resource/shapefile/" + names[name] + ".shp")
 
     # add map
     ax.add_geometries(
         Reader(shpfile).geometries(), ccrs.PlateCarree(),
         facecolor=facecolor, edgecolor=edgecolor, lw=lw, **kwargs)
 
-def add_public_title(title, initial_time,
+def add_public_title(title, initTime,
                     fhour=0, fontsize=20, multilines=False,atime=24,
                     English=False):
     """
     Add the title information to the plot.
     :param title: str, the plot content information.
-    :param initial_time: model initial time.
+    :param initTime: model initial time.
     :param fhour: forecast hour.
     :param fontsize: font size.
     :param multilines: multilines for title.
@@ -234,9 +243,9 @@ def add_public_title(title, initial_time,
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-    if isinstance(initial_time, np.datetime64):
-        initial_time = pd.to_datetime(
-            str(initial_time)).replace(tzinfo=None).to_pydatetime()
+    if isinstance(initTime, np.datetime64):
+        initTime = pd.to_datetime(
+            str(initTime)).replace(tzinfo=None).to_pydatetime()
 
     if(sys.platform[0:3] == 'win'):
         locale.setlocale(locale.LC_CTYPE, 'chinese')
@@ -246,15 +255,15 @@ def add_public_title(title, initial_time,
 
 
     if(English == False):
-        start_time = initial_time + timedelta(hours=fhour-atime)
+        start_time = initTime + timedelta(hours=fhour-atime)
         start_time_str=start_time.strftime("%Y年%m月%d日%H时")
-        valid_time = initial_time + timedelta(hours=fhour)
+        valid_time = initTime + timedelta(hours=fhour)
         valid_time_str=valid_time.strftime('%m月%d日%H时')
         time_str=start_time_str+'至'+valid_time_str
     else:
-        start_time = initial_time + timedelta(hours=fhour-atime)
+        start_time = initTime + timedelta(hours=fhour-atime)
         start_time_str=start_time.strftime("%Y/%m/%d/%H")
-        valid_time = initial_time + timedelta(hours=fhour)
+        valid_time = initTime + timedelta(hours=fhour)
         valid_time_str=valid_time.strftime('%m/%d/%H')
         time_str=start_time_str+' to '+valid_time_str
 
@@ -311,13 +320,13 @@ def adjust_map_ratio(ax,map_extent=None,datacrs=None):
         ax.set_extent(map_extent2, crs=datacrs)
     return map_extent2
 
-def add_public_title_obs(title=None, initial_time=None,valid_hour=0, fontsize=20, multilines=False,
+def add_public_title_obs(title=None, initTime=None,valid_hour=0, fontsize=20, multilines=False,
                            shw_period=True):
 
     """
     Add the title information to the plot.
     :param title: str, the plot content information.
-    :param initial_time: model initial time.
+    :param initTime: model initial time.
     :param fhour: forecast hour.
     :param fontsize: font size.
     :param multilines: multilines for title.
@@ -328,9 +337,9 @@ def add_public_title_obs(title=None, initial_time=None,valid_hour=0, fontsize=20
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-    if isinstance(initial_time, np.datetime64):
-        initial_time = pd.to_datetime(
-            str(initial_time)).replace(tzinfo=None).to_pydatetime()
+    if isinstance(initTime, np.datetime64):
+        initTime = pd.to_datetime(
+            str(initTime)).replace(tzinfo=None).to_pydatetime()
 
     if(sys.platform[0:3] == 'win'):
         locale.setlocale(locale.LC_CTYPE, 'chinese')
@@ -338,8 +347,8 @@ def add_public_title_obs(title=None, initial_time=None,valid_hour=0, fontsize=20
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
 
-    obs_time_str=initial_time.strftime("%m月%d日%H时%M分")
-    valid_time = initial_time - timedelta(hours=valid_hour)
+    obs_time_str=initTime.strftime("%m月%d日%H时%M分")
+    valid_time = initTime - timedelta(hours=valid_hour)
     valid_time_str=valid_time.strftime('%Y年%m月%d日%H时%M分')
 
     if(shw_period == False):
@@ -459,21 +468,27 @@ def get_coord_AWX(data_in=None):
     return lon,lat,time
 
 
-def model_filename(initial_time, fhour):
+def model_filename(initTime, fhour,UTC=False):
     """
         Construct model file name.
 
     Arguments:
-        initial_time {string or datetime object} -- model initial time,
+        initTime {string or datetime object} -- model initial time,
             like 18042008' or datetime(2018, 4, 20, 8).
         fhour {int} -- model forecast hours.
     """
 
-    if isinstance(initial_time, datetime):
-        return initial_time.strftime('%y%m%d%H') + ".{:03d}".format(fhour)
+    if(UTC is False):
+        if isinstance(initTime, datetime):
+            return initTime.strftime('%y%m%d%H') + ".{:03d}".format(fhour)
+        else:
+            return initTime.strip() + ".{:03d}".format(fhour)
     else:
-        return initial_time.strip() + ".{:03d}".format(fhour)
-
+        if isinstance(initTime, datetime):
+            return (initTime-timedelta(hours=8)).strftime('%y%m%d%H') + ".{:03d}".format(fhour)
+        else:
+            time_rel = (datetime.strptime('20'+initTime,'%Y%m%d%H')-timedelta(hours=8)).strftime('%y%m%d%H')
+            return time_rel.strip() + ".{:03d}".format(fhour)
 
 def filename_day_back(day_back=0,fhour=0):
     """
@@ -493,7 +508,7 @@ def filename_day_back(day_back=0,fhour=0):
             
     return filename
 
-def filename_day_back_model(day_back=0,fhour=0):
+def filename_day_back_model(day_back=0,fhour=0,UTC=False):
     """
     get different initial time from models or observation time according the systime and day_back
     day_back: in, days to go back, days
@@ -502,10 +517,17 @@ def filename_day_back_model(day_back=0,fhour=0):
     """
     hour=int(datetime.now().strftime('%H'))
 
-    if(hour >= 14 or hour < 2):
-        filename = (datetime.now()-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'08.'+'%03d' % fhour
-    elif(hour >= 2):    
-        filename = (datetime.now()-timedelta(hours=24)-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'20.'+'%03d' % fhour
+    if(UTC is False):
+        if(hour >= 14 or hour < 2):
+            filename = (datetime.now()-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'08.'+'%03d' % fhour
+        elif(hour >= 2):    
+            filename = (datetime.now()-timedelta(hours=24)-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'20.'+'%03d' % fhour
+    if(UTC is True):
+        if(hour >= 14 or hour < 2):
+            filename = (datetime.now()-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'00.'+'%03d' % fhour
+        elif(hour >= 2):    
+            filename = (datetime.now()-timedelta(hours=24)-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'12.'+'%03d' % fhour
+
     return filename    
 
 def wind2UV(Winddir=None,Windsp=None):
@@ -534,12 +556,12 @@ def wind2UV(Winddir=None,Windsp=None):
 
     return U,V
 
-def add_public_title_sta(title=None, initial_time=None,fontsize=20,English=False):
+def add_public_title_sta(title=None, initTime=None,fontsize=20,English=False):
 
     """
     Add the title information to the plot.
     :param title: str, the plot content information.
-    :param initial_time: model initial time.
+    :param initTime: model initial time.
     :param fhour: forecast hour.
     :param fontsize: font size.
     :param atime: accumulating time.
@@ -549,9 +571,9 @@ def add_public_title_sta(title=None, initial_time=None,fontsize=20,English=False
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-    if isinstance(initial_time, np.datetime64):
-        initial_time = pd.to_datetime(
-            str(initial_time)).replace(tzinfo=None).to_pydatetime()
+    if isinstance(initTime, np.datetime64):
+        initTime = pd.to_datetime(
+            str(initTime)).replace(tzinfo=None).to_pydatetime()
 
     if(sys.platform[0:3] == 'win'):
         locale.setlocale(locale.LC_CTYPE, 'chinese')
@@ -560,11 +582,11 @@ def add_public_title_sta(title=None, initial_time=None,fontsize=20,English=False
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
 
     if(English == False):
-        initial_time_str=initial_time.strftime("%Y年%m月%d日%H时")
-        time_str='起报时间：'+initial_time_str
+        initTime_str=initTime.strftime("%Y年%m月%d日%H时")
+        time_str='起报时间：'+initTime_str
     else:
-        initial_time_str=initial_time.strftime("%Y%m%d%H")
-        time_str='Initial Time：'+initial_time_str
+        initTime_str=initTime.strftime("%Y%m%d%H")
+        time_str='Initial Time：'+initTime_str
 
     plt.title(title, loc='left', fontsize=fontsize)
     plt.title(time_str, loc='right', fontsize=fontsize-6)
@@ -891,7 +913,7 @@ def read_micaps_17(fname, limit=None):
     :param limit: region limit, [min_lat, min_lon, max_lat, max_lon]
     :return: data, pandas type
     :Examples:
-    >>> data = read_micaps_3('L:\py_develop\nmc_met_publish_map\nmc_met_publish_map\resource\sta2513.dat')
+    >>> data = read_micaps_3('L:\py_develop\nmc_met_map\nmc_met_map\resource\sta2513.dat')
     """
 
     # check file exist
@@ -933,3 +955,44 @@ def read_micaps_17(fname, limit=None):
         return None
     # return
     return data
+
+def CMISS_data_code(
+        data_source=None,var_name=None
+    ):
+
+    data_code={
+            'ECMWF':{
+                    'TEM':'NAFP_FOR_FTM_HIGH_EC_ANEA',
+                    'GPH':'NAFP_FOR_FTM_HIGH_EC_ANEA',
+                    'WIU':'NAFP_FOR_FTM_HIGH_EC_ANEA',
+                    'WIV':'NAFP_FOR_FTM_HIGH_EC_ANEA',
+                    'GSSP':'NAFP_FOR_FTM_HIGH_EC_ASI',
+                    'RHU':'NAFP_FOR_FTM_HIGH_EC_ANEA',
+                    'VVP':'NAFP_FOR_FTM_HIGH_EC_ANEA',
+                    'TCWV':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'SHU':'NAFP_FOR_FTM_HIGH_EC_ANEA',
+                    'TMP':'ECMWF_HR/TMP/',
+                    'TPE':'NAFP_FOR_FTM_HIGH_EC_ASI'
+                    },
+            'GRAPES_GFS':{
+                    'TEM':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'GPH':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'WIU':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'WIV':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'SSP':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'TPE':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'RHU':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'MOFU':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'TIWV':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'SHU':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'WVFL':'GRAPES_GFS/WVFL/',
+                    'THETAE':'GRAPES_GFS/THETASE/'
+                    },
+            'OBS':{            
+                    'PLOT':'UPPER_AIR/PLOT/'
+                    }
+            }
+
+    return data_code[data_source][var_name]
+
+    

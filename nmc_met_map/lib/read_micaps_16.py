@@ -16,7 +16,7 @@ def read_micaps_16(fname, limit=None):
     :param limit: region limit, [min_lat, min_lon, max_lat, max_lon]
     :return: data, pandas type
     :Examples:
-    >>> data = read_micaps_3('L:\py_develop\nmc_met_publish_map\nmc_met_publish_map\resource\sta2513.dat')
+    >>> data = read_micaps_3('L:\py_develop\nmc_met_map\nmc_met_map\resource\sta2513.dat')
     """
 
     # check file exist
