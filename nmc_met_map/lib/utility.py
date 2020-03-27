@@ -125,7 +125,6 @@ def add_logo_extra_in_axes(pos=[0.1,0.1,.2,.4],
         fpath = "resource/logo/" + fname
     except KeyError:
         raise ValueError('Unknown logo size or selection')
-
     logo = plt.imread(pkg_resources.resource_filename(
         'nmc_met_map', fpath))
 
@@ -164,7 +163,7 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
                     #ax.text(lon[i],lat[i],city_names[i], family='SimHei-Bold',ha='right',va='top',size=size-4,color='w',zorder=zorder,**kwargs)
                 ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
             ax.scatter(lon[i], lat[i], c='black', s=25, alpha=0.5,zorder=zorder, **kwargs)
-#province city
+    #province city
     try:
         fname = 'city_province.000'
         fpath = "resource/" + fname
@@ -985,6 +984,7 @@ def CMISS_data_code(
                     'MOFU':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
                     'TIWV':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
                     'SHU':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'PPT':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
                     'WVFL':'GRAPES_GFS/WVFL/',
                     'THETAE':'GRAPES_GFS/THETASE/'
                     },
@@ -995,4 +995,9 @@ def CMISS_data_code(
 
     return data_code[data_source][var_name]
 
-    
+def add_cartopy_background(ax,name='RD'):
+    #http://earthpy.org/cartopy_backgroung.html
+    #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
+    bg_dir=pkg_resources.resource_filename('nmc_met_map','resource/backgrounds/')
+    os.environ["CARTOPY_USER_BACKGROUNDS"] = bg_dir
+    ax.background_img(name=name, resolution='high')
