@@ -46,7 +46,8 @@ setup(
                       'scipy >= 1.2.1',
                       'numba >= 0.43.1',
                       'cfgrib >= 0.9.7.2'],
-    python_requires='>=3'
+    python_requires='>=3',
+    zip_safe = False
 )
 
 # development mode (DOS command):
