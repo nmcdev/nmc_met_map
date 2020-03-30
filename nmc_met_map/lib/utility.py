@@ -282,8 +282,9 @@ def add_south_China_sea(map_extent=[107,120,2,20],pos=[0.1,0.1,.2,.4], **kwargs)
     ax.coastlines('50m', edgecolor='black', linewidth=0.5, zorder=50)
     add_china_map_2cartopy_public(
         ax, name='nation', edgecolor='black', lw=0.8, zorder=40)
-    ax.background_img(name='RD', resolution='high')
-
+    #ax.background_img(name='RD', resolution='high')
+    add_cartopy_background(ax,name='RD')
+    
 def adjust_map_ratio(ax,map_extent=None,datacrs=None):
     '''
     adjust the map_ratio in the projection of AlbersEqualArea in different area
