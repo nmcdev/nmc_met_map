@@ -12,7 +12,7 @@ import metpy.calc as mpcalc
 import xarray as xr
 import copy
 
-def gh_rain(initial_time=None, fhour=24, day_back=0,model='ECMWF',
+def gh_rain(initTime=None, fhour=24, day_back=0,model='ECMWF',
     gh_lev='500',atime=6,
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
@@ -30,10 +30,10 @@ def gh_rain(initial_time=None, fhour=24, day_back=0,model='ECMWF',
         raise ValueError('Can not find all directories needed')
 
     # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
+    if(initTime != None):
+        filename = utl.model_filename(initTime, fhour)
         if(atime > 3):
-            filename_gh=utl.model_filename(initial_time, int(fhour-atime/2))
+            filename_gh=utl.model_filename(initTime, int(fhour-atime/2))
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
         if(atime > 3):
@@ -94,7 +94,7 @@ def gh_rain(initial_time=None, fhour=24, day_back=0,model='ECMWF',
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)
 
-def mslp_rain_snow(initial_time=None, fhour=24, day_back=0,model='ECMWF',
+def mslp_rain_snow(initTime=None, fhour=24, day_back=0,model='ECMWF',
     atime=6,
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
@@ -112,10 +112,10 @@ def mslp_rain_snow(initial_time=None, fhour=24, day_back=0,model='ECMWF',
         raise ValueError('Can not find all directories needed')
 
     # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
+    if(initTime != None):
+        filename = utl.model_filename(initTime, fhour)
         if(atime > 3):
-            filename_mslp=utl.model_filename(initial_time, int(fhour-atime/2))
+            filename_mslp=utl.model_filename(initTime, int(fhour-atime/2))
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
         if(atime > 3):

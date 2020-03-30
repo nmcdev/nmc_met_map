@@ -41,9 +41,9 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
  
     ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     
-    plt.title('['+gh['model']+'] '+
-    gh['lev']+'hPa 位势高度场, '+
-    uv['lev']+'hPa 风场, 海平面气压场', 
+    plt.title('['+gh.attrs['model']+'] '+
+    str(int(gh['level'].values[0]))+'hPa 位势高度场, '+
+    str(int(uv['level'].values[0]))+'hPa 风场, 海平面气压场', 
         loc='left', fontsize=30)
         
     datacrs = ccrs.PlateCarree()
@@ -54,35 +54,35 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
 
     ax.add_feature(cfeature.OCEAN)
     utl.add_china_map_2cartopy_public(
-        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
+        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=5,alpha=0.5)
     if add_china:
         utl.add_china_map_2cartopy_public(
-            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
+            ax, name='province', edgecolor='gray', lw=0.5, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
+            ax, name='nation', edgecolor='black', lw=0.8, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
+            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=5,alpha=0.5)
 
     # define return plots
     plots = {}
     # draw mean sea level pressure
-    if mslp is not None:
+    if mslp is not None:   
         x, y = np.meshgrid(mslp['lon'], mslp['lat'])
         clevs_mslp = np.arange(960, 1065, 5)
         cmap = guide_cmaps(26)
         plots['mslp'] = ax.contourf(
             x, y, np.squeeze(mslp['data']), clevs_mslp,
-            cmap=cmap, alpha=0.8, zorder=10, transform=datacrs)
+            cmap=cmap, alpha=0.8, zorder=1, transform=datacrs)
 
     # draw -hPa wind bards
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
-        u = np.squeeze(uv['udata']) * 2.5
-        v = np.squeeze(uv['vdata']) * 2.5
+        u = np.squeeze(uv['u']) * 2.5
+        v = np.squeeze(uv['v']) * 2.5
         plots['uv'] = ax.barbs(
-            x, y, u, v, length=6, regrid_shape=regrid_shape,
+            x, y, u.values, v.values, length=6, regrid_shape=regrid_shape,
             transform=datacrs, fill_empty=False, sizes=dict(emptybarb=0.05),
-            zorder=20)
+            zorder=2)
 
     # draw -hPa geopotential height
     if gh is not None:
@@ -90,40 +90,40 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
         clevs_gh = np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 584, 8), np.arange(580, 604, 4))), np.arange(604, 2000, 8))
         plots['gh'] = ax.contour(
             x, y, np.squeeze(gh['data']), clevs_gh, colors='purple',
-            linewidths=2, transform=datacrs, zorder=30)
-        plt.clabel(plots['gh'], inline=1, fontsize=20, fmt='%.0f',colors='black')
+            linewidths=2, transform=datacrs, zorder=3)
+        ax.clabel(plots['gh'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 
     # grid lines
     gl = ax.gridlines(
-        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=40)
+        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=4)
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    #http://earthpy.org/cartopy_backgroung.html
-    #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
-    ax.background_img(name='RD', resolution='high')
-
+    utl.add_cartopy_background(ax,name='RD')
+    
     #forecast information
-    bax=plt.axes([0.01,0.835,.25,.1],facecolor='#FFFFFFCC')
+    l, b, w, h = ax.get_position().bounds
+
+    bax=plt.axes([l,b+h-0.1,.25,.1],facecolor='#FFFFFFCC')
     bax.set_yticks([])
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
-    str(gh['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['fhour'])
+    initTime = pd.to_datetime(
+    str(gh.coords['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    fcst_time=initTime+timedelta(hours=gh.coords['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(gh['fhour'])+'小时',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(gh.coords['forecast_period'].values[0]))+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add color bar
-    cax=plt.axes([0.11,0.06,.86,.02])
+    cax=plt.axes([l,b-0.04,w,.02])
     cb = plt.colorbar(plots['mslp'], cax=cax, orientation='horizontal',
                       ticks=clevs_mslp[:-1],
                       extend='max',extendrect=False)
@@ -132,21 +132,21 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
 
     # add south China sea
     if south_China_sea:
-        utl.add_south_China_sea(pos=[0.85,0.13,.1,.2])
+        utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
     if(map_extent2[1]-map_extent2[0] < 25):
         small_city=True
     if city:
-        utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=110,size=13,small_city=small_city)
+        utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=6,size=15,small_city=small_city)
 
-    utl.add_logo_extra_in_axes(pos=[-0.01,0.835,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
 
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'最高温度_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(gh['fhour'])+'小时'+'.png', dpi=200)
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()
@@ -156,28 +156,6 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
                     regrid_shape=20,
                     add_china=True,city=True,south_China_sea=True,
                     output_dir=None,Global=False):
-    """
-    Draw -hPa geopotential height contours, -hPa wind barbs
-    and mean sea level pressure filled contours.
-    :param gh: -hPa gh, dictionary:
-                  necessary, {'lon': 1D array, 'lat': 1D array,
-                              'data': 2D array}
-                  optional, {'clevs': 1D array}
-    :param uv: -hPa u-component and v-component wind, dictionary:
-                  necessary, {'lon': 1D array, 'lat': 1D array,
-                              'udata': 2D array, 'vdata': 2D array}
-    :param wsp: wsp, dictionary:
-                 necessary, {'lon': 1D array, 'lat': 1D array,
-                             'data': 2D array}
-                 optional, {'clevs': 1D array}
-    :param map_extent: [lonmin, lonmax, latmin, latmax],
-                       longitude and latitude range.
-    :param add_china: add china map or not.
-    :param regrid_shape: control the wind barbs density.
-    :return: plots dictionary.
-
-    :Examples:
-    """
 
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
@@ -194,9 +172,9 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
  
     ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     
-    plt.title('['+gh['model']+'] '+
-    gh['lev']+'hPa 位势高度场, '+
-    uv['lev']+'hPa 风场, 风速', 
+    plt.title('['+gh.attrs['model']+'] '+
+    str(int(gh['level'].values[0]))+'hPa 位势高度场, '+
+    str(int(uv['level'].values[0]))+'hPa 风场, 风速', 
         loc='left', fontsize=30)
         
     datacrs = ccrs.PlateCarree()
@@ -207,21 +185,21 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
 
     ax.add_feature(cfeature.OCEAN)
     utl.add_china_map_2cartopy_public(
-        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
+        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=5,alpha=0.5)
     if add_china:
         utl.add_china_map_2cartopy_public(
-            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
+            ax, name='province', edgecolor='gray', lw=0.5, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
+            ax, name='nation', edgecolor='black', lw=0.8, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
+            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=5,alpha=0.5)
 
     # define return plots
     plots = {}
     # draw mean sea level pressure
     if wsp is not None:
         x, y = np.meshgrid(wsp['lon'], wsp['lat'])
-        z=np.squeeze(wsp['data'])
+        z=np.squeeze(wsp.values)
         clevs_wsp = [12, 15, 18,21, 24, 27,30]
         colors = ["#FFF59D", "#FFEE58", "#FFCA28", "#FFC107","#FF9800", "#FB8C00",'#E64A19','#BF360C'] # #RRGGBBAA
         cmap=ListedColormap(colors, 'wsp')
@@ -232,17 +210,17 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
 
         plots['wsp'] = ax.pcolormesh(
             x, y, z, norm=norm,
-            cmap=cmap, zorder=10,transform=datacrs,alpha=0.5)
+            cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
 
     # draw -hPa wind bards
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
-        u = np.squeeze(uv['udata']) * 2.5
-        v = np.squeeze(uv['vdata']) * 2.5
+        u = np.squeeze(uv['u']) * 2.5
+        v = np.squeeze(uv['v']) * 2.5
         plots['uv'] = ax.barbs(
-            x, y, u, v, length=6, regrid_shape=regrid_shape,
+            x, y, u.values, v.values, length=6, regrid_shape=regrid_shape,
             transform=datacrs, fill_empty=False, sizes=dict(emptybarb=0.05),
-            zorder=20)
+            zorder=2)
 
     # draw -hPa geopotential height
     if gh is not None:
@@ -250,50 +228,49 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
         clevs_gh = np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 584, 8), np.arange(580, 604, 4))), np.arange(604, 2000, 8))
         plots['gh'] = ax.contour(
             x, y, np.squeeze(gh['data']), clevs_gh, colors='black',
-            linewidths=2, transform=datacrs, zorder=110)
+            linewidths=2, transform=datacrs, zorder=3)
         plt.clabel(plots['gh'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 
     # grid lines
     gl = ax.gridlines(
-        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=40)
+        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=4)
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    #http://earthpy.org/cartopy_backgroung.html
-    #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
-    ax.background_img(name='RD', resolution='high')
+    utl.add_cartopy_background(ax,name='RD')
 
+    l, b, w, h = ax.get_position().bounds
     #forecast information
-    bax=plt.axes([0.01,0.835,.25,.1],facecolor='#FFFFFFCC')
+    bax=plt.axes([l,b+h-0.1,.25,.1],facecolor='#FFFFFFCC')
     bax.set_yticks([])
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
-    str(gh['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['fhour'])
+    initTime = pd.to_datetime(
+    str(gh.coords['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    fcst_time=initTime+timedelta(hours=gh.coords['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(gh['fhour'])+'小时',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(gh.coords['forecast_period'].values[0]))+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add color bar
-    if(wsp != None):
-        cax=plt.axes([0.11,0.06,.86,.02])
+    if(wsp is not None):
+        cax=plt.axes([l,b-0.04,w,.02])
         cb = plt.colorbar(plots['wsp'], cax=cax, orientation='horizontal',
                       ticks=clevs_wsp[:],
                       extend='max',extendrect=False)
         cb.ax.tick_params(labelsize='x-large')                      
-        cb.set_label('(m/s)',size=20)
+        cb.set_label('Wind Speed (m/s)',size=20)
 
     # add south China sea
     if south_China_sea:
-        utl.add_south_China_sea(pos=[0.85,0.13,.1,.2])
+        utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
     if(map_extent2[1]-map_extent2[0] < 25):
@@ -301,13 +278,13 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=110,size=13,small_city=small_city)
 
-    utl.add_logo_extra_in_axes(pos=[-0.01,0.835,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
 
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'高度场_风_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(gh['fhour'])+'小时'+'.png', dpi=200)
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()
@@ -317,28 +294,6 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
                     regrid_shape=20,
                     add_china=True,city=True,south_China_sea=True,
                     output_dir=None,Global=False):
-    """
-    Draw -hPa geopotential height contours, -hPa wind barbs
-    and mean sea level pressure filled contours.
-    :param gh: -hPa gh, dictionary:
-                  necessary, {'lon': 1D array, 'lat': 1D array,
-                              'data': 2D array}
-                  optional, {'clevs': 1D array}
-    :param uv: -hPa u-component and v-component wind, dictionary:
-                  necessary, {'lon': 1D array, 'lat': 1D array,
-                              'udata': 2D array, 'vdata': 2D array}
-    :param r6: r6, dictionary:
-                 necessary, {'lon': 1D array, 'lat': 1D array,
-                             'data': 2D array}
-                 optional, {'clevs': 1D array}
-    :param map_extent: [lonmin, lonmax, latmin, latmax],
-                       longitude and latitude range.
-    :param add_china: add china map or not.
-    :param regrid_shape: control the wind barbs density.
-    :return: plots dictionary.
-
-    :Examples:
-    """
 
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
@@ -355,9 +310,9 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
  
     ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     
-    plt.title('['+gh['model']+'] '+
-    gh['lev']+'hPa 位势高度场, '+
-    uv['lev']+'hPa 风场, 6小时降水', 
+    plt.title('['+gh.attrs['model']+'] '+
+    str(int(gh['level'].values[0]))+'hPa 位势高度场, '+
+    str(int(uv['level'].values[0]))+'hPa 风场, 6小时降水', 
         loc='left', fontsize=30)
         
     datacrs = ccrs.PlateCarree()
@@ -368,14 +323,14 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
 
     ax.add_feature(cfeature.OCEAN)
     utl.add_china_map_2cartopy_public(
-        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
+        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=5,alpha=0.5)
     if add_china:
         utl.add_china_map_2cartopy_public(
-            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
+            ax, name='province', edgecolor='gray', lw=0.5, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
+            ax, name='nation', edgecolor='black', lw=0.8, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
+            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=5,alpha=0.5)
 
     # define return plots
     plots = {}
@@ -386,17 +341,17 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
         plots['r6'] = ax.contourf(
             x, y, np.squeeze(r6['data']), clevs_r6,
             colors=["#88F492", "#00A929", "#2AB8FF", "#1202FC", "#FF04F4", "#850C3E"],
-            alpha=0.8, zorder=10, transform=datacrs,extend='max',extendrect=False)
+            alpha=0.8, zorder=1, transform=datacrs,extend='max',extendrect=False)
 
     # draw -hPa wind bards
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
-        u = np.squeeze(uv['udata']) * 2.5
-        v = np.squeeze(uv['vdata']) * 2.5
+        u = np.squeeze(uv['u']) * 2.5
+        v = np.squeeze(uv['v']) * 2.5
         plots['uv'] = ax.barbs(
-            x, y, u, v, length=6, regrid_shape=regrid_shape,
+            x, y, u.values, v.values, length=6, regrid_shape=regrid_shape,
             transform=datacrs, fill_empty=False, sizes=dict(emptybarb=0.05),
-            zorder=20)
+            zorder=2)
 
     # draw -hPa geopotential height
     if gh is not None:
@@ -404,41 +359,40 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
         clevs_gh = np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 584, 8), np.arange(580, 604, 4))), np.arange(604, 2000, 8))
         plots['gh'] = ax.contour(
             x, y, np.squeeze(gh['data']), clevs_gh, colors='black',
-            linewidths=2, transform=datacrs, zorder=30)
+            linewidths=2, transform=datacrs, zorder=3)
         plt.clabel(plots['gh'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 
     # grid lines
     gl = ax.gridlines(
-        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=40)
+        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=4)
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    #http://earthpy.org/cartopy_backgroung.html
-    #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
-    ax.background_img(name='RD', resolution='high')
+    utl.add_cartopy_background(ax,name='RD')
 
+    l, b, w, h = ax.get_position().bounds
     #forecast information
-    bax=plt.axes([0.01,0.835,.25,.1],facecolor='#FFFFFFCC')
+    bax=plt.axes([l,b+h-0.1,.25,.1],facecolor='#FFFFFFCC')
     bax.set_yticks([])
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
-    str(gh['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['fhour'])
+    initTime = pd.to_datetime(
+    str(gh.coords['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    fcst_time=initTime+timedelta(hours=gh.coords['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(gh['fhour'])+'小时',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(gh.coords['forecast_period'].values[0]))+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add color bar
     if(r6 != None):
-        cax=plt.axes([0.11,0.06,.86,.02])
+        cax=plt.axes([l,b-0.04,w,.02])
         cb = plt.colorbar(plots['r6'], cax=cax, orientation='horizontal',
                       ticks=clevs_r6[:],
                       extend='max',extendrect=False)
@@ -447,7 +401,7 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
 
     # add south China sea
     if south_China_sea:
-        utl.add_south_China_sea(pos=[0.85,0.13,.1,.2])
+        utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
     if(map_extent2[1]-map_extent2[0] < 25):
@@ -455,17 +409,16 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=110,size=13,small_city=small_city)
 
-    utl.add_logo_extra_in_axes(pos=[-0.01,0.835,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
 
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'高度场_风场_降水_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(gh['fhour'])+'小时'+'.png', dpi=200)
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()      
-
 
 def draw_PV_Div_uv(pv=None, uv=None, div=None,
                     map_extent=(50, 150, 0, 65),
@@ -488,8 +441,8 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
  
     ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     
-    plt.title('['+pv['model']+'] '+
-    pv['lev']+'hPa 位涡扰动, 风场, 散度', 
+    plt.title('['+pv.attrs['model']+'] '+
+    str(int(pv['level']))+'hPa 位涡扰动, 风场, 散度', 
         loc='left', fontsize=30)
         
     datacrs = ccrs.PlateCarree()
@@ -500,14 +453,14 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
 
     ax.add_feature(cfeature.OCEAN)
     utl.add_china_map_2cartopy_public(
-        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
+        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=5,alpha=0.5)
     if add_china:
         utl.add_china_map_2cartopy_public(
-            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
+            ax, name='province', edgecolor='gray', lw=0.5, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
+            ax, name='nation', edgecolor='black', lw=0.8, zorder=5)
         utl.add_china_map_2cartopy_public(
-            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
+            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=5,alpha=0.5)
 
     # define return plots
     plots = {}
@@ -519,17 +472,17 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
         clevs_div = np.arange(-15, 16, 1)
         plots['div'] = ax.contourf(
             x, y, z*1e5,clevs_div,cmap=plt.cm.PuOr,
-            transform=datacrs,alpha=0.5,extend='both')
+            transform=datacrs,alpha=0.5, zorder=1,extend='both')
 
     # draw -hPa wind bards
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
-        u = np.squeeze(uv['udata']) * 2.5
-        v = np.squeeze(uv['vdata']) * 2.5
+        u = np.squeeze(uv['u'].values) * 2.5
+        v = np.squeeze(uv['v'].values) * 2.5
         plots['uv'] = ax.barbs(
             x, y, u, v, length=6, regrid_shape=regrid_shape,
             transform=datacrs, fill_empty=False, sizes=dict(emptybarb=0.05),
-            zorder=20)
+            zorder=2)
 
     # draw -hPa geopotential height
     if pv is not None:
@@ -537,41 +490,40 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
         clevs_pv = np.arange(0, 25, 1)
         plots['pv'] = ax.contour(
             x, y, np.squeeze(pv['data'])*1e6, clevs_pv, colors='black',
-            linewidths=2, transform=datacrs, zorder=30)
+            linewidths=2, transform=datacrs, zorder=3)
         plt.clabel(plots['pv'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 
     # grid lines
     gl = ax.gridlines(
-        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=40)
+        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=4)
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    #http://earthpy.org/cartopy_backgroung.html
-    #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
-    ax.background_img(name='RD', resolution='high')
+    utl.add_cartopy_background(ax,name='RD')
 
+    l, b, w, h = ax.get_position().bounds
     #forecast information
-    bax=plt.axes([0.01,0.835,.25,.1],facecolor='#FFFFFFCC')
+    bax=plt.axes([l,b+h-0.1,.25,.1],facecolor='#FFFFFFCC')
     bax.set_yticks([])
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
-    str(pv['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=pv['fhour'])
+    initTime = pd.to_datetime(
+    str(pv['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    fcst_time=initTime+timedelta(hours=pv['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(pv['fhour'])+'小时',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(pv.coords['forecast_period'].values[0]))+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add color bar
     if(div != None):
-        cax=plt.axes([0.11,0.06,.86,.02])
+        cax=plt.axes([l,b-0.04,w,.02])
         cb = plt.colorbar(plots['div'], cax=cax, orientation='horizontal',
                       ticks=clevs_div[:],
                       extend='both',extendrect=False)
@@ -580,7 +532,7 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
 
     # add south China sea
     if south_China_sea:
-        utl.add_south_China_sea(pos=[0.85,0.13,.1,.2])
+        utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
     if(map_extent2[1]-map_extent2[0] < 25):
@@ -588,13 +540,13 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=110,size=13,small_city=small_city)
 
-    utl.add_logo_extra_in_axes(pos=[-0.01,0.835,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
 
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'位涡_风场_散度_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(pv['fhour'])+'小时'+'.png', dpi=200)
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(pv.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()              

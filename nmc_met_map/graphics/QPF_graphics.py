@@ -99,15 +99,15 @@ def draw_gh_rain(gh=None, rain=None,atime=24,
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(gh['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['fhour'])
+    fcst_time=initTime+timedelta(hours=gh['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 2.5,'预报时效: '+str(gh['fhour'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
@@ -134,7 +134,7 @@ def draw_gh_rain(gh=None, rain=None,atime=24,
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'高度场_降水_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh['fhour'])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
@@ -243,15 +243,15 @@ def draw_mslp_rain_snow(
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(mslp['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=mslp['fhour'])
+    fcst_time=initTime+timedelta(hours=mslp['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 2.5,'预报时效: '+str(mslp['fhour'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
@@ -290,7 +290,7 @@ def draw_mslp_rain_snow(
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_降水_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(mslp['fhour'])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):

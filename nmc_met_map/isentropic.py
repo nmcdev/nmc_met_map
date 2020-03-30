@@ -11,7 +11,7 @@ import metpy.calc as mpcalc
 from metpy.units import units
 import xarray as xr
 
-def isentropic_uv(initial_time=None, fhour=6, day_back=0,model='ECMWF',
+def isentropic_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     isentlev=310,
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,100],
@@ -29,8 +29,8 @@ def isentropic_uv(initial_time=None, fhour=6, day_back=0,model='ECMWF',
         raise ValueError('Can not find all directories needed')
 
     # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
+    if(initTime != None):
+        filename = utl.model_filename(initTime, fhour)
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
         

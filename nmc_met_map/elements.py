@@ -11,7 +11,7 @@ from metpy.units import units
 import metpy.calc as mpcalc
 import xarray as xr
 
-def T2m_all_type(initial_time=None, fhour=24, day_back=0,model='中央台指导预报',Var_plot='Tmn_2m',
+def T2m_all_type(initTime=None, fhour=24, day_back=0,model='中央台指导预报',Var_plot='Tmn_2m',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
@@ -26,8 +26,8 @@ def T2m_all_type(initial_time=None, fhour=24, day_back=0,model='中央台指导�
         raise ValueError('Can not find all directories needed')
 
     # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
+    if(initTime != None):
+        filename = utl.model_filename(initTime, fhour)
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
 
@@ -77,7 +77,7 @@ def T2m_all_type(initial_time=None, fhour=24, day_back=0,model='中央台指导�
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)
     
-def T2m_mslp_uv10m(initial_time=None, fhour=6, day_back=0,model='ECMWF',
+def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
@@ -95,8 +95,8 @@ def T2m_mslp_uv10m(initial_time=None, fhour=6, day_back=0,model='ECMWF',
         raise ValueError('Can not find all directories needed')
 
     # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
+    if(initTime != None):
+        filename = utl.model_filename(initTime, fhour)
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
 
@@ -173,7 +173,7 @@ def T2m_mslp_uv10m(initial_time=None, fhour=6, day_back=0,model='ECMWF',
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)        
 
-def mslp_gust10m(initial_time=None, fhour=6, day_back=0,model='ECMWF',
+def mslp_gust10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
@@ -189,8 +189,8 @@ def mslp_gust10m(initial_time=None, fhour=6, day_back=0,model='ECMWF',
         raise ValueError('Can not find all directories needed')
 
     # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
+    if(initTime != None):
+        filename = utl.model_filename(initTime, fhour)
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
 
@@ -255,7 +255,7 @@ def mslp_gust10m(initial_time=None, fhour=6, day_back=0,model='ECMWF',
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)
 
-def low_level_wind(initial_time=None, fhour=6, day_back=0,model='ECMWF',wind_level='100m',
+def low_level_wind(initTime=None, fhour=6, day_back=0,model='ECMWF',wind_level='100m',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
@@ -271,8 +271,8 @@ def low_level_wind(initial_time=None, fhour=6, day_back=0,model='ECMWF',wind_lev
         raise ValueError('Can not find all directories needed')
 
     # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
+    if(initTime != None):
+        filename = utl.model_filename(initTime, fhour)
     else:
         filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
 

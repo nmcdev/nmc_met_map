@@ -93,15 +93,15 @@ def draw_T_2m(T_2m=None,
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(T_2m['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=T_2m['fhour'])
+    fcst_time=initTime+timedelta(hours=T_2m['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 2.5,'预报时效: '+str(T_2m['fhour'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
@@ -128,7 +128,7 @@ def draw_T_2m(T_2m=None,
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'最低温度_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(T_2m['fhour'])+'小时'+'.png', dpi=200)
     if(output_dir == None):
         plt.show()
@@ -225,15 +225,15 @@ def draw_T2m_mslp_uv10m(t2m=None, mslp=None, uv10m=None,
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(mslp['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=mslp['fhour'])
+    fcst_time=initTime+timedelta(hours=mslp['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 2.5,'预报时效: '+str(mslp['fhour'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
@@ -260,7 +260,7 @@ def draw_T2m_mslp_uv10m(t2m=None, mslp=None, uv10m=None,
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_10米风场_2米温度_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(mslp['fhour'])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
@@ -348,15 +348,15 @@ def draw_mslp_gust10m(gust=None, mslp=None,
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(mslp['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=mslp['fhour'])
+    fcst_time=initTime+timedelta(hours=mslp['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 2.5,'预报时效: '+str(mslp['fhour'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
@@ -383,7 +383,7 @@ def draw_mslp_gust10m(gust=None, mslp=None,
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_逐6小时最大风速_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(mslp['fhour'])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
@@ -480,15 +480,15 @@ def draw_low_level_wind(uv=None,wsp=None,
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(uv['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=uv['fhour'])
+    fcst_time=initTime+timedelta(hours=uv['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 2.5,'预报时效: '+str(uv['fhour'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
@@ -515,7 +515,7 @@ def draw_low_level_wind(uv=None,wsp=None,
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'低层风_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(uv['fhour'])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):

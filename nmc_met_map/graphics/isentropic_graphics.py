@@ -111,15 +111,15 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(isentrh['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=isentrh['fhour'])
+    fcst_time=initTime+timedelta(hours=isentrh['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=15)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 2.5,'预报时效: '+str(isentrh['fhour'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
@@ -148,7 +148,7 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+isentrh['lev']+'等熵面分析_相对湿度_风场_气压_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(isentrh['fhour'])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
