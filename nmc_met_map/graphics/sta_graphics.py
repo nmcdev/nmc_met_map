@@ -442,8 +442,8 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
     gap_hour_SDEN=int(SDEN['forecast_period'].values[1]-SDEN['forecast_period'].values[0])
 
     if(drw_thr == True):
-        ax.plot([SDEN_t[0],SDEN_t[-1]],[1*gap_hour_SDEN,1*gap_hour_SDEN],c='#FFEB3B',label=str(gap_hour_r03)+'小时降水较大影响',linewidth=1)
-        ax.plot([SDEN_t[0],SDEN_t[-1]],[10*gap_hour_SDEN,10*gap_hour_SDEN],c='#F44336',label=str(gap_hour_r03)+'小时降水高影响',linewidth=1)
+        ax.plot([SDEN_t[0],SDEN_t[-1]],[1*gap_hour_SDEN,1*gap_hour_SDEN],c='#FFEB3B',label=str(gap_hour_SDEN)+'小时降水较大影响',linewidth=1)
+        ax.plot([SDEN_t[0],SDEN_t[-1]],[10*gap_hour_SDEN,10*gap_hour_SDEN],c='#F44336',label=str(gap_hour_SDEN)+'小时降水高影响',linewidth=1)
         ax.legend(fontsize=10,loc='upper right')
     ax.tick_params(length=10)    
     ax.grid()

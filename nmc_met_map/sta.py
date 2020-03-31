@@ -459,10 +459,10 @@ def point_wind_time_fcst_according_to_3D_wind(
     V_4D=get_model_3D_grids(directory=directory,filenames=filenames,levels=extra_info['levels_for_interp'], allExists=False)
     #obs
     if(draw_obs == True):
-        initial_time=pd.to_datetime(str(V_4D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+        initTime=pd.to_datetime(str(V_4D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
         sign=0
         for ifhour in V_4D['forecast_period'].values:
-            temp=(initial_time+timedelta(hours=ifhour))
+            temp=(initTime+timedelta(hours=ifhour))
             filenames_obs=temp.strftime("%Y%m%d%H")+'0000.000'
             try:
                 obs_data=get_station_data('SURFACE/PLOT/',filename=filenames_obs)

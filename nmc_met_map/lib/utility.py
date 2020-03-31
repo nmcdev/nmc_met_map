@@ -250,7 +250,7 @@ def add_public_title(title, initTime,
         locale.setlocale(locale.LC_CTYPE, 'chinese')
 
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
 
 
     if(English == False):
@@ -345,7 +345,7 @@ def add_public_title_obs(title=None, initTime=None,valid_hour=0, fontsize=20, mu
         locale.setlocale(locale.LC_CTYPE, 'chinese')
 
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
 
     obs_time_str=initTime.strftime("%m月%d日%H时%M分")
     valid_time = initTime - timedelta(hours=valid_hour)
@@ -579,7 +579,7 @@ def add_public_title_sta(title=None, initTime=None,fontsize=20,English=False):
         locale.setlocale(locale.LC_CTYPE, 'chinese')
 
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
 
     if(English == False):
         initTime_str=initTime.strftime("%Y年%m月%d日%H时")
