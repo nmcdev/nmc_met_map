@@ -121,7 +121,7 @@ def draw_gh_uv_pwat(gh=None, uv=None, pwat=None,
     fcst_time=initTime+timedelta(hours=gh.coords['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
@@ -254,7 +254,7 @@ def draw_gh_uv_rh(gh=None, uv=None, rh=None,
     fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
@@ -387,7 +387,7 @@ def draw_gh_uv_spfh(gh=None, uv=None, spfh=None,
     fcst_time=initTime+timedelta(hours=gh.coords['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
@@ -524,7 +524,7 @@ def draw_gh_uv_wvfl(gh=None, uv=None, wvfl=None,
     fcst_time=initTime+timedelta(hours=gh.coords['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
