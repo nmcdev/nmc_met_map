@@ -28,9 +28,9 @@ def draw_Crosssection_Wind_Theta_e_absv(
 
 
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(cross_Theta_e['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['forecast_period'].values[0])
+    fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
@@ -81,7 +81,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
     absv_colorbar.set_label('Absolute Vorticity (dimensionless)')
 
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     bax=fig.add_axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
@@ -89,7 +89,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
     #bax.set_yticks([])
     #bax.set_xticks([])
     bax.axis([0, 10, 0, 10])        
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 2.5,'预报时效: '+str(int(gh['forecast_period'].values[0]))+'小时',size=11)
     plt.text(2.5, 0.5,'www.nmc.cn',size=11)
@@ -99,7 +99,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'相当位温_绝对涡度_水平风场_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
@@ -117,9 +117,9 @@ def draw_Crosssection_Wind_Theta_e_RH(
 
 
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(cross_Theta_e['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['forecast_period'].values[0])
+    fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
@@ -170,7 +170,7 @@ def draw_Crosssection_Wind_Theta_e_RH(
     rh_colorbar.set_label('Relative Humidity')
 
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     bax=fig.add_axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
@@ -178,7 +178,7 @@ def draw_Crosssection_Wind_Theta_e_RH(
     #bax.set_yticks([])
     #bax.set_xticks([])
     bax.axis([0, 10, 0, 10])        
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 2.5,'预报时效: '+str(int(gh['forecast_period'].values[0]))+'小时',size=11)
     plt.text(2.5, 0.5,'www.nmc.cn',size=11)
@@ -188,7 +188,7 @@ def draw_Crosssection_Wind_Theta_e_RH(
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'相当位温_相对湿度_水平风场_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
@@ -205,9 +205,9 @@ def draw_Crosssection_Wind_Theta_e_Qv(
 
 
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(cross_Theta_e['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['forecast_period'].values[0])
+    fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
@@ -258,7 +258,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     Qv_colorbar.set_label('Specific Humidity (g/kg)')
 
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     bax=fig.add_axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
@@ -266,7 +266,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     #bax.set_yticks([])
     #bax.set_xticks([])
     bax.axis([0, 10, 0, 10])        
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 2.5,'预报时效: '+str(int(gh['forecast_period'].values[0]))+'小时',size=11)
     plt.text(2.5, 0.5,'www.nmc.cn',size=11)
@@ -276,7 +276,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'相当位温_绝对湿度_水平风场_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
@@ -332,13 +332,13 @@ def draw_Time_Crossection_rh_uv_t(
     bax.axis('off')
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
         str(rh_2D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5.0,'['+str(rh_2D.attrs['model'])+']'+'模式时间剖面',size=11)
     plt.text(2.5, 2.5,'预报点: '+str(rh_2D.attrs['points']['lon'])+
         ', '+str(rh_2D.attrs['points']['lat']),size=11)
@@ -366,7 +366,7 @@ def draw_Time_Crossection_rh_uv_theta_e(
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
 
- #   utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
+ #   utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initTime=rh_2D['forecast_reference_time'].values, fontsize=23)
 
     # Plot RH using contourf
     #rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
@@ -407,13 +407,13 @@ def draw_Time_Crossection_rh_uv_theta_e(
     bax.axis('off')
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
         str(rh_2D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5.0,'['+str(rh_2D.attrs['model'])+']'+'模式时间剖面',size=11)
     plt.text(2.5, 2.5,'预报点: '+str(rh_2D.attrs['points']['lon'])+
         ', '+str(rh_2D.attrs['points']['lat']),size=11)
@@ -443,9 +443,9 @@ def draw_Crosssection_Wind_Temp_RH(
 
 
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
     str(cross_Temp['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initial_time+timedelta(hours=gh['forecast_period'].values[0])
+    fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
@@ -522,7 +522,7 @@ def draw_Crosssection_Wind_Temp_RH(
     rh_colorbar.set_label('Relative Humidity (%)')
 
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     bax=fig.add_axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
@@ -530,7 +530,7 @@ def draw_Crosssection_Wind_Temp_RH(
     #bax.set_yticks([])
     #bax.set_xticks([])
     bax.axis([0, 10, 0, 10])        
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 2.5,'预报时效: '+str(int(gh['forecast_period'].values[0]))+'小时',size=11)
     plt.text(2.5, 0.5,'www.nmc.cn',size=11)
@@ -540,7 +540,7 @@ def draw_Crosssection_Wind_Temp_RH(
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'温度_相对湿度_水平风场_预报_'+
-        '起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
@@ -557,7 +557,7 @@ def draw_Time_Crossection_rh_uv_Temp(
     fig = plt.figure(1, figsize=(16., 9.))
     ax = plt.axes()
 
- #   utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initial_time=rh_2D['forecast_reference_time'].values, fontsize=23)
+ #   utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initTime=rh_2D['forecast_reference_time'].values, fontsize=23)
 
     # Plot RH using contourf
     #rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
@@ -621,13 +621,13 @@ def draw_Time_Crossection_rh_uv_Temp(
     bax.axis('off')
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
         str(rh_2D['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5.0,'['+str(rh_2D.attrs['model'])+']'+'模式时间剖面',size=11)
     plt.text(2.5, 2.5,'预报点: '+str(rh_2D.attrs['points']['lon'])+
         ', '+str(rh_2D.attrs['points']['lat']),size=11)

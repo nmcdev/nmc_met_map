@@ -104,7 +104,7 @@ def draw_gh_rain(gh=None, rain=None,atime=24,
     fcst_time=initTime+timedelta(hours=gh['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
@@ -248,7 +248,7 @@ def draw_mslp_rain_snow(
     fcst_time=initTime+timedelta(hours=mslp['fhour'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)

@@ -31,27 +31,27 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')       
 
-    initial_time1=pd.to_datetime(str(t2m['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    initial_time2=pd.to_datetime(str(VIS['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initTime1=pd.to_datetime(str(t2m['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initTime2=pd.to_datetime(str(VIS['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
 
     # draw figure
     fig=plt.figure(figsize=(12,16))
     # draw main figure
     #温度————————————————————————————————————————————————
     ax = plt.axes([0.05,0.83,.94,.15])
-    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime1, fontsize=23)
 
     for ifhour in t2m['forecast_period'].values:
         if (ifhour == t2m['forecast_period'].values[0] ):
-            t2m_t=(initial_time1
+            t2m_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             t2m_t=np.append(t2m_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -90,29 +90,29 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.66,.94,.15])
     for ifhour in u10m['forecast_period'].values:
         if (ifhour == u10m['forecast_period'].values[0] ):
-            uv10m_t=(initial_time1
+            uv10m_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             uv10m_t=np.append(uv10m_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
 
     for ifhour in u100m['forecast_period'].values:
         if (ifhour == u100m['forecast_period'].values[0] ):
-            uv100m_t=(initial_time1
+            uv100m_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             uv100m_t=np.append(uv100m_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
             
     for ifhour in gust10m['forecast_period'].values:
         if (ifhour == gust10m['forecast_period'].values[0] ):
-            gust10m_t=(initial_time1
+            gust10m_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             gust10m_t=np.append(gust10m_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
 
     ax.plot(uv10m_t, np.squeeze(wsp10m), c='#40C4FF',label='10米风',linewidth=3)
@@ -153,11 +153,11 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.49,.94,.15])
     for ifhour in r03['forecast_period'].values:
         if (ifhour == r03['forecast_period'].values[0] ):
-            r03_t=(initial_time1
+            r03_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             r03_t=np.append(r03_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -184,20 +184,20 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.32,.94,.15])
     for ifhour in TCDC['forecast_period'].values:
         if (ifhour == TCDC['forecast_period'].values[0] ):
-            TCDC_t=(initial_time1
+            TCDC_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             TCDC_t=np.append(TCDC_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
     # draw main figure
     for ifhour in LCDC['forecast_period'].values:
         if (ifhour == LCDC['forecast_period'].values[0] ):
-            LCDC_t=(initial_time1
+            LCDC_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             LCDC_t=np.append(LCDC_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
 
     #开启自适应
@@ -230,7 +230,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         ax.axis([0, 10, 0, 10])
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.23,.05,.05],which='nmc', size='Xlarge')
-        ax.text(7.5, 33,(initial_time1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+        ax.text(7.5, 33,(initTime1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     if(draw_VIS==True):
         #能见度——————————————————————————————————————
@@ -240,11 +240,11 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         #VIS=pd.read_csv(dir_all['VIS_SC']+last_file[model])
         for ifhour in VIS['forecast_period'].values:
             if (ifhour == VIS['forecast_period'].values[0] ):
-                VIS_t=(initial_time2
+                VIS_t=(initTime2
                     +timedelta(hours=ifhour))
             else:
                 VIS_t=np.append(VIS_t,
-                                (initial_time2
+                                (initTime2
                                 +timedelta(hours=ifhour)))
 
         #开启自适应
@@ -289,7 +289,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.06,.05,.05],which='nmc', size='Xlarge')
         ax.text(7.5, 0.1,
-                (initial_time2 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+                (initTime2 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):
@@ -297,7 +297,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
         if not isExists:
             os.makedirs(output_dir)
         plt.savefig(output_dir+extra_info['output_head_name']+
-        initial_time1.strftime("%Y%m%d%H")+
+        initTime1.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()
@@ -318,27 +318,27 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')       
 
-    initial_time1=pd.to_datetime(str(TWC['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    initial_time2=pd.to_datetime(str(VIS['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initTime1=pd.to_datetime(str(TWC['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initTime2=pd.to_datetime(str(VIS['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
 
     # draw figure
     fig=plt.figure(figsize=(12,16))
     # draw main figure
     #风寒指数 体感温度————————————————————————————————————————————————
     ax = plt.axes([0.05,0.83,.94,.15])
-    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time1, fontsize=23)
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime1, fontsize=23)
 
     for ifhour in TWC['forecast_period'].values:
         if (ifhour == TWC['forecast_period'].values[0] ):
-            TWC_t=(initial_time1
+            TWC_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             TWC_t=np.append(TWC_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -363,29 +363,29 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.66,.94,.15])
     for ifhour in u10m['forecast_period'].values:
         if (ifhour == u10m['forecast_period'].values[0] ):
-            uv10m_t=(initial_time1
+            uv10m_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             uv10m_t=np.append(uv10m_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
 
     for ifhour in u100m['forecast_period'].values:
         if (ifhour == u100m['forecast_period'].values[0] ):
-            uv100m_t=(initial_time1
+            uv100m_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             uv100m_t=np.append(uv100m_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
             
     for ifhour in gust10m['forecast_period'].values:
         if (ifhour == gust10m['forecast_period'].values[0] ):
-            gust10m_t=(initial_time1
+            gust10m_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             gust10m_t=np.append(gust10m_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
 
     ax.plot(uv10m_t, np.squeeze(wsp10m), c='#40C4FF',label='10米风',linewidth=3)
@@ -426,11 +426,11 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.49,.94,.15])
     for ifhour in SDEN['forecast_period'].values:
         if (ifhour == SDEN['forecast_period'].values[0] ):
-            SDEN_t=(initial_time1
+            SDEN_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             SDEN_t=np.append(SDEN_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -459,29 +459,29 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
     ax = plt.axes([0.05,0.32,.94,.15])
     for ifhour in SNOD1['forecast_period'].values:
         if (ifhour == SNOD1['forecast_period'].values[0] ):
-            SNOD1_t=(initial_time1
+            SNOD1_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             SNOD1_t=np.append(SNOD1_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
     # draw main figure
     for ifhour in SNOD2['forecast_period'].values:
         if (ifhour == SNOD2['forecast_period'].values[0] ):
-            SNOD2_t=(initial_time1
+            SNOD2_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             SNOD2_t=np.append(SNOD2_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
 
     for ifhour in SN06['forecast_period'].values:
         if (ifhour == SN06['forecast_period'].values[0] ):
-            SN06_t=(initial_time1
+            SN06_t=(initTime1
                 +timedelta(hours=ifhour))
         else:
             SN06_t=np.append(SN06_t,
-                            (initial_time1
+                            (initTime1
                             +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -519,7 +519,7 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
         ax.axis([0, 10, 0, 10])
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.23,.05,.05],which='nmc', size='Xlarge')
-        ax.text(7.5, 33,(initial_time1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+        ax.text(7.5, 33,(initTime1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     if(draw_VIS==True):
         #能见度——————————————————————————————————————
@@ -529,11 +529,11 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
         #VIS=pd.read_csv(dir_all['VIS_SC']+last_file[model])
         for ifhour in VIS['forecast_period'].values:
             if (ifhour == VIS['forecast_period'].values[0] ):
-                VIS_t=(initial_time2
+                VIS_t=(initTime2
                     +timedelta(hours=ifhour))
             else:
                 VIS_t=np.append(VIS_t,
-                                (initial_time2
+                                (initTime2
                                 +timedelta(hours=ifhour)))
 
         #开启自适应
@@ -578,7 +578,7 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.06,.05,.05],which='nmc', size='Xlarge')
         ax.text(7.5, 0.1,
-                (initial_time2 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+                (initTime2 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):
@@ -586,7 +586,7 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
         if not isExists:
             os.makedirs(output_dir)
         plt.savefig(output_dir+extra_info['output_head_name']+
-        initial_time1.strftime("%Y%m%d%H")+
+        initTime1.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()
@@ -638,13 +638,13 @@ def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=
     bax.axis('off')
     bax.axis([0, 10, 0, 10])
 
-    initial_time = pd.to_datetime(
+    initTime = pd.to_datetime(
         str(fcst_info['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')
-    plt.text(2.5, 7.5,'起报时间: '+initial_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5.0,'['+str(fcst_info.attrs['model'])+'] '+str(int(fcst_info['forecast_period'].values[0]))+'小时预报探空',size=11)
     plt.text(2.5, 2.5,'预报点: '+str(fcst_info.attrs['points']['lon'])+
         ', '+str(fcst_info.attrs['points']['lat']),size=11)
@@ -670,25 +670,25 @@ def draw_point_wind(U=None,V=None,
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')       
 
-    initial_time=pd.to_datetime(str(time_info['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initTime=pd.to_datetime(str(time_info['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
 
     # draw figure
     fig=plt.figure(figsize=(12,12))
     # draw main figure    
     #10米风——————————————————————————————————————
     ax = plt.axes([0.1,0.2,.8,.7])
-    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time, fontsize=21)
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime, fontsize=21)
     for ifhour in time_info['forecast_period'].values:
         if (ifhour == time_info['forecast_period'].values[0] ):
-            uv_t=(initial_time
+            uv_t=(initTime
                 +timedelta(hours=ifhour))
         else:
             uv_t=np.append(uv_t,
-                            (initial_time
+                            (initTime
                             +timedelta(hours=ifhour)))
 
     wsp=(U**2+V**2)**0.5
@@ -727,12 +727,12 @@ def draw_point_wind(U=None,V=None,
         if not isExists:
             os.makedirs(output_dir)
 
-        output_dir2=output_dir+model+'_起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+'/'
+        output_dir2=output_dir+model+'_起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+'/'
         if(os.path.exists(output_dir2) == False):
             os.makedirs(output_dir2)
 
         plt.savefig(output_dir2+model+'_'+extra_info['point_name']+'_'+extra_info['output_head_name']+
-        initial_time.strftime("%Y%m%d%H")+
+        initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()
@@ -747,11 +747,11 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
     if(sys.platform[0:3] == 'lin'):
-        locale.setlocale(locale.LC_CTYPE, 'zh_CN')
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
     if(sys.platform[0:3] == 'win'):        
         locale.setlocale(locale.LC_CTYPE, 'chinese')       
 
-    initial_time=pd.to_datetime(str(t2m['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    initTime=pd.to_datetime(str(t2m['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
 
     # draw figure
     fig=plt.figure(figsize=(16,4.5))
@@ -778,14 +778,14 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
     #2米温度——————————————————————————————————————
     if(model == '中央台指导'):
         model='智能网格'
-    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initial_time=initial_time, fontsize=21)
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime, fontsize=21)
     for ifhour in t2m['forecast_period'].values:
         if (ifhour == t2m['forecast_period'].values[0] ):
-            t2m_t=(initial_time
+            t2m_t=(initTime
                 +timedelta(hours=ifhour))
         else:
             t2m_t=np.append(t2m_t,
-                            (initial_time
+                            (initTime
                             +timedelta(hours=ifhour)))
 
     curve_t2m=ax_t2m.plot(t2m_t, np.squeeze(t2m['data'].values), c='#FF6600',linewidth=3,label='2m温度')
@@ -795,11 +795,11 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
     #降水——————————————————————————————————————
     for ifhour in rn['forecast_period'].values:
         if (ifhour == rn['forecast_period'].values[0] ):
-            rn_t=(initial_time
+            rn_t=(initTime
                 +timedelta(hours=ifhour))
         else:
             rn_t=np.append(rn_t,
-                            (initial_time
+                            (initTime
                             +timedelta(hours=ifhour)))
     mask = (rn['data'] < 999)
     rn=rn['data'].where(mask)
@@ -833,11 +833,11 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
     ax_uv = plt.axes([0.1,0.16,.8,.12])
     for ifhour in u10m['forecast_period'].values:
         if (ifhour == u10m['forecast_period'].values[0] ):
-            uv_t=(initial_time
+            uv_t=(initTime
                 +timedelta(hours=ifhour))
         else:
             uv_t=np.append(uv_t,
-                            (initial_time
+                            (initTime
                             +timedelta(hours=ifhour)))
 
     wsp=(u10m**2+v10m**2)**0.5
@@ -876,12 +876,12 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
         if not isExists:
             os.makedirs(output_dir)
 
-        output_dir2=output_dir+model+'_起报时间_'+initial_time.strftime("%Y年%m月%d日%H时")+'/'
+        output_dir2=output_dir+model+'_起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+'/'
         if(os.path.exists(output_dir2) == False):
             os.makedirs(output_dir2)
 
         plt.savefig(output_dir2+model+'_'+extra_info['point_name']+'_'+extra_info['output_head_name']+
-        initial_time.strftime("%Y%m%d%H")+
+        initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()
