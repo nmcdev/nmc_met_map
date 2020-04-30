@@ -4,7 +4,8 @@
 Synoptic analysis or diagnostic maps for numeric weather model.
 """
 import numpy as np
-from nmc_met_io.retrieve_micaps_server import get_model_grid,get_model_3D_grid
+import nmc_met_io.retrieve_micaps_server as MICAPS_IO
+import nmc_met_io.retrieve_cimiss_server as CMISS_IO
 import nmc_met_map.lib.utility as utl
 import metpy.calc as mpcalc
 from metpy.units import units
@@ -30,94 +31,210 @@ import numpy.ma as ma
 from scipy.ndimage import gaussian_filter
 from nmc_met_map.graphics import synthetical_graphics
 
-def Miller_Composite_Chart(initial_time=None, fhour=24, day_back=0,model='GRAPES_GFS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+def Miller_Composite_Chart(initTime=None, fhour=24, day_back=0,model='GRAPES_GFS',
+    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
     Global=False,
     south_China_sea=True,area = '全国',city=False,output_dir=None
      ):
 
     # micaps data directory
-    try:
-        data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='700'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='300'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='300'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='500'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='500'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='850'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='850'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl='700'),
-                    utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl='500'),
-                    utl.Cassandra_dir(data_type='surface',data_source=model,var_name='BLI'),
-                    utl.Cassandra_dir(data_type='surface',data_source=model,var_name='Td2m'),
-                    utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PRMSL')
-                    ]
-    except KeyError:
-        raise ValueError('Can not find all directories needed')
+    if(data_source is 'MICAPS'):
+        try:
+            data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='700'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='300'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='300'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='500'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='500'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='850'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl='850'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl='700'),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl='500'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='BLI'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='Td2m'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PRMSL')
+                        ]
+        except KeyError:
+            raise ValueError('Can not find all directories needed')
 
-    # get filename
-    if(initial_time != None):
-        filename = utl.model_filename(initial_time, fhour)
-        filename2 = utl.model_filename(initial_time, fhour-12)
-    else:
-        filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
-        filename2=utl.filename_day_back_model(day_back=day_back,fhour=fhour-12)
-        
-    # retrieve data from micaps server
-    rh_700=get_model_grid(directory=data_dir[0],filename=filename)
-    if rh_700 is None:
-        return
+        # get filename
+        if(initTime != None):
+            filename = utl.model_filename(initTime, fhour)
+            filename2 = utl.model_filename(initTime, fhour-12)
+        else:
+            filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
+            filename2=utl.filename_day_back_model(day_back=day_back,fhour=fhour-12)
+            
+        # retrieve data from micaps server
+        rh_700=MICAPS_IO.get_model_grid(directory=data_dir[0],filename=filename)
+        if rh_700 is None:
+            return
 
-    u_300=get_model_grid(directory=data_dir[1],filename=filename)
-    if u_300 is None:
-        return
+        u_300=MICAPS_IO.get_model_grid(directory=data_dir[1],filename=filename)
+        if u_300 is None:
+            return
 
-    v_300=get_model_grid(directory=data_dir[2],filename=filename)
-    if v_300 is None:
-        return
+        v_300=MICAPS_IO.get_model_grid(directory=data_dir[2],filename=filename)
+        if v_300 is None:
+            return
 
-    u_500=get_model_grid(directory=data_dir[3],filename=filename)
-    if u_500 is None:
-        return
+        u_500=MICAPS_IO.get_model_grid(directory=data_dir[3],filename=filename)
+        if u_500 is None:
+            return
 
-    v_500=get_model_grid(directory=data_dir[4],filename=filename)
-    if v_500 is None:
-        return
+        v_500=MICAPS_IO.get_model_grid(directory=data_dir[4],filename=filename)
+        if v_500 is None:
+            return
 
-    u_850=get_model_grid(directory=data_dir[5],filename=filename)
-    if u_850 is None:
-        return
+        u_850=MICAPS_IO.get_model_grid(directory=data_dir[5],filename=filename)
+        if u_850 is None:
+            return
 
-    v_850=get_model_grid(directory=data_dir[6],filename=filename)
-    if v_850 is None:
-        return
+        v_850=MICAPS_IO.get_model_grid(directory=data_dir[6],filename=filename)
+        if v_850 is None:
+            return
 
-    t_700=get_model_grid(directory=data_dir[7],filename=filename)
-    if t_700 is None:
-        return
+        t_700=MICAPS_IO.get_model_grid(directory=data_dir[7],filename=filename)
+        if t_700 is None:
+            return
 
-    hgt_500=get_model_grid(directory=data_dir[8],filename=filename)
-    if hgt_500 is None:
-        return     
+        hgt_500=MICAPS_IO.get_model_grid(directory=data_dir[8],filename=filename)
+        if hgt_500 is None:
+            return     
 
-    hgt_500_2=get_model_grid(directory=data_dir[8],filename=filename2)
-    if hgt_500_2 is None:
-        return 
+        hgt_500_2=MICAPS_IO.get_model_grid(directory=data_dir[8],filename=filename2)
+        if hgt_500_2 is None:
+            return 
 
-    BLI=get_model_grid(directory=data_dir[9],filename=filename)
-    if BLI is None:
-        return
+        BLI=MICAPS_IO.get_model_grid(directory=data_dir[9],filename=filename)
+        if BLI is None:
+            return
 
-    Td2m=get_model_grid(directory=data_dir[10],filename=filename)
-    if Td2m is None:
-        return
+        Td2m=MICAPS_IO.get_model_grid(directory=data_dir[10],filename=filename)
+        if Td2m is None:
+            return
 
-    PRMSL=get_model_grid(directory=data_dir[11],filename=filename)
-    if PRMSL is None:
-        return
+        PRMSL=MICAPS_IO.get_model_grid(directory=data_dir[11],filename=filename)
+        if PRMSL is None:
+            return
 
-    PRMSL2=get_model_grid(directory=data_dir[11],filename=filename2)
-    if PRMSL2 is None:
-        return
+        PRMSL2=MICAPS_IO.get_model_grid(directory=data_dir[11],filename=filename2)
+        if PRMSL2 is None:
+            return
+
+    if(data_source =='CIMISS'):
+
+        # get filename
+        if(initTime != None):
+            filename = utl.model_filename(initTime, fhour,UTC=True)
+            filename2 = utl.model_filename(initTime, fhour-12,UTC=True)
+        else:
+            filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
+            filename2=utl.filename_day_back_model(day_back=day_back,fhour=fhour-12,UTC=True)
+        try:
+            # retrieve data from CMISS server        
+            rh_700=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='RHU'),
+                        fcst_level=700, fcst_ele="RHU", units='%')
+            if rh_700 is None:
+                return
+
+            hgt_500=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
+                        fcst_level=500, fcst_ele="GPH", units='gpm')
+            if hgt_500 is None:
+                return
+            hgt_500['data'].values=hgt_500['data'].values/10.
+
+            hgt_500_2=CMISS_IO.cimiss_model_by_time('20'+filename2[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
+                        fcst_level=500, fcst_ele="GPH", units='gpm')
+            if hgt_500_2 is None:
+                return
+            hgt_500_2['data'].values=hgt_500_2['data'].values/10.            
+
+            u_300=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
+                        fcst_level=300, fcst_ele="WIU", units='m/s')
+            if u_300 is None:
+                return
+                
+            v_300=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
+                        fcst_level=300, fcst_ele="WIV", units='m/s')
+            if v_300 is None:
+                return
+
+            u_500=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
+                        fcst_level=500, fcst_ele="WIU", units='m/s')
+            if u_500 is None:
+                return
+                
+            v_500=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
+                        fcst_level=500, fcst_ele="WIV", units='m/s')
+            if v_500 is None:
+                return
+
+            u_850=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
+                        fcst_level=850, fcst_ele="WIU", units='m/s')
+            if u_850 is None:
+                return
+                
+            v_850=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
+                        fcst_level=850, fcst_ele="WIV", units='m/s')
+            if v_850 is None:
+                return
+
+            BLI=CMISS_IO.cimiss_model_by_time('20'+filename2[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PLI'),
+                        fcst_level=0, fcst_ele="PLI", units='Pa')
+            if BLI is None:
+                return
+
+            #1000hPa 露点温度代替2m露点温度
+            Td2m=CMISS_IO.cimiss_model_by_time('20'+filename2[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='DPT'),
+                        fcst_level=1000, fcst_ele="DPT", units='Pa')
+            if Td2m is None:
+                return
+            Td2m['data'].values=Td2m['data'].values-273.15
+
+            if(model == 'ECMWF'):
+                PRMSL=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='GSSP'),
+                            fcst_level=0, fcst_ele="GSSP", units='Pa')
+            else:
+                PRMSL=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='SSP'),
+                            fcst_level=0, fcst_ele="SSP", units='Pa')
+
+            t_700=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='TEM'),
+                        fcst_level=700, fcst_ele="TEM", units='K')
+            if t_700 is None:
+                return   
+            t_700['data'].values=t_700['data'].values-273.15
+
+            if PRMSL is None:
+                return
+            PRMSL['data']=PRMSL['data']/100.
+
+            if(model == 'ECMWF'):
+                PRMSL2=CMISS_IO.cimiss_model_by_time('20'+filename2[0:8], valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='GSSP'),
+                            fcst_level=0, fcst_ele="GSSP", units='Pa')
+            else:
+                PRMSL2=CMISS_IO.cimiss_model_by_time('20'+filename2[0:8],valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='SSP'),
+                            fcst_level=0, fcst_ele="SSP", units='Pa')
+            if PRMSL2 is None:
+                return
+            PRMSL2['data']=PRMSL2['data']/100.
+        except KeyError:
+            raise ValueError('Can not find all data needed') 
 
     lats = np.squeeze(rh_700['lat'].values)
     lons = np.squeeze(rh_700['lon'].values)
@@ -183,16 +300,10 @@ def Miller_Composite_Chart(initial_time=None, fhour=24, day_back=0,model='GRAPES
     delt_x=(map_extent[1]-map_extent[0])*0.2
     delt_y=(map_extent[3]-map_extent[2])*0.1
 
-    #+ to solve the problem of labels on all the contours
-    idx_x1 = np.where((lons > map_extent[0]-delt_x) & 
-        (lons < map_extent[1]+delt_x))
-    idx_y1 = np.where((lats > map_extent[2]-delt_y) & 
-        (lats < map_extent[3]+delt_y))
-
     fcst_info= {'lon':lons,'lat':lats,
-                'fhour':fhour,
+                'forecast_period':fhour,
                 'model':model,
-                'init_time': t_700.coords['forecast_reference_time'].values
+                'forecast_reference_time': t_700.coords['forecast_reference_time'].values
                 }
 
     synthetical_graphics.draw_Miller_Composite_Chart(fcst_info=fcst_info,

@@ -78,10 +78,12 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(
     ax.grid(axis='x',c='black')
     miloc = mpl.dates.HourLocator(byhour=(11,14,17,23,2,5)) #单位是小时
     ax.xaxis.set_minor_locator(miloc)
+    ymajorLocator   = MultipleLocator(5) #将此y轴次刻度标签设置为5的倍数
+    ax.yaxis.set_major_locator(ymajorLocator)    
     ax.grid(axis='x', which='minor')
     plt.xlim(time_all[0],time_all[-1])
-    plt.ylim(min([np.array(Td2m).min(),AT.values.min(),t2m['data'].values.min()]),
-        max([np.array(Td2m).max(),AT.values.max(),t2m['data'].values.max()]))
+    plt.ylim(min([np.array(Td2m).min(),AT.values.min(),t2m['data'].values.min()])-3,
+        math.floor(max([np.array(Td2m).max(),AT.values.max(),t2m['data'].values.max()])/5.)*5+10)
     ax.legend(fontsize=10,loc='upper right')
     ax.set_ylabel('2米温度 体感温度\n'+'2米露点温度 ($^\circ$C)', fontsize=15)
     
@@ -880,8 +882,157 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
         if(os.path.exists(output_dir2) == False):
             os.makedirs(output_dir2)
 
-        plt.savefig(output_dir2+model+'_'+extra_info['point_name']+'_'+extra_info['output_head_name']+
+        plt.savefig(output_dir2+extra_info['point_name']+
+        extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()
+
+
+def draw_point_uv_rh_fcst(rh2m=None,u10m=None,v10m=None,rn=None,
+        model=None,
+        output_dir=None,
+        points=None,
+        extra_info=None):
+
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')       
+
+    initTime=pd.to_datetime(str(rh2m['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+
+    # draw figure
+    fig=plt.figure(figsize=(16,4.5))
+    ax_rh2m = HostAxes(fig,[0.1,0.28,.8,.62])
+    ax_rn = ParasiteAxes(ax_rh2m, sharex=ax_rh2m)
+    #其他信息
+
+
+    #append axes
+    ax_rh2m.parasites.append(ax_rn)
+
+    #invisible right axis of ax
+    ax_rh2m.axis['right'].set_visible(False)
+    ax_rh2m.axis['right'].set_visible(False)
+    ax_rn.axis['right'].set_visible(True)
+    ax_rn.axis['right'].major_ticklabels.set_visible(True)
+    ax_rn.axis['right'].label.set_visible(True)
+    #set label for axis
+    ax_rh2m.set_ylabel('相对湿度(%)', fontsize=100)
+    ax_rn.set_ylabel('降水(mm)', fontsize=100)
+    fig.add_axes(ax_rh2m)
+
+    # draw main figure    
+    #2米温度——————————————————————————————————————
+    if(model == '中央台指导'):
+        model='智能网格'
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime, fontsize=21)
+    for ifhour in rh2m['forecast_period'].values:
+        if (ifhour == rh2m['forecast_period'].values[0] ):
+            rh2m_t=(initTime
+                +timedelta(hours=ifhour))
+        else:
+            rh2m_t=np.append(rh2m_t,
+                            (initTime
+                            +timedelta(hours=ifhour)))
+
+    curve_t2m=ax_rh2m.plot(rh2m_t, np.squeeze(rh2m['data'].values), c='#FF6600',linewidth=3,label='相对湿度')
+    ax_rh2m.set_xlim(rh2m_t[0],rh2m_t[-1])
+    ax_rh2m.set_ylim(0,100)
+    #降水——————————————————————————————————————
+    for ifhour in rn['forecast_period'].values:
+        if (ifhour == rn['forecast_period'].values[0] ):
+            rn_t=(initTime
+                +timedelta(hours=ifhour))
+        else:
+            rn_t=np.append(rn_t,
+                            (initTime
+                            +timedelta(hours=ifhour)))
+    mask = (rn['data'] < 999)
+    rn=rn['data'].where(mask)
+    ax_rn.bar(rn_t,np.squeeze(rn.values),width=0.1,color='#00008B',
+        label=str(int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0]))+'小时降水',alpha=0.5)
+    #curve_rn=ax_rn.plot(rn_t, np.squeeze(rn['data'].values), c='#40C4FF',linewidth=3)
+    
+    ax_rn.set_ylim(0,np.nanmax(np.append(10,np.squeeze(rn.values))))
+    ###
+
+    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    ax_rh2m.xaxis.set_major_locator(xaxis_intaval)
+    # add legend
+    ax_rh2m.legend(fontsize=15,loc='upper right')
+    ax_rh2m.tick_params(length=10)   
+    ax_rh2m.tick_params(axis='y',labelsize=100)
+    ax_rh2m.set_xticklabels([' '])
+    miloc = mpl.dates.HourLocator(byhour=(8,11,14,17,20,23,2,5)) #单位是小时
+    ax_rh2m.xaxis.set_minor_locator(miloc)
+    yminorLocator   = MultipleLocator(10) #将此y轴次刻度标签设置为1的倍数
+    ax_rh2m.yaxis.set_minor_locator(yminorLocator)
+    ymajorLocator   = MultipleLocator(20) #将此y轴次刻度标签设置为1的倍数
+    ax_rh2m.yaxis.set_major_locator(ymajorLocator)
+
+    ax_rh2m.grid(axis='x', which='minor',ls='--')    
+    ax_rh2m.axis['left'].label.set_fontsize(15)
+    ax_rh2m.axis['left'].major_ticklabels.set_fontsize(15)
+    ax_rn.axis['right'].label.set_fontsize(15)
+    ax_rn.axis['right'].major_ticklabels.set_fontsize(15)
+    #10米风——————————————————————————————————————
+    ax_uv = plt.axes([0.1,0.16,.8,.12])
+    for ifhour in u10m['forecast_period'].values:
+        if (ifhour == u10m['forecast_period'].values[0] ):
+            uv_t=(initTime
+                +timedelta(hours=ifhour))
+        else:
+            uv_t=np.append(uv_t,
+                            (initTime
+                            +timedelta(hours=ifhour)))
+
+    wsp=(u10m**2+v10m**2)**0.5
+    #curve_uv=ax_uv.plot(uv_t, np.squeeze(wsp['data'].values), c='#696969',linewidth=3,label='10m风')
+
+    ax_uv.barbs(uv_t, np.zeros(len(uv_t)),
+            np.squeeze(u10m['data'].values),np.squeeze(v10m['data'].values),
+            fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20},length=5.8,linewidth=1.5,zorder=100)
+    ax_uv.set_ylim(-1,1)
+    ax_uv.set_xlim(uv_t[0],uv_t[-1])
+    #ax_uv.axis('off')
+    ax_uv.set_yticklabels([' '])
+    #logo
+    utl.add_logo_extra_in_axes(pos=[0.87,0.00,.1,.1],which='nmc', size='Xlarge')
+
+    #开启自适应
+    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    ax_uv.xaxis.set_major_locator(xaxis_intaval)
+    ax_uv.tick_params(length=5,axis='x')
+    ax_uv.tick_params(length=0,axis='y')
+    miloc = mpl.dates.HourLocator(byhour=(8,11,14,17,20,23,2,5)) #单位是小时
+    ax_uv.xaxis.set_minor_locator(miloc)
+    ax_uv.grid(axis='x',which='both',ls='--')    
+    ax_uv.set_ylabel('10m风', fontsize=15)
+
+    xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
+    for label in ax_uv.get_xticklabels():
+        label.set_rotation(30)
+        label.set_horizontalalignment('center')
+    ax_uv.tick_params(axis='x',labelsize=15)
+
+    #出图——————————————————————————————————————————————————————————
+    
+    if(output_dir != None ):
+        isExists=os.path.exists(output_dir)
+        if not isExists:
+            os.makedirs(output_dir)
+
+        #output_dir2=output_dir+model+'_起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+'/'
+        #if(os.path.exists(output_dir2) == False):
+        #    os.makedirs(output_dir2)
+
+        plt.savefig(output_dir+extra_info['output_head_name']+
+        initTime.strftime("%Y%m%d%H")+
+        '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()        

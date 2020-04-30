@@ -4,7 +4,6 @@
 Synoptic analysis or diagnostic maps for numeric weather model.
 """
 import numpy as np
-from nmc_met_io.retrieve_micaps_server import get_model_grid
 import nmc_met_io.retrieve_micaps_server as MICAPS_IO
 import nmc_met_io.retrieve_cimiss_server as CMISS_IO
 from nmc_met_map.graphics import thermal_graphics
@@ -36,18 +35,18 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='ECMWF',
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
 
         # retrieve data from micaps server
-        gh = get_model_grid(data_dir[0], filename=filename)
+        gh = MICAPS_IO.get_model_grid(data_dir[0], filename=filename)
         if gh is None:
             return
         
-        u = get_model_grid(data_dir[1], filename=filename)
+        u = MICAPS_IO.get_model_grid(data_dir[1], filename=filename)
         if u is None:
             return
             
-        v = get_model_grid(data_dir[2], filename=filename)
+        v = MICAPS_IO.get_model_grid(data_dir[2], filename=filename)
         if v is None:
             return
-        thetae = get_model_grid(data_dir[3], filename=filename)
+        thetae = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
         if thetae is None:
             return   
 
@@ -148,18 +147,18 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
 
         # retrieve data from micaps server
-        gh = get_model_grid(data_dir[0], filename=filename)
+        gh = MICAPS_IO.get_model_grid(data_dir[0], filename=filename)
         if gh is None:
             return
         
-        u = get_model_grid(data_dir[1], filename=filename)
+        u = MICAPS_IO.get_model_grid(data_dir[1], filename=filename)
         if u is None:
             return
             
-        v = get_model_grid(data_dir[2], filename=filename)
+        v = MICAPS_IO.get_model_grid(data_dir[2], filename=filename)
         if v is None:
             return
-        tmp = get_model_grid(data_dir[3], filename=filename)
+        tmp = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
         if tmp is None:
             return   
     

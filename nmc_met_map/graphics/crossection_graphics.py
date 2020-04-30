@@ -20,19 +20,17 @@ import matplotlib.cm as cm
 def draw_Crosssection_Wind_Theta_e_absv(
                     cross_absv3d=None, cross_Theta_e=None, cross_u=None,cross_v=None,gh=None,
                     h_pos=None,st_point=None,ed_point=None,
-                    levels=None,map_extent=(50, 150, 0, 65),
+                    levels=None,map_extent=(50, 150, 0, 65),lw_ratio=None,
                     output_dir=None):
 
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-
-
     initTime = pd.to_datetime(
     str(cross_Theta_e['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
-    fig = plt.figure(1, figsize=(16., 9.))
+    fig = plt.figure(1, figsize=(lw_ratio[0], lw_ratio[1]))
     ax = plt.axes()
     absv_contour = ax.contourf(cross_absv3d['lon'], cross_absv3d['level'], cross_absv3d['data']*100000,
                             levels=range(-60, 60, 1), cmap=plt.cm.RdBu_r)
@@ -42,7 +40,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
     Theta_e_contour = ax.contour(cross_Theta_e['lon'], cross_Theta_e['level'],cross_Theta_e.values,
                             levels=np.arange(250, 450, 5), colors='k', linewidths=2)
 
-    Theta_e_contour.clabel(np.arange(250, 450, 5), fontsize=8, colors='k', inline=1,
+    Theta_e_contour.clabel(np.arange(250, 450, 5), fontsize=20, colors='k', inline=1,
                         inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)
 
     wind_slc_vert = list(range(0, len(levels), 1))
@@ -109,19 +107,17 @@ def draw_Crosssection_Wind_Theta_e_absv(
 def draw_Crosssection_Wind_Theta_e_RH(
                     cross_rh=None, cross_Theta_e=None, cross_u=None,cross_v=None,gh=None,
                     h_pos=None,st_point=None,ed_point=None,
-                    levels=None,map_extent=(50, 150, 0, 65),
+                    levels=None,map_extent=(50, 150, 0, 65),lw_ratio=None,
                     output_dir=None):
 
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-
-
     initTime = pd.to_datetime(
     str(cross_Theta_e['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
-    fig = plt.figure(1, figsize=(16., 9.))
+    fig = plt.figure(1, figsize=(lw_ratio[0],lw_ratio[1]))
     ax = plt.axes()
     rh_contour = ax.contourf(cross_rh['lon'], cross_rh['level'], cross_rh['data'],
                             levels=np.arange(0, 106, 5), cmap='YlGnBu')
@@ -131,7 +127,7 @@ def draw_Crosssection_Wind_Theta_e_RH(
     Theta_e_contour = ax.contour(cross_Theta_e['lon'], cross_Theta_e['level'],cross_Theta_e.values,
                             levels=np.arange(250, 450, 5), colors='k', linewidths=2)
 
-    Theta_e_contour.clabel(np.arange(250, 450, 5), fontsize=8, colors='k', inline=1,
+    Theta_e_contour.clabel(np.arange(250, 450, 5), fontsize=20, colors='k', inline=1,
                         inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)
 
     wind_slc_vert = list(range(0, len(levels), 1))
@@ -175,8 +171,6 @@ def draw_Crosssection_Wind_Theta_e_RH(
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     bax=fig.add_axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
     bax.axis('off')
-    #bax.set_yticks([])
-    #bax.set_xticks([])
     bax.axis([0, 10, 0, 10])        
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=11)
@@ -196,7 +190,7 @@ def draw_Crosssection_Wind_Theta_e_RH(
 
 def draw_Crosssection_Wind_Theta_e_Qv(
                     cross_Qv=None, cross_Theta_e=None, cross_u=None,cross_v=None,gh=None,
-                    h_pos=None,st_point=None,ed_point=None,
+                    h_pos=None,st_point=None,ed_point=None,lw_ratio=None,
                     levels=None,map_extent=(50, 150, 0, 65),
                     output_dir=None):
 
@@ -209,7 +203,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     str(cross_Theta_e['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
-    fig = plt.figure(1, figsize=(16., 9.))
+    fig = plt.figure(1, figsize=(lw_ratio[0], lw_ratio[1]))
     ax = plt.axes()
     Qv_contour = ax.contourf(cross_Qv['lon'], cross_Qv['level'], cross_Qv.values,
                             levels=np.arange(0, 20, 2), cmap='YlGnBu')
@@ -284,18 +278,15 @@ def draw_Crosssection_Wind_Theta_e_Qv(
 
 def draw_Time_Crossection_rh_uv_t(
                     rh_2D=None, u_2D=None, v_2D=None,TMP_2D=None,
-                    t_range=None,output_dir=None):   
+                    t_range=None,lw_ratio=[16,9],output_dir=None):   
 
+#set font
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）                         
-    # # 画图
-    # Define the figure object and primary axes
-    fig = plt.figure(1, figsize=(16., 9.))
+    
+    fig = plt.figure(1, figsize=(lw_ratio[0],lw_ratio[1]))
     ax = plt.axes()
 
-    # Plot RH using contourf
-    #rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),
-                            #levels=np.arange(0, 106, 5), cmap='RdBu')
     rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),                            
                             levels=np.arange(0, 100, 5), cmap='YlGnBu',extend='max')
     rh_colorbar = fig.colorbar(rh_contour)
@@ -327,7 +318,7 @@ def draw_Time_Crossection_rh_uv_t(
     ax.set_ylim(rh_2D['level'].values.max(), rh_2D['level'].values.min())
     ax.set_xlim([rh_2D['time'].values[0], rh_2D['time'].values[-1]])
 
-    #forecast information
+#forecast information
     bax=plt.axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
     bax.axis('off')
     bax.axis([0, 10, 0, 10])
@@ -434,20 +425,18 @@ def draw_Crosssection_Wind_Temp_RH(
                     cross_rh=None, cross_Temp=None, cross_u=None,
                     cross_v=None,cross_terrain=None,
                     gh=None,
-                    h_pos=None,st_point=None,ed_point=None,
+                    h_pos=None,st_point=None,ed_point=None,lw_ratio=None,
                     levels=None,map_extent=(50, 150, 0, 65),model=None,
                     output_dir=None):
 
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-
-
     initTime = pd.to_datetime(
     str(cross_Temp['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
     fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
     
-    fig = plt.figure(1, figsize=(16., 9.))
+    fig = plt.figure(1, figsize=(lw_ratio[0],lw_ratio[1]))
     ax = plt.axes()
     cross_rh['data'].values[cross_rh['data'].values > 100]=100
 
@@ -548,13 +537,13 @@ def draw_Crosssection_Wind_Temp_RH(
 
 def draw_Time_Crossection_rh_uv_Temp(
                     rh_2D=None, u_2D=None, v_2D=None,TMP_2D=None,terrain_2D=None,
-                    t_range=None,model=None,output_dir=None):        
+                    t_range=None,model=None,lw_ratio=None,output_dir=None):        
 
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）                    
     # # 画图
     # Define the figure object and primary axes
-    fig = plt.figure(1, figsize=(16., 9.))
+    fig = plt.figure(1, figsize=(lw_ratio[0], lw_ratio[1]))
     ax = plt.axes()
 
  #   utl.add_public_title_sta(title=rh_2D.attrs['model']+'模式预报时间剖面',initTime=rh_2D['forecast_reference_time'].values, fontsize=23)

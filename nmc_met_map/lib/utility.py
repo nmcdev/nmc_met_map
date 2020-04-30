@@ -37,7 +37,8 @@ import os.path
 from matplotlib.text import TextPath
 from matplotlib.patches import PathPatch
 from matplotlib.transforms import IdentityTransform
-
+import cartopy.io.img_tiles as cimgt
+import matplotlib.colors as colors
 def obs_radar_filename(time='none', product_name='CREF'):
     """
         Construct obsed radar file name.
@@ -603,7 +604,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'VVEL':'ECMWF_HR/VVEL/',
                     'RH':'ECMWF_HR/RH/',
                     'SPFH':'ECMWF_HR/SPFH/',
-                    'TMP':'ECMWF_HR/TMP/',
+                    'TMP':'ECMWF_HR/TMP/'
                     },
             'GRAPES_GFS':{
                     'HGT':'GRAPES_GFS/HGT/',
@@ -625,7 +626,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'TMP':'NCEP_GFS/TMP/',
                     },
             'OBS':{            
-                    'PLOT':'UPPER_AIR/PLOT/'
+                    'PLOT':'UPPER_AIR/PLOT/',
+                    'FY4AL1':'SATELLITE/FY4A/L1/CHINA/'
                     }
             }
 
@@ -650,7 +652,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'TCDC':'ECMWF_HR/TCDC/',
                     'T2m':'ECMWF_HR/TMP_2M/',
                     'Td2m':'ECMWF_HR/DPT_2M/',
-                    'PSFC':'ECMWF_HR/PRES/SURFACE/'
+                    'PSFC':'ECMWF_HR/PRES/SURFACE/',
+                    'ORO':'ECMWF_HR/OROGRAPHY/'
                     },
             'GRAPES_GFS':{
                     'u10m':'GRAPES_GFS/UGRD/10M_ABOVE_GROUND/',
@@ -668,7 +671,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'rh2m':'GRAPES_GFS/RH/2M_ABOVE_GROUND/',
                     'Td2m':'GRAPES_GFS/DPT/2M_ABOVE_GROUND/',
                     'BLI':'GRAPES_GFS/BLI/',
-                    'PSFC':'GRAPES_GFS/PRES/SURFACE/'
+                    'PSFC':'GRAPES_GFS/PRES/SURFACE/',
+                    'ORO':'GRAPES_GFS/HGT/SURFACE/'
                     },
             'NCEP_GFS':{
                     'u10m':'NCEP_GFS/UGRD/10M_ABOVE_GROUND/',
@@ -683,16 +687,18 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'rh2m':'NCEP_GFS/RH/2M_ABOVE_GROUND/',
                     'Td2m':'NCEP_GFS/DPT/2M_ABOVE_GROUND/',
                     'BLI':'NCEP_GFS/BLI/',
-                    'PSFC':'NCEP_GFS/PRES/SURFACE/'
+                    'PSFC':'NCEP_GFS/PRES/SURFACE/',
+                    'ORO':'NCEP_GFS/HGT/SURFACE/'
                     },
 
             'OBS':{
                 'Tmx_2m':'SURFACE/TMP_MAX_24H_ALL_STATION/',
+                'PLOT_ALL':'SURFACE/PLOT_ALL/',
                 'PLOT_GLOBAL_3H':'SURFACE/PLOT_GLOBAL_3H/',
                 'CREF':'RADARMOSAIC/CREF/'
                     },
 
-            '中央台指导':{
+            '中央气象台中短期指导':{
                     'u10m':'NWFD_SCMOC/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SCMOC/VGRD/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SCMOC/RAIN24/',
@@ -704,7 +710,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'VIS':'NWFD_SCMOC/VIS/',
                     'rh2m':'NWFD_SCMOC/RH/2M_ABOVE_GROUND/'
                     },
-            '国省反馈':{
+            '中央气象台智能网格预报':{
                     'u10m':'NWFD_SMERGE/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SMERGE/VGRD/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SMERGE/RAIN24/',
@@ -966,13 +972,20 @@ def CMISS_data_code(
                     'GPH':'NAFP_FOR_FTM_HIGH_EC_ANEA',
                     'WIU':'NAFP_FOR_FTM_HIGH_EC_ANEA',
                     'WIV':'NAFP_FOR_FTM_HIGH_EC_ANEA',
-                    'GSSP':'NAFP_FOR_FTM_HIGH_EC_ASI',
+                    'GSSP':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'RHU':'NAFP_FOR_FTM_HIGH_EC_ANEA',
                     'VVP':'NAFP_FOR_FTM_HIGH_EC_ANEA',
                     'TCWV':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'SHU':'NAFP_FOR_FTM_HIGH_EC_ANEA',
-                    'TMP':'ECMWF_HR/TMP/',
-                    'TPE':'NAFP_FOR_FTM_HIGH_EC_ASI'
+                    'WIU10':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'WIU100':'NAFP_FOR_FTM_HIGH_EC_GLB',                    'WIU10':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'WIV100':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'TPE':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'TEF2':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'DPT':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'TTSP':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'GUST10T6':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'PRS':'NAFP_FOR_FTM_HIGH_EC_GLB'
                     },
             'GRAPES_GFS':{
                     'TEM':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
@@ -986,11 +999,16 @@ def CMISS_data_code(
                     'TIWV':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
                     'SHU':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
                     'PPT':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
-                    'WVFL':'GRAPES_GFS/WVFL/',
-                    'THETAE':'GRAPES_GFS/THETASE/'
+                    'WIU10':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'WIV10':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'TEF2':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'RHF2':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'PLI':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'DPT':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'PRS':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE'
                     },
             'OBS':{            
-                    'PLOT':'UPPER_AIR/PLOT/'
+                    'PLOT_sfc':'SURF_CHN_MUL_HOR'
                     }
             }
 
@@ -1002,3 +1020,34 @@ def add_cartopy_background(ax,name='RD'):
     bg_dir=pkg_resources.resource_filename('nmc_met_map','resource/backgrounds/')
     os.environ["CARTOPY_USER_BACKGROUNDS"] = bg_dir
     ax.background_img(name=name, resolution='high')
+
+class TDT_img(cimgt.GoogleWTS):
+    def _image_url(self, tile):
+        x, y, z = tile
+        url = 'https://webst01.is.autonavi.com/appmaptile?x=%s&y=%s&z=%s&style=6'% (x, y, z)
+        return url
+class TDT_ter(cimgt.GoogleWTS):
+    def _image_url(self, tile):
+        x, y, z = tile
+        url = 'http://mt2.google.cn/vt/lyrs=p&scale=2&hl=zh-CN&gl=cn&x=%s&y=%s&z=%s'% (x, y, z)
+        return url
+class TDT(cimgt.GoogleWTS):
+    def _image_url(self, tile):
+        x, y, z = tile
+        url = 'http://wprd01.is.autonavi.com/appmaptile?x=%s&y=%s&z=%s&lang=zh_cn&size=1&scl=1&style=7'% (x, y, z)
+        return url
+
+def cal_background_zoom_ratio(zoom_ratio):
+    x=zoom_ratio/0.0625
+    zm = 0
+    while (x >= 1):
+        x = x / 2
+        zm=zm+1
+    return 14-zm
+
+def get_part_clev_and_cmap(clev_range=[0,4],color_all=None,clev_slt=None):
+    cmap=mpl.cm.jet
+    if color_all is not None:
+        cmap=mpl.colors.LinearSegmentedColormap.from_list(" ", color_all)    
+    color_slt=np.array(cmap((clev_slt-clev_range[0])/(clev_range[-1]-clev_range[0]))).reshape(1,4)
+    return color_slt

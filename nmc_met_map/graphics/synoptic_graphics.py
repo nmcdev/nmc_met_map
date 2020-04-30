@@ -100,7 +100,6 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
     utl.add_cartopy_background(ax,name='RD')
-    
     #forecast information
     l, b, w, h = ax.get_position().bounds
 
@@ -141,7 +140,6 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=6,size=15,small_city=small_city)
 
     utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
-
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'最高温度_预报_'+

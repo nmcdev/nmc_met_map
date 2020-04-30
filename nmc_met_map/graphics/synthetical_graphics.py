@@ -26,49 +26,27 @@ def draw_Miller_Composite_Chart(fcst_info=None,
                     map_extent=(50, 150, 0, 65),
                     add_china=True,city=True,south_China_sea=True,
                     output_dir=None,Global=False):
-
+# set font
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-    # draw figure
+# set figure
     plt.figure(figsize=(16,9))
 
-    # set data projection
     if(Global == True):
         plotcrs = ccrs.Robinson(central_longitude=115.)
     else:
         plotcrs = ccrs.AlbersEqualArea(central_latitude=(map_extent[2]+map_extent[3])/2., 
             central_longitude=(map_extent[0]+map_extent[1])/2., standard_parallels=[30., 60.])
- 
-    ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
-    
-    plt.title('['+fcst_info['model']+'] '+
-    'Miller 综合分析图', 
-        loc='left', fontsize=30)
-        
     datacrs = ccrs.PlateCarree()
-
-    #adapt to the map ratio
+    ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     map_extent2=utl.adjust_map_ratio(ax,map_extent=map_extent,datacrs=datacrs)
-    #adapt to the map ratio
 
-    ax.add_feature(cfeature.OCEAN)
-    utl.add_china_map_2cartopy_public(
-        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
-    if add_china:
-        utl.add_china_map_2cartopy_public(
-            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
-        utl.add_china_map_2cartopy_public(
-            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
-        utl.add_china_map_2cartopy_public(
-            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
-
-    # define return plots
+#draw data
     plots = {}
 
     lons=fcst_info['lon']
     lats=fcst_info['lat']
-    # Plot Lifted Index
     cs1 = ax.contour(lons, lats, lifted_index, range(-8, -2, 2), transform=ccrs.PlateCarree(),
                     colors='red', linewidths=0.75, linestyles='solid', zorder=7)
     cs1.clabel(fontsize=10, inline=1, inline_spacing=7,
@@ -128,15 +106,30 @@ def draw_Miller_Composite_Chart(fcst_info=None,
                     transform=ccrs.PlateCarree(),
                     color='k', zorder=8, label='850-hPa Jet Core Winds (m/s)')
 
-    # grid lines
+#additional information
+    plt.title('['+fcst_info['model']+'] '+
+    'Miller 综合分析图', 
+        loc='left', fontsize=30)
+        
+    ax.add_feature(cfeature.OCEAN)
+    utl.add_china_map_2cartopy_public(
+        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
+    if add_china:
+        utl.add_china_map_2cartopy_public(
+            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
+        utl.add_china_map_2cartopy_public(
+            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
+        utl.add_china_map_2cartopy_public(
+            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
+
     gl = ax.gridlines(
         crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=40)
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    #http://earthpy.org/cartopy_backgroung.html
-    #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
-    ax.background_img(name='RD', resolution='high')
+    utl.add_cartopy_background(ax,name='RD')
+
+    l, b, w, h = ax.get_position().bounds
 
     # Legend
     purple = mpatches.Patch(color='BlueViolet', label='Cyclonic Absolute Vorticity Advection')
@@ -155,14 +148,14 @@ def draw_Miller_Composite_Chart(fcst_info=None,
     leg.set_zorder(100)
 
     #forecast information
-    bax=plt.axes([0.01,0.835,.25,.1],facecolor='#FFFFFFCC')
+    bax=plt.axes([l,b+h-0.1,.25,.1],facecolor='#FFFFFFCC')
     bax.set_yticks([])
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
     initTime = pd.to_datetime(
-    str(fcst_info['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initTime+timedelta(hours=fcst_info['fhour'])
+    str(fcst_info['forecast_reference_time'])).replace(tzinfo=None).to_pydatetime()
+    fcst_time=initTime+timedelta(hours=fcst_info['forecast_period'])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
@@ -170,12 +163,12 @@ def draw_Miller_Composite_Chart(fcst_info=None,
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(fcst_info['fhour'])+'小时',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(fcst_info['forecast_period'])+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add south China sea
     if south_China_sea:
-        utl.add_south_China_sea(pos=[0.85,0.13,.1,.2])
+        utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
     if(map_extent2[1]-map_extent2[0] < 25):
@@ -184,13 +177,13 @@ def draw_Miller_Composite_Chart(fcst_info=None,
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=110,size=13,small_city=small_city)
 
-    utl.add_logo_extra_in_axes(pos=[-0.01,0.835,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
 
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'Miller_综合图_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(fcst_info['fhour'])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(fcst_info['forecast_period'])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
         plt.show()

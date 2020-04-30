@@ -34,16 +34,14 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
     else:
         plotcrs = ccrs.AlbersEqualArea(central_latitude=(map_extent[2]+map_extent[3])/2., 
             central_longitude=(map_extent[0]+map_extent[1])/2., standard_parallels=[30., 60.])
- 
+
     datacrs = ccrs.PlateCarree()
 
     ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     map_extent2=utl.adjust_map_ratio(ax,map_extent=map_extent,datacrs=datacrs)   
 
 #draw data
-    # define plots
     plots = {}
-    # draw mean sea level pressure
     if thetae is not None:
         x, y = np.meshgrid(thetae['lon'], thetae['lat'])
         z=np.squeeze(thetae['data'])
@@ -54,7 +52,6 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
             x, y, z, 
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
 
-    # draw -hPa wind bards
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
         u = np.squeeze(uv['u']) * 2.5
@@ -64,7 +61,6 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
             transform=datacrs, fill_empty=False, sizes=dict(emptybarb=0.05),
             zorder=2)
 
-    # draw -hPa geopotential height
     if gh is not None:
         x, y = np.meshgrid(gh['lon'], gh['lat'])
         clevs_gh = np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 584, 8), np.arange(580, 604, 4))), np.arange(604, 2000, 8))
@@ -210,7 +206,6 @@ def draw_gh_uv_tmp(gh=None, uv=None, tmp=None,
     str(int(uv['level'].values[0]))+'hPa 风场, '+
     str(int(tmp['level'].values[0]))+'hPa 温度', 
         loc='left', fontsize=30)
-        
 
     ax.add_feature(cfeature.OCEAN)
     utl.add_china_map_2cartopy_public(

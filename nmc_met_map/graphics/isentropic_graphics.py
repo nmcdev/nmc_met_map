@@ -27,10 +27,11 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
                     add_china=True,city=False,south_China_sea=True,
                     output_dir=None,Global=False):
 
+# set font
     plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
-    # draw figure
+# set figure
     plt.figure(figsize=(16,9))
 
     # set data projection
@@ -39,35 +40,15 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     else:
         plotcrs = ccrs.AlbersEqualArea(central_latitude=(map_extent[2]+map_extent[3])/2., 
             central_longitude=(map_extent[0]+map_extent[1])/2., standard_parallels=[30., 60.])
- 
-    ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     
-    plt.title('['+isentrh['model']+'] '+
-    isentrh['lev']+'等熵面  风场 相对湿度 气压', 
-        loc='left', fontsize=30)
-        
     datacrs = ccrs.PlateCarree()
-
-    #adapt to the map ratio
+    ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
     map_extent2=utl.adjust_map_ratio(ax,map_extent=map_extent,datacrs=datacrs)
-    #adapt to the map ratio
 
-    ax.add_feature(cfeature.OCEAN)
-    utl.add_china_map_2cartopy_public(
-        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
-    if add_china:
-        utl.add_china_map_2cartopy_public(
-            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
-        utl.add_china_map_2cartopy_public(
-            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
-        utl.add_china_map_2cartopy_public(
-            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
 
-    # define return plots
+#draw data
     plots = {}
-    # draw mean sea level pressure
     if isentrh is not None:
-
         x, y = np.meshgrid(isentrh['lon'], isentrh['lat'])
         z=np.squeeze(isentrh['data'])
         clevs_rh= range(10, 106, 5)
@@ -78,8 +59,8 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     # draw -hPa wind bards
     if isentuv is not None:
         x, y = np.meshgrid(isentuv['lon'], isentuv['lat'])
-        u = np.squeeze(isentuv['isentu']) * 2.5
-        v = np.squeeze(isentuv['isentv']) * 2.5
+        u = np.squeeze(isentuv['isentu'].values) * 2.5
+        v = np.squeeze(isentuv['isentv'].values) * 2.5
         plots['uv'] = ax.barbs(
             x, y, u, v, length=6, regrid_shape=regrid_shape,
             transform=datacrs, fill_empty=False, sizes=dict(emptybarb=0.05),
@@ -94,6 +75,21 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
             x, y, z , clevs_isentprs, colors='black',
             linewidths=2, transform=datacrs, zorder=30)
         plt.clabel(plots['isentprs'], inline=1, fontsize=20, fmt='%.0f',colors='black')
+#additional information
+    plt.title('['+isentrh.attrs['model']+'] '+
+    str(isentrh['level'].values)+'等熵面  风场 相对湿度 气压', 
+        loc='left', fontsize=30)
+
+    ax.add_feature(cfeature.OCEAN)
+    utl.add_china_map_2cartopy_public(
+        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=105,alpha=0.5)
+    if add_china:
+        utl.add_china_map_2cartopy_public(
+            ax, name='province', edgecolor='gray', lw=0.5, zorder=105)
+        utl.add_china_map_2cartopy_public(
+            ax, name='nation', edgecolor='black', lw=0.8, zorder=105)
+        utl.add_china_map_2cartopy_public(
+            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=105,alpha=0.5)
 
     # grid lines
     gl = ax.gridlines(
@@ -101,19 +97,19 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    #http://earthpy.org/cartopy_backgroung.html
-    #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
-    ax.background_img(name='RD', resolution='high')
+    utl.add_cartopy_background(ax,name='RD')
+
+    l, b, w, h = ax.get_position().bounds
 
     #forecast information
-    bax=plt.axes([0.01,0.835,.25,.1],facecolor='#FFFFFFCC')
+    bax=plt.axes([l,b+h-0.1,.25,.1],facecolor='#FFFFFFCC')
     bax.set_yticks([])
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])
 
     initTime = pd.to_datetime(
-    str(isentrh['init_time'])).replace(tzinfo=None).to_pydatetime()
-    fcst_time=initTime+timedelta(hours=isentrh['fhour'])
+    str(isentrh.coords['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    fcst_time=initTime+timedelta(hours=isentrh.coords['forecast_period'].values[0])
     #发布时间
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
@@ -121,12 +117,12 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(isentrh['fhour'])+'小时',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(isentrh.coords['forecast_period'].values[0]))+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add color bar
     if(isentrh != None):
-        cax=plt.axes([0.11,0.06,.86,.02])
+        cax=plt.axes([l,b-0.04,w,.02])
         cb = plt.colorbar(plots['isentrh'], cax=cax, orientation='horizontal',
                       ticks=clevs_rh[:],
                       extend='both',extendrect=False)
@@ -135,7 +131,7 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
 
     # add south China sea
     if south_China_sea:
-        utl.add_south_China_sea(pos=[0.85,0.13,.1,.2])
+        utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
     if(map_extent2[1]-map_extent2[0] < 25):
@@ -143,13 +139,13 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=110,size=13,small_city=small_city)
 
-    utl.add_logo_extra_in_axes(pos=[-0.01,0.835,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
 
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+isentrh['lev']+'等熵面分析_相对湿度_风场_气压_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(isentrh['fhour'])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(isentrh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
     
     if(output_dir == None):
         plt.show()              

@@ -300,7 +300,6 @@ def gh_uv_spfh(initTime=None, fhour=6, day_back=0,model='ECMWF',
             # retrieve data from CMISS server        
             gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
             if gh is None:
                 return
@@ -308,21 +307,18 @@ def gh_uv_spfh(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
             u=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
             if u is None:
                 return
                 
             v=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
             if v is None:
                 return
 
             spfh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='SHU'),
-                        levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
                         fcst_level=spfh_lev, fcst_ele="SHU", units='kg.kg-1')
             if spfh is None:
                 return
