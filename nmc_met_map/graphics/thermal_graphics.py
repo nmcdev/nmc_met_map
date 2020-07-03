@@ -27,7 +27,7 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
 
 # set figure
-    plt.figure(figsize=(16,9))
+    fig=plt.figure(figsize=(16,9))
 
     if(Global == True):
         plotcrs = ccrs.Robinson(central_longitude=115.)

@@ -19,6 +19,7 @@ import nmc_met_graphics.cmap.ctables as dk_ctables
 from scipy.ndimage import gaussian_filter
 import matplotlib.patches as mpatches
 from matplotlib.animation import FuncAnimation
+import os
 
 def draw_gh_rain(gh=None, rain=None,
                     map_extent=(50, 150, 0, 65),
@@ -326,7 +327,8 @@ def draw_Rain_evo(
             z[z<=0.1]=np.nan
             initTime = pd.to_datetime(str(rain.coords['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
             labels=(initTime+timedelta(hours=rain.coords['forecast_period'].values[itime])).strftime("%m月%d日%H时")
-            per_color=utl.get_part_clev_and_cmap(clev_range=[0,len(rain['time'].values)],clev_slt=itime)
+            cmap=mpl.cm.jet
+            per_color=utl.get_part_clev_and_cmap(cmap=cmap,clev_range=[0,len(rain['time'].values)],clev_slt=itime)
             ax.contourf(
                 x,y,z, levels=[fcs_lvl,800],
                 colors=per_color, zorder=3,transform=datacrs,

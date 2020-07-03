@@ -10,10 +10,8 @@ import pkg_resources
 import numpy as np
 import pandas as pd
 import cartopy.crs as ccrs
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as mpatheffects
-import matplotlib.ticker as mticker
 from cartopy.io.shapereader import Reader
 import locale
 import cartopy.feature as cfeature
@@ -22,11 +20,7 @@ import sys
 import re
 import http.client
 from datetime import datetime, timedelta
-import numpy as np
-import xarray as xr
 import pandas as pd
-from nmc_met_io import DataBlock_pb2
-from nmc_met_io.config import _get_config_from_rcfile
 import math
 import struct
 from nmc_met_io.retrieve_micaps_server import get_model_grids
@@ -34,11 +28,14 @@ from scipy.ndimage import gaussian_filter
 from scipy.interpolate import griddata
 import matplotlib as mpl
 import os.path
-from matplotlib.text import TextPath
-from matplotlib.patches import PathPatch
-from matplotlib.transforms import IdentityTransform
 import cartopy.io.img_tiles as cimgt
 import matplotlib.colors as colors
+import nmc_met_graphics.cmap.cm as cm_collected
+from scipy.interpolate import LinearNDInterpolator
+from shapely.geometry import Polygon as ShapelyPolygon
+from shapely.geometry import Point as ShapelyPoint
+
+
 def obs_radar_filename(time='none', product_name='CREF'):
     """
         Construct obsed radar file name.
@@ -186,17 +183,81 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
         (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
             if(city_names[i] != '香港' and city_names[i] != '南京' and city_names[i] != '石家庄' and  city_names[i] != '天津'):
                 r = city_names[i]
-                ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
+                t=ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size,zorder=zorder,**kwargs)
             else:
-                ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='left',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
-                #"""带白边字体，字体大小会随着地图范围放大缩小，尚未解决该问题
-                #r = city_names[i]
-                #text_path = TextPath((int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.), r,ha='left',va='top', size=size, **kwargs)
-                #p1 = PathPatch(text_path, ec="w", lw=3, fc="w", **kwargs,visible=True)
-                #p2 = PathPatch(text_path, ec="none", fc="k", **kwargs,visible=True)
-                #ax.add_artist(p1)
-                #ax.add_artist(p2)
-                #"""
+                t=ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='left',va='top',size=size,
+                zorder=zorder,**kwargs)
+            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='#D9D9D9'),
+                       mpatheffects.Normal()])
+            ax.scatter(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60., c='black', s=25, zorder=zorder,**kwargs)
+    return
+
+def add_city_and_number_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=10,
+     data=None,cmap=None,**kwargs):
+    
+    dlon=map_extent[1]-map_extent[0]
+    dlat=map_extent[3]-map_extent[2]
+
+    #small city
+    if(small_city):
+        try:
+            fname = 'small_city.000'
+            fpath = "resource/" + fname
+        except KeyError:
+            raise ValueError('can not find the file small_city.000 in the resources')
+        city = read_micaps_17(pkg_resources.resource_filename(
+            'nmc_met_map', fpath))
+
+        lon=city['lon'].values.astype(np.float)
+        lat=city['lat'].values.astype(np.float)
+        city_names=city['Name'].values
+
+        for i in range(0,len(city_names)):
+            if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
+            (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
+                    #ax.text(lon[i],lat[i],city_names[i], family='SimHei-Bold',ha='right',va='top',size=size-4,color='w',zorder=zorder,**kwargs)
+                ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
+            ax.scatter(lon[i], lat[i], c='black', s=25, alpha=0.5,zorder=zorder, **kwargs)
+    #province city
+    try:
+        fname = 'city_province.000'
+        fpath = "resource/" + fname
+    except KeyError:
+        raise ValueError('can not find the file city_province.000 in the resources')
+
+    city = read_micaps_17(pkg_resources.resource_filename(
+        'nmc_met_map', fpath))
+
+    lon=city['lon'].values.astype(np.float)/100.
+    lat=city['lat'].values.astype(np.float)/100.
+    city_names=city['Name'].values
+    
+    number_city=data.interp(lon=('points',lon),lat=('points',lat))
+
+     # 步骤一（替换sans-serif字体） #得删除C:\Users\HeyGY\.matplotlib 然后重启vs，刷新该缓存目录获得新的字体
+    plt.rcParams['font.sans-serif'] = ['SimHei']     
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+    for i in range(0,len(city_names)):
+        if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
+        (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
+            if((np.array(['香港','南京','石家庄','天津','济南','上海'])!=city_names[i]).all()):
+                r = city_names[i]
+                t=ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.
+                    ,city_names[i], family='SimHei',ha='right',va='top',size=size,zorder=zorder,**kwargs)
+                num=ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.
+                    ,'%.1f'%np.squeeze(number_city['data'].values)[i],
+                     family='SimHei',ha='right',va='bottom',size=size,zorder=zorder,**kwargs)
+            else:
+                t=ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.
+                    ,city_names[i], family='SimHei',ha='left',va='top',size=size,
+                    zorder=zorder,**kwargs)
+                num=ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.
+                    ,'%.1f'%np.squeeze(number_city['data'].values)[i],
+                     family='SimHei',ha='left',va='bottom',size=size,zorder=zorder,**kwargs)
+            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='#D9D9D9'),
+                       mpatheffects.Normal()])
+            num.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='#D9D9D9'),
+                       mpatheffects.Normal()])
             ax.scatter(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60., c='black', s=25, zorder=zorder,**kwargs)
     return
 
@@ -470,14 +531,6 @@ def get_coord_AWX(data_in=None):
 
 
 def model_filename(initTime, fhour,UTC=False):
-    """
-        Construct model file name.
-
-    Arguments:
-        initTime {string or datetime object} -- model initial time,
-            like 18042008' or datetime(2018, 4, 20, 8).
-        fhour {int} -- model forecast hours.
-    """
 
     if(UTC is False):
         if isinstance(initTime, datetime):
@@ -519,16 +572,22 @@ def filename_day_back_model(day_back=0,fhour=0,UTC=False):
     hour=int(datetime.now().strftime('%H'))
 
     if(UTC is False):
-        if(hour >= 14 or hour < 2):
-            filename = (datetime.now()-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'08.'+'%03d' % fhour
+        if(hour >= 14):
+            initTime = (datetime.now()).strftime('%Y%m%d')+'08'
         elif(hour >= 2):    
-            filename = (datetime.now()-timedelta(hours=24)-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'20.'+'%03d' % fhour
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'20'
+        else:
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'08'
     if(UTC is True):
         if(hour >= 14 or hour < 2):
-            filename = (datetime.now()-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'00.'+'%03d' % fhour
+            initTime = (datetime.now()).strftime('%Y%m%d')+'00'
         elif(hour >= 2):    
-            filename = (datetime.now()-timedelta(hours=24)-timedelta(hours=day_back*24)).strftime('%Y%m%d')[2:8]+'12.'+'%03d' % fhour
-
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'12'
+        else:
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'00'
+    #process day back
+    initTime_dayback=datetime.strptime(initTime,'%Y%m%d%H')-timedelta(hours=day_back*24)
+    filename=initTime_dayback.strftime('%Y%m%d%H')[2:10]+'.%03d'%fhour
     return filename    
 
 def wind2UV(Winddir=None,Windsp=None):
@@ -625,7 +684,14 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'RH':'NCEP_GFS/RH/',
                     'TMP':'NCEP_GFS/TMP/',
                     },
+            'ECMWF_ENSEMBLE':{
+                    'UGRD_RAW':'ECMWF_ENSEMBLE/RAW/UGRD/',
+                    'VGRD_RAW':'ECMWF_ENSEMBLE/RAW/VGRD/',
+                    'HGT_RAW':'ECMWF_ENSEMBLE/RAW/HGT/',
+                    'TMP_RAW':'ECMWF_ENSEMBLE/RAW/TMP/'
+                    },
             'OBS':{            
+                    'TLOGP':'UPPER_AIR/TLOGP/',
                     'PLOT':'UPPER_AIR/PLOT/',
                     'FY4AL1':'SATELLITE/FY4A/L1/CHINA/'
                     }
@@ -636,7 +702,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'u10m':'ECMWF_HR/UGRD_10M/',
                     'v10m':'ECMWF_HR/VGRD_10M/',
                     'u100m':'ECMWF_HR/UGRD_100M/',
-                    'v100m':'ECMWF_HR/VGRD_100M/',                    
+                    'v100m':'ECMWF_HR/VGRD_100M/',
+                    'wind10m':'ECMWF_HR/WIND_10M/',
                     'PRMSL':'ECMWF_HR/PRMSL/',
                     'RAIN24':'ECMWF_HR/RAIN24/',
                     'RAIN03':'ECMWF_HR/RAIN03/',                    
@@ -653,11 +720,14 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'T2m':'ECMWF_HR/TMP_2M/',
                     'Td2m':'ECMWF_HR/DPT_2M/',
                     'PSFC':'ECMWF_HR/PRES/SURFACE/',
-                    'ORO':'ECMWF_HR/OROGRAPHY/'
+                    'ORO':'ECMWF_HR/OROGRAPHY/',
+                    'Tmx3_2m':'ECMWF_HR/MAXIMUM_TEMPERATURE_AT_2_METRES_IN_THE_LAST_3_HOURS/',
+                    'Tmn3_2m':'ECMWF_HR/MINIMUM_TEMPERATURE_AT_2_METRES_IN_THE_LAST_3_HOURS/'
                     },
             'GRAPES_GFS':{
                     'u10m':'GRAPES_GFS/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'GRAPES_GFS/VGRD/10M_ABOVE_GROUND/',
+                    'wind10m':'GRAPES_GFS/WIND/10M_ABOVE_GROUND/',
                     'PRMSL':'GRAPES_GFS/PRMSL/',
                     'RAIN24':'GRAPES_GFS/RAIN24/',
                     'RAIN03':'GRAPES_GFS/RAIN03/',                    
@@ -668,6 +738,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'SNOW24':'GRAPES_GFS/SNOW024/',
                     'TCWV':'GRAPES_GFS/PWAT/ENTIRE_ATMOSPHERE/',
                     'T2m':'GRAPES_GFS/TMP/2M_ABOVE_GROUND/',
+                    'Tmx3_2m':'GRAPES_GFS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'Tmn3_2m':'GRAPES_GFS/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'rh2m':'GRAPES_GFS/RH/2M_ABOVE_GROUND/',
                     'Td2m':'GRAPES_GFS/DPT/2M_ABOVE_GROUND/',
                     'BLI':'GRAPES_GFS/BLI/',
@@ -677,6 +749,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
             'NCEP_GFS':{
                     'u10m':'NCEP_GFS/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NCEP_GFS/VGRD/10M_ABOVE_GROUND/',
+                    'wind10m':'NCEP_GFS/WIND/10M_ABOVE_GROUND/',
                     'PRMSL':'NCEP_GFS/PRMSL/',
                     'RAIN24':'NCEP_GFS/RAIN24/',
                     'RAIN03':'NCEP_GFS/RAIN03/',
@@ -684,23 +757,29 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'RAINC06':'NCEP_GFS/RAINC06/',
                     'TCWV':'NCEP_GFS/PWAT/ENTIRE_ATMOSPHERE/',
                     'T2m':'NCEP_GFS/TMP/2M_ABOVE_GROUND/',
+                    'Tmx3_2m':'NCEP_GFS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'Tmn3_2m':'mdfs:///NCEP_GFS/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'rh2m':'NCEP_GFS/RH/2M_ABOVE_GROUND/',
                     'Td2m':'NCEP_GFS/DPT/2M_ABOVE_GROUND/',
                     'BLI':'NCEP_GFS/BLI/',
                     'PSFC':'NCEP_GFS/PRES/SURFACE/',
                     'ORO':'NCEP_GFS/HGT/SURFACE/'
                     },
-
+            'ECMWF_ENSEMBLE':{
+                    'RAIN06_RAW':'ECMWF_ENSEMBLE/RAW/RAIN06/'
+                    },
             'OBS':{
                 'Tmx_2m':'SURFACE/TMP_MAX_24H_ALL_STATION/',
                 'PLOT_ALL':'SURFACE/PLOT_ALL/',
+                'RAIN06_ALL':'SURFACE/RAIN06_ALL_STATION/',
                 'PLOT_GLOBAL_3H':'SURFACE/PLOT_GLOBAL_3H/',
-                'CREF':'RADARMOSAIC/CREF/'
+                'CREF':'RADARMOSAIC/CREF/',
+                'PLOT_GUST':'SURFACE/MAX_WIND/'
                     },
-
             '中央气象台中短期指导':{
                     'u10m':'NWFD_SCMOC/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SCMOC/VGRD/10M_ABOVE_GROUND/',
+                    'wind10m':'NWFD_SCMOC/WIND/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SCMOC/RAIN24/',
                     'RAIN06':'NWFD_SCMOC/RAIN06/',
                     'RAIN03':'NWFD_SCMOC/RAIN03/',
@@ -722,7 +801,8 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'rh2m':'NWFD_SMERGE/RH/2M_ABOVE_GROUND/'               
                     },
             'CLDAS':{
-                    'Tmx_2m':"CLDAS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/"  
+                    'Tmx_2m':"CLDAS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/",
+                    'RAIN24':'CLDAS/RAIN24_TRI_DATA_SOURCE/'
                     } 
             }
     if(data_type== 'high'):
@@ -978,13 +1058,17 @@ def CMISS_data_code(
                     'TCWV':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'SHU':'NAFP_FOR_FTM_HIGH_EC_ANEA',
                     'WIU10':'NAFP_FOR_FTM_HIGH_EC_GLB',
-                    'WIU100':'NAFP_FOR_FTM_HIGH_EC_GLB',                    'WIU10':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'WIV10':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'WIU100':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'WIV100':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'TPE':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'TEF2':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'MN2T3':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'MX2T6':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'DPT':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'TTSP':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'GUST10T6':'NAFP_FOR_FTM_HIGH_EC_GLB',
+                    'GUST10T3':'NAFP_FOR_FTM_HIGH_EC_GLB',
                     'PRS':'NAFP_FOR_FTM_HIGH_EC_GLB'
                     },
             'GRAPES_GFS':{
@@ -1045,9 +1129,126 @@ def cal_background_zoom_ratio(zoom_ratio):
         zm=zm+1
     return 14-zm
 
-def get_part_clev_and_cmap(clev_range=[0,4],color_all=None,clev_slt=None):
-    cmap=mpl.cm.jet
+def get_part_clev_and_cmap(cmap=None,clev_range=[0,4],color_all=None,clev_slt=None):
     if color_all is not None:
         cmap=mpl.colors.LinearSegmentedColormap.from_list(" ", color_all)    
     color_slt=np.array(cmap((clev_slt-clev_range[0])/(clev_range[-1]-clev_range[0]))).reshape(1,4)
     return color_slt
+
+def linearized_ncl_cmap(name):
+    cmap1=cm_collected.ncl_cmaps(name)
+    COLORS = []
+    norm=np.linspace(0,1,cmap1.N-1)
+    for i, n in enumerate(norm):
+        COLORS.append((n, np.array(cmap1.colors[i])))
+    cmap = mpl.colors.LinearSegmentedColormap.from_list(name, COLORS)
+    return cmap
+
+def sta_to_point_interpolation(points=None,sta=None,var_name=None):
+
+    Ex1 = np.squeeze(sta[var_name].values)
+    coords = np.zeros((sta['lon'].size,2))
+    coords[...,0] = sta['lat'].values
+    coords[...,1] = sta['lon'].values
+    interpolator_sta = LinearNDInterpolator(coords,Ex1,rescale=True)
+    coords2=np.zeros((np.size(points['lon']),2))
+    coords2[:,0]=points['lat']
+    coords2[:,1]=points['lon']
+    point_interpolated=interpolator_sta(coords2)
+
+
+    return point_interpolated
+
+def find_nearest_sta(points=None,sta=None,var_name=None):
+
+    Ex1 = np.squeeze(sta[var_name].values)
+    coords = np.zeros((sta['lon'].size,2))
+    coords[...,0] = sta['lat'].values
+    coords[...,1] = sta['lon'].values
+    interpolator_sta = LinearNDInterpolator(coords,Ex1,rescale=True)
+    coords2=np.zeros((np.size(points['lon']),2))
+    coords2[:,0]=points['lat']
+    coords2[:,1]=points['lon']
+    point_interpolated=interpolator_sta(coords2)
+
+
+    return point_interpolated   
+
+
+def cm_heavy_rain_nws(atime=24, pos=None):
+    """
+    Rainfall color map.
+
+    Keyword Arguments:
+        atime {int} -- [description] (default: {24})
+        pos {[type]} -- specify the color position (default: {None})
+    """
+
+    # set colors
+    _colors = [
+        [135, 206, 250],
+        [0, 0, 255], [255, 0, 255], [127, 0, 0]
+    ]
+    _colors = np.array(_colors)/255.0
+    if pos is None:
+        if atime == 24:
+            _pos = [251, 252, 253, 254, 800]
+        elif atime == 6:
+            _pos = [13, 25, 60, 120, 800]
+        else:
+            _pos = [7, 13, 30, 60, 800]
+    else:
+        _pos = pos
+    cmap, norm = mpl.colors.from_levels_and_colors(_pos, _colors, extend='neither')
+    return cmap, norm 
+
+
+    #coding=utf-8
+###################################################################################################################################
+#####This module enables you to maskout the unneccessary data outside the interest region on a matplotlib-plotted output instance
+####################in an effecient way,You can use this script for free     ########################################################
+#####################################################################################################################################
+#####USAGE: INPUT  include           'originfig':the matplotlib instance##
+#                                    'ax': the Axes instance
+#                                    'shapefile': the shape file used for generating a basemap A
+#                                    'region':the name of a region of on the basemap A,outside the region the data is to be maskout
+#           OUTPUT    is             'clip' :the the masked-out or clipped matplotlib instance.
+import shapefile
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
+def gy_shp2clip_China(originfig,ax,shpfile,lbs_originfig=None):
+    
+    sf = shapefile.Reader(shpfile,encoding='utf-8')
+    vertices = []
+    codes = []
+    for shape_rec in sf.shapeRecords():
+        if shape_rec.record[2] == 'China':  ####这里需要找到和region匹配的唯一标识符，record[]中必有一项是对应的。
+            pts = shape_rec.shape.points
+            prt = list(shape_rec.shape.parts) + [len(pts)]
+            for i in range(len(prt) - 1):
+                for j in range(prt[i], prt[i+1]):
+                    vertices.append((pts[j][0], pts[j][1]))
+                codes += [Path.MOVETO]
+                codes += [Path.LINETO] * (prt[i+1] - prt[i] -2)
+                codes += [Path.CLOSEPOLY]
+    #codes = [Path.MOVETO] + [Path.LINETO]*2 + [Path.CLOSEPOLY]
+    #vertices = [(120, 50), (120, 20), (70, 20), (70, 50)]
+    clip = Path(vertices, codes)
+    clip = PathPatch(clip, transform=ax.transData, facecolor='orange', lw=2,alpha=0.5)
+    #clip=ax.add_patch(clip)
+    for contour in originfig.collections:
+        contour.set_clip_path(clip)
+
+    if(lbs_originfig is not None):
+        clip_map_shapely = ShapelyPolygon(vertices)
+        for text_object in lbs_originfig:
+            if not clip_map_shapely.contains(ShapelyPoint(text_object.get_position())):
+                text_object.set_visible(False)
+
+    return clip
+
+def gy_China_maskout(originfig,ax,lbs_originfig=None):
+    shpfile = pkg_resources.resource_filename(
+        'nmc_met_graphics', "resources/maps/country1.shp")
+    clip=gy_shp2clip_China(originfig,ax,shpfile,lbs_originfig=lbs_originfig)
+    return clip

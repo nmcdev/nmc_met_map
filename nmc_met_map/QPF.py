@@ -11,7 +11,9 @@ from nmc_met_map.graphics import QPF_graphics
 import nmc_met_map.lib.utility as utl
 from metpy.units import units
 import metpy.calc as mpcalc
+from datetime import datetime, timedelta
 import xarray as xr
+from scipy.ndimage import gaussian_filter
 import copy
 
 def gh_rain(initTime=None, fhour=24, day_back=0,model='ECMWF',
