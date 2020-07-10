@@ -142,25 +142,25 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
     dlat=map_extent[3]-map_extent[2]
 
     #small city
-    if(small_city):
-        try:
-            fname = 'small_city.000'
-            fpath = "resource/" + fname
-        except KeyError:
-            raise ValueError('can not find the file small_city.000 in the resources')
-        city = read_micaps_17(pkg_resources.resource_filename(
-            'nmc_met_map', fpath))
+    # if(small_city):
+    #     try:
+    #         fname = 'small_city.000'
+    #         fpath = "resource/" + fname
+    #     except KeyError:
+    #         raise ValueError('can not find the file small_city.000 in the resources')
+    #     city = read_micaps_17(pkg_resources.resource_filename(
+    #         'nmc_met_map', fpath))
 
-        lon=city['lon'].values.astype(np.float)
-        lat=city['lat'].values.astype(np.float)
-        city_names=city['Name'].values
+    #     lon=city['lon'].values.astype(np.float)
+    #     lat=city['lat'].values.astype(np.float)
+    #     city_names=city['Name'].values
 
-        for i in range(0,len(city_names)):
-            if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
-            (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
-                    #ax.text(lon[i],lat[i],city_names[i], family='SimHei-Bold',ha='right',va='top',size=size-4,color='w',zorder=zorder,**kwargs)
-                ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
-            ax.scatter(lon[i], lat[i], c='black', s=25, alpha=0.5,zorder=zorder, **kwargs)
+    #     for i in range(0,len(city_names)):
+    #         if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
+    #         (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
+    #                 #ax.text(lon[i],lat[i],city_names[i], family='SimHei-Bold',ha='right',va='top',size=size-4,color='w',zorder=zorder,**kwargs)
+    #             ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size-4,color='black',zorder=zorder,**kwargs)
+    #         ax.scatter(lon[i], lat[i], c='black', s=25, alpha=0.5,zorder=zorder, **kwargs)
     #province city
     try:
         fname = 'city_province.000'

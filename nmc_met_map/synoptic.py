@@ -334,7 +334,7 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
             raise ValueError('Can not find all data needed')      
 
         r6=TPE1.copy(deep=True)
-        r6['data'].values=TPE1['data'].values-TPE2['data'].values
+        r6['data'].values=TPE1['data'].values*1000-TPE2['data'].values*1000
 
     # prepare data
 
@@ -379,7 +379,7 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,100],lvl_ana=250,
     Global=False,
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS'
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS'
      ):
 
     # micaps data directory
@@ -431,7 +431,6 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
             rh=CMISS_IO.cimiss_model_3D_grid(
                         data_code=utl.CMISS_data_code(data_source=model,var_name='RHU'),
                         init_time_str='20'+filename[0:8],valid_time=fhour,
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_levels=levels, fcst_ele="RHU", units='%')
             if rh is None:
                 return
@@ -439,7 +438,6 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
             u=CMISS_IO.cimiss_model_3D_grid(
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         init_time_str='20'+filename[0:8],valid_time=fhour,
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_levels=levels, fcst_ele="WIU", units='m/s')
             if u is None:
                 return
@@ -447,7 +445,6 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
             v=CMISS_IO.cimiss_model_3D_grid(
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         init_time_str='20'+filename[0:8],valid_time=fhour,
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_levels=levels, fcst_ele="WIV", units='m/s')
             if v is None:
                 return        
@@ -455,7 +452,6 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
             t=CMISS_IO.cimiss_model_3D_grid(
                         data_code=utl.CMISS_data_code(data_source=model,var_name='TEM'),
                         init_time_str='20'+filename[0:8],valid_time=fhour,
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_levels=levels, fcst_ele="TEM", units='K')
             if t is None:
                 return            
@@ -463,6 +459,9 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
             t['data'].attrs['units']='C'
         except KeyError:
             raise ValueError('Can not find all data needed')
+
+    if(area != None):
+        cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
     map_extent=[0,0,0,0]
     map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
@@ -506,8 +505,6 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
     # prepare data
     idx_z1 = list(pres.m).index(((lvl_ana * units('hPa')).to(pres.units)).m)
-    if(area != None):
-        cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
     pv=rh.copy(deep=True)
     pv['data'].values=np.array(pv_raw).reshape(np.append(1,np.array(pv_raw).shape))

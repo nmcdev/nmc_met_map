@@ -479,7 +479,7 @@ def draw_Crosssection_Wind_Temp_RH(
     # extra arguments are N=256, gamma=1.0
     cm.register_cmap(cmap=cmap2)
     terrain_contour = ax.contourf(cross_terrain['lon'], cross_terrain['level'], cross_terrain.values,
-                            levels=np.arange(0, 200, 1), cmap=cm.get_cmap('own3'),zorder=100)            
+                            levels=np.arange(0, 500, 1), cmap=cm.get_cmap('own3'),zorder=100)            
     # Adjust the y-axis to be logarithmic
     ax.set_yscale('symlog')
     ax.set_yticklabels(np.arange(levels[0], levels[-1], -100))

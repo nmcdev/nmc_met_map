@@ -77,7 +77,7 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
         plt.clabel(plots['isentprs'], inline=1, fontsize=20, fmt='%.0f',colors='black')
 #additional information
     plt.title('['+isentrh.attrs['model']+'] '+
-    str(isentrh['level'].values)+'等熵面  风场 相对湿度 气压', 
+    str(isentrh['level'].values[0])+'K 等熵面  风场 相对湿度 气压', 
         loc='left', fontsize=30)
 
     ax.add_feature(cfeature.OCEAN)

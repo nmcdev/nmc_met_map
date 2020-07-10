@@ -337,7 +337,7 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
         x, y = np.meshgrid(r6['lon'], r6['lat'])
         clevs_r6 = [0.1, 4, 13, 25, 60, 120]
         plots['r6'] = ax.contourf(
-            x, y, np.squeeze(r6['data']), clevs_r6,
+            x, y, np.squeeze(r6['data'].values), clevs_r6,
             colors=["#88F492", "#00A929", "#2AB8FF", "#1202FC", "#FF04F4", "#850C3E"],
             alpha=0.8, zorder=1, transform=datacrs,extend='max',extendrect=False)
 

@@ -142,8 +142,8 @@ def draw_gh_uv_pwat(gh=None, uv=None, pwat=None,
         utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
-    if(map_extent2[1]-map_extent2[0] < 25):
-        small_city=True
+    #if(map_extent2[1]-map_extent2[0] < 25):
+    #    small_city=True
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=5,size=13,small_city=small_city)
 
@@ -274,8 +274,8 @@ def draw_gh_uv_rh(gh=None, uv=None, rh=None,
         utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
-    if(map_extent2[1]-map_extent2[0] < 25):
-        small_city=True
+    #if(map_extent2[1]-map_extent2[0] < 25):
+    #    small_city=True
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=5,size=13,small_city=small_city)
 
@@ -409,8 +409,8 @@ def draw_gh_uv_spfh(gh=None, uv=None, spfh=None,
         utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
-    if(map_extent2[1]-map_extent2[0] < 25):
-        small_city=True
+    #if(map_extent2[1]-map_extent2[0] < 25):
+    #    small_city=True
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=5,size=13,small_city=small_city)
 
@@ -544,8 +544,8 @@ def draw_gh_uv_wvfl(gh=None, uv=None, wvfl=None,
         utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
 
     small_city=False
-    if(map_extent2[1]-map_extent2[0] < 25):
-        small_city=True
+    #if(map_extent2[1]-map_extent2[0] < 25):
+    #    small_city=True
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=110,size=13,small_city=small_city)
 
