@@ -6,11 +6,9 @@ Other required packages:
 - matplotlib
 - pandas
 - cartopy
-- cfgrib
 - metpy
 - nmc_met_io          请预先安装, 见https://github.com/nmcdev/nmc_met_io
 - nmc_met_graphics    请预先安装, 见https://github.com/nmcdev/nmc_met_graphics
-- nmc_met_base        请预先安装, 见https://github.com/nmcdev/nmc_met_base
 - nmc_met_diagnostic  请预先安装, https://github.com/nmcdev/nmc_met_diagnostic
 ## Install
 Using the fellowing command to install packages:
