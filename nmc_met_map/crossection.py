@@ -31,7 +31,8 @@ def Crosssection_Wind_Theta_e_absv(
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=''),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl='500')]
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl='500'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
         except KeyError:
             raise ValueError('Can not find all directories needed')
 
@@ -43,33 +44,18 @@ def Crosssection_Wind_Theta_e_absv(
             
         # retrieve data from micaps server
         rh=MICAPS_IO.get_model_3D_grid(directory=data_dir[0][0:-1],filename=filename,levels=levels, allExists=False)
-        if rh is None:
-            return
         rh = rh.metpy.parse_cf().squeeze()
-
         u=MICAPS_IO.get_model_3D_grid(directory=data_dir[1][0:-1],filename=filename,levels=levels, allExists=False)
-        if u is None:
-            return
         u = u.metpy.parse_cf().squeeze()
-
         v=MICAPS_IO.get_model_3D_grid(directory=data_dir[2][0:-1],filename=filename,levels=levels, allExists=False)
-        if v is None:
-            return
         v = v.metpy.parse_cf().squeeze()
-
         v2=MICAPS_IO.get_model_3D_grid(directory=data_dir[2][0:-1],filename=filename,levels=levels, allExists=False)
-        if v2 is None:
-            return
         v2 = v2.metpy.parse_cf().squeeze()
-
         t=MICAPS_IO.get_model_3D_grid(directory=data_dir[3][0:-1],filename=filename,levels=levels, allExists=False)
-        if t is None:
-            return
         t = t.metpy.parse_cf().squeeze()
-
         gh=MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
-        if t is None:
-            return
+        psfc=get_model_grid(data_dir[5], filename=filename)
+
     if(data_source == 'CIMISS'):
         # get filename
         if(initTime != None):
@@ -115,6 +101,11 @@ def Crosssection_Wind_Theta_e_absv(
                 return
             gh['data'].values=gh['data'].values/10.
 
+            psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
+
         except KeyError:
             raise ValueError('Can not find all data needed')   
     rh = rh.metpy.parse_cf().squeeze()
@@ -122,8 +113,22 @@ def Crosssection_Wind_Theta_e_absv(
     v = v.metpy.parse_cf().squeeze()
     v2 = v2.metpy.parse_cf().squeeze()
     t = t.metpy.parse_cf().squeeze()
+    psfc=psfc.metpy.parse_cf().squeeze()
     resolution=u['lon'][1]-u['lon'][0]
     x,y=np.meshgrid(u['lon'], u['lat'])
+
+    # +form 3D psfc
+    mask1 = (
+            (psfc['lon']>=t['lon'].values.min())&
+            (psfc['lon']<=t['lon'].values.max())&
+            (psfc['lat']>=t['lat'].values.min())&
+            (psfc['lat']<=t['lat'].values.max())
+            )
+
+    t2,psfc_bdcst=xr.broadcast(t['data'],psfc['data'].where(mask1, drop=True))
+    mask2=(psfc_bdcst > -10000)
+    psfc_bdcst=psfc_bdcst.where(mask2, drop=True)
+    # -form 3D psfc
 
     dx,dy=mpcalc.lat_lon_grid_deltas(u['lon'],u['lat'])
     for ilvl in levels:
@@ -147,6 +152,7 @@ def Crosssection_Wind_Theta_e_absv(
     cross_u=cross.set_coords(('lat', 'lon'))
     cross = cross_section(v, st_point, ed_point)
     cross_v=cross.set_coords(('lat', 'lon'))
+    cross_psfc = cross_section(psfc_bdcst, st_point, ed_point)
 
     cross_u['data'].attrs['units']=units.meter/units.second
     cross_v['data'].attrs['units']=units.meter/units.second
@@ -165,6 +171,7 @@ def Crosssection_Wind_Theta_e_absv(
     Theta_e=mpcalc.equivalent_potential_temperature(pressure,
                                                 cross_t['data'].values*units.celsius, 
                                                 cross_Td)
+    cross_terrain=pressure-cross_psfc
 
     cross_Theta_e = xr.DataArray(np.array(Theta_e),
                         coords=cross_rh['data'].coords,
@@ -173,7 +180,7 @@ def Crosssection_Wind_Theta_e_absv(
 
     crossection_graphics.draw_Crosssection_Wind_Theta_e_absv(
                     cross_absv3d=cross_absv3d, cross_Theta_e=cross_Theta_e, cross_u=cross_u,
-                    cross_v=cross_v,gh=gh,
+                    cross_v=cross_v,cross_terrain=pressure-cross_psfc,gh=gh,
                     h_pos=h_pos,st_point=st_point,ed_point=ed_point,
                     levels=levels,map_extent=map_extent,lw_ratio=lw_ratio,
                     output_dir=output_dir)
@@ -635,16 +642,6 @@ def Crosssection_Wind_Temp_RH(
         psfc=get_model_grid(data_dir[5], filename=filename)
 
     if(data_source is 'CIMISS'):
-        try:
-            data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl=''),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=''),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl='500'),
-                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
-        except KeyError:
-            raise ValueError('Can not find all directories needed')
-
         if(initTime != None):
             filename = utl.model_filename(initTime, fhour,UTC=True)
         else:
@@ -687,19 +684,19 @@ def Crosssection_Wind_Temp_RH(
     t = t.metpy.parse_cf().squeeze()
     psfc=psfc.metpy.parse_cf().squeeze()
 
-    if(psfc['lon'].values[0] != t['lon'].values[0]):
-        mask1 = (
-                (psfc['lon']>=t['lon'].values.min())&
-                (psfc['lon']<=t['lon'].values.max())&
-                (psfc['lat']>=t['lat'].values.min())&
-                (psfc['lat']<=t['lat'].values.max())
-                )
+    #if(psfc['lon'].values[0] != t['lon'].values[0]):
+    mask1 = (
+            (psfc['lon']>=t['lon'].values.min())&
+            (psfc['lon']<=t['lon'].values.max())&
+            (psfc['lat']>=t['lat'].values.min())&
+            (psfc['lat']<=t['lat'].values.max())
+            )
 
-        t2,psfc_bdcst=xr.broadcast(t['data'],psfc['data'].where(mask1, drop=True))
-        mask2=(psfc_bdcst > -10000)
-        psfc_bdcst=psfc_bdcst.where(mask2, drop=True)
-    else:
-        psfc_bdcst=psfc['data'].copy
+    t2,psfc_bdcst=xr.broadcast(t['data'],psfc['data'].where(mask1, drop=True))
+    mask2=(psfc_bdcst > -10000)
+    psfc_bdcst=psfc_bdcst.where(mask2, drop=True)
+    #else:
+    #    psfc_bdcst=psfc['data'].copy
 
     resolution=u['lon'][1]-u['lon'][0]
     x,y=np.meshgrid(u['lon'], u['lat'])

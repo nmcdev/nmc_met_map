@@ -277,7 +277,13 @@ def add_china_map_2cartopy_public(ax, name='province', facecolor='none',
     names = {'nation': "NationalBorder", 'province': "Province",
              'county': "County", 'river': "hyd1_4l",
              'river_high': "hyd2_4l",
-             'coastline':'ne_10m_coastline'}
+             'coastline':'ne_10m_coastline',
+             'world':'world_line',
+             'Yangtze_basin':'Yangtze_line',
+             'MurrayDarling_basin':'MurrayDarling_complete',
+             'MISSISSIPPI_basin':'MISSISSIPPI_line',
+             'MEKONG_basin':'MEKONG_Line',
+             'Amazonas_basin':'Amazonas_Line'}
 
     # get shape filename
     shpfile = pkg_resources.resource_filename(
@@ -1192,7 +1198,7 @@ def cm_heavy_rain_nws(atime=24, pos=None):
     _colors = np.array(_colors)/255.0
     if pos is None:
         if atime == 24:
-            _pos = [251, 252, 253, 254, 800]
+            _pos = [10, 25, 50, 100, 250]
         elif atime == 6:
             _pos = [13, 25, 60, 120, 800]
         else:

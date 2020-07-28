@@ -14,6 +14,7 @@ import locale
 import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
+import nmc_met_graphics.cmap.cm as dk_ctables2
 import nmc_met_map.lib.gy_ctables as gy_ctables
 
 def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
@@ -45,12 +46,13 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
     if thetae is not None:
         x, y = np.meshgrid(thetae['lon'], thetae['lat'])
         z=np.squeeze(thetae['data'])
-        cmap=dk_ctables.cm_thetae()
-        cmap.set_under(color=[0,0,0,0],alpha=0.0)
-
+        #cmap=dk_ctables.cm_thetae()
+        cmap=dk_ctables2.ncl_cmaps('BlueDarkRed18')
+        #cmap.set_under(color=[0,0,0,0],alpha=0.0)
         plots['thetae'] = ax.pcolormesh(
             x, y, z, 
-            cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
+            cmap=cmap, zorder=1,transform=datacrs,alpha=0.5,
+            vmin=300,vmax=370)
 
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
@@ -93,7 +95,7 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    utl.add_cartopy_background(ax,name='RD')
+    #utl.add_cartopy_background(ax,name='RD')
 
     l, b, w, h = ax.get_position().bounds
 
@@ -118,7 +120,7 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
     # add color bar
     if(thetae != None):
         cax=plt.axes([l,b-0.04,w,.02])
-        cb = plt.colorbar(plots['thetae'], cax=cax, orientation='horizontal')
+        cb = plt.colorbar(plots['thetae'], cax=cax, orientation='horizontal', extend='both')
         cb.ax.tick_params(labelsize='x-large')                      
         cb.set_label('Theta-E (K)',size=20)
 

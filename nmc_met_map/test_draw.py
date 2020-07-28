@@ -15,6 +15,20 @@ import nmc_met_map.observation as draw_observation
 import nmc_met_map.synoptic_verification as draw_synoptic_verification
 import nmc_met_map.observation2 as draw_observation2
 
+
+draw_crossection.Crosssection_Wind_Theta_e_absv(model='ECMWF',data_source='CIMISS',lw_ratio=[16,9])
+draw_crossection.Crosssection_Wind_Temp_RH(model='ECMWF',fhour=60,lw_ratio=[25,9],
+    st_point=[43.5,111.5], ed_point=[33,125.0])
+
+draw_isentropic.isentropic_uv(data_source='CIMISS',fhour=72)
+draw_observation2.MICAPS.CLDAS.cumulative_precip_and_rain_days(
+    endtime='20072308', cu_ndays=7, rn_ndays=7,area='全国',
+    south_China_sea=True,city=False)
+
+draw_elements.mslp_gust10m_uv10m(model='ECMWF',area='全国',data_source='CIMISS',t_gap=6)
+draw_synoptic.gh_uv_r6(initTime='20062620',model='ECMWF',data_source='CIMISS',fhour=12)
+draw_synoptic.PV_Div_uv(data_source='CIMISS',map_ratio=12/10)
+
 draw_observation.IR_Sounding_GeopotentialHeight(Sounding_time='2020062720',
     HGT_initTime='20062720',IR_time='20200628060000',fhour=12,zoom_ratio=20,map_ratio=4/3,
     south_China_sea=True,Channel='C009')
@@ -25,11 +39,6 @@ draw_observation.IR_Sounding_GeopotentialHeight(Sounding_time='2020062720',
     map_ratio=4/3,zoom_ratio=25,cntr_pnt=[110,30],city=False,
     south_China_sea=True,area = '全国',data_source='MICAPS',Channel='C009')
 
-draw_observation2.MICAPS.CLDAS.cumulative_precip_and_rain_days(
-    endtime='20062808', cu_ndays=5, rn_ndays=7,
-    map_ratio=16/9,zoom_ratio=8,cntr_pnt=[111,30],
-    south_China_sea=True,area = '全国',city=False)
-    
 draw_crossection.Crosssection_Wind_Temp_RH(model='ECMWF',fhour=60,lw_ratio=[25,9],data_source='CIMISS')
 
 draw_QPF.cumulative_precip_and_rain_days(endtime='20060620',
@@ -127,7 +136,6 @@ draw_crossection.Crosssection_Wind_Temp_RH(model='ECMWF',fhour=60,lw_ratio=[16,9
 
 draw_sta.sta_SkewT()
 
-draw_elements.mslp_gust10m_uv10m(model='ECMWF',area='全国',data_source='CIMISS',t_gap=6)
 draw_elements.mslp_gust10m(model='ECMWF',day_back=1,data_source='CIMISS',t_gap=3,city=True)
 draw_elements.T2m_mslp_uv10m(model='ECMWF',data_source='CIMISS')
 
@@ -154,10 +162,8 @@ draw_crossection.Crosssection_Wind_Theta_e_Qv(model='GRAPES_GFS',day_back=1,lw_r
 draw_crossection.Time_Crossection_rh_uv_Temp(model='GRAPES_GFS',t_range=[0,84],levels=[1000,950,925,900,850,800,700,600,500],lw_ratio=[25,9],data_source='CIMISS')
 
 draw_crossection.Time_Crossection_rh_uv_t(data_source='CIMISS',lw_ratio=[16,9])
-draw_crossection.Crosssection_Wind_Theta_e_absv(model='ECMWF',data_source='CIMISS',lw_ratio=[16,9])
 draw_crossection.Crosssection_Wind_Theta_e_RH(model='GRAPES_GFS',data_source='CIMISS')
 draw_synthetical.Miller_Composite_Chart(map_ratio=8/5)
-draw_isentropic.isentropic_uv(data_source='CIMISS',fhour=72)
 #draw_elements.low_level_wind(model='ECMWF',day_back=1,data_source='CIMISS')
 draw_QPF.mslp_rain_snow(model='ECMWF',fhour=24,data_source='CIMISS')
 draw_QPF.gh_rain(model='GRAPES_GFS')
@@ -168,8 +174,7 @@ draw_moisture.gh_uv_spfh(model='ECMWF',data_source='CIMISS')
 draw_moisture.gh_uv_rh(model='ECMWF',data_source='CIMISS',map_ratio=12/10)
 draw_moisture.gh_uv_pwat(model='ECMWF',data_source='CIMISS',map_ratio=12/10)
 draw_dynamic.gh_uv_VVEL(model='ECMWF',data_source='CIMISS',map_ratio=12/10)
-draw_synoptic.PV_Div_uv(data_source='CIMISS',map_ratio=12/10)
-draw_synoptic.gh_uv_r6(initTime='20031608',model='GRAPES_GFS',data_source='CIMISS',fhour=12)
+
 draw_synoptic.gh_uv_wsp(model='ECMWF',map_ratio=12/9,output_dir='L:/Download/',data_source='CIMISS')
 draw_synoptic.gh_uv_mslp(initTime='20031608',model='ECMWF',map_ratio=15/9,city=True,area='华北')
 ###############################-重新梳理

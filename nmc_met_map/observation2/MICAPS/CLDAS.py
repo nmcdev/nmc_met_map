@@ -22,7 +22,7 @@ import math
 from nmc_met_map.graphics import observation_graphics
 
 def cumulative_precip_and_rain_days(endtime=None, cu_ndays=5, rn_ndays=7,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=19/11,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = None,city=False,output_dir=None,
     Global=False):
 
@@ -47,7 +47,8 @@ def cumulative_precip_and_rain_days(endtime=None, cu_ndays=5, rn_ndays=7,
 
 # set map extent
     if(area != None):
-        south_China_sea=False
+        if(area != '全国'):
+            south_China_sea=False
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
     map_extent=[0,0,0,0]

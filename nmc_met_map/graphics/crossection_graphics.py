@@ -14,11 +14,14 @@ import locale
 import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
+import nmc_met_graphics.cmap.cm as dk_ctables2
 import matplotlib.colors as col
 import matplotlib.cm as cm
     
 def draw_Crosssection_Wind_Theta_e_absv(
-                    cross_absv3d=None, cross_Theta_e=None, cross_u=None,cross_v=None,gh=None,
+                    cross_absv3d=None, cross_Theta_e=None, cross_u=None,
+                    cross_v=None,cross_terrain=None,
+                    gh=None,
                     h_pos=None,st_point=None,ed_point=None,
                     levels=None,map_extent=(50, 150, 0, 65),lw_ratio=None,
                     output_dir=None):
@@ -33,7 +36,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
     fig = plt.figure(1, figsize=(lw_ratio[0], lw_ratio[1]))
     ax = plt.axes()
     absv_contour = ax.contourf(cross_absv3d['lon'], cross_absv3d['level'], cross_absv3d['data']*100000,
-                            levels=range(-60, 60, 1), cmap=plt.cm.RdBu_r)
+                            levels=range(-60, 60, 1), cmap=dk_ctables2.ncl_cmaps('hotcold_18lev'))
     absv_colorbar = fig.colorbar(absv_contour)
 
     # Plot potential temperature using contour, with some custom labeling
@@ -48,6 +51,15 @@ def draw_Crosssection_Wind_Theta_e_absv(
     ax.barbs(cross_u['lon'][wind_slc_horz], cross_u['level'][wind_slc_vert],
             cross_u['t_wind'][wind_slc_vert, wind_slc_horz]*2.5,    
             cross_v['n_wind'][wind_slc_vert, wind_slc_horz]*2.5, color='k')
+
+    startcolor = '#8B4513'   #棕色
+    endcolor='#DAC2AD' #绿 
+    cmap2 = col.LinearSegmentedColormap.from_list('own3',[endcolor,startcolor])
+    # extra arguments are N=256, gamma=1.0
+    cm.register_cmap(cmap=cmap2)
+    terrain_contour = ax.contourf(cross_terrain['lon'], cross_terrain['level'], cross_terrain.values,
+                            levels=np.arange(0, 500, 1), cmap=cm.get_cmap('own3'),zorder=100)
+
     # Adjust the y-axis to be logarithmic
     ax.set_yscale('symlog')
     ax.set_yticklabels(np.arange(levels[0], levels[-1], -100))
@@ -479,7 +491,7 @@ def draw_Crosssection_Wind_Temp_RH(
     # extra arguments are N=256, gamma=1.0
     cm.register_cmap(cmap=cmap2)
     terrain_contour = ax.contourf(cross_terrain['lon'], cross_terrain['level'], cross_terrain.values,
-                            levels=np.arange(0, 500, 1), cmap=cm.get_cmap('own3'),zorder=100)            
+                            levels=np.arange(0, 500, 1), cmap=cm.get_cmap('own3'),zorder=100)
     # Adjust the y-axis to be logarithmic
     ax.set_yscale('symlog')
     ax.set_yticklabels(np.arange(levels[0], levels[-1], -100))

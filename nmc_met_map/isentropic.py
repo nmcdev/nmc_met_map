@@ -131,7 +131,7 @@ def isentropic_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',data_source='
     isentrh1=t.where(mask1 ,drop=True)
     isentrh1['data'].values=[[np.array(isentrh)[0,idx_y1[0][0]:(idx_y1[0][-1]+1),idx_x1[0][0]:(idx_x1[0][-1]+1)]]]
     isentrh1.attrs['model']=model
-    isentrh1['level'].values=[np.array(isentlev)]
+    isentrh1=isentrh1.assign_coords(level=[np.array(isentlev)])
 
     isentu1=isentrh1.copy()
     isentu1['data'].values=[[np.array(isentu)[0,idx_y1[0][0]:(idx_y1[0][-1]+1),idx_x1[0][0]:(idx_x1[0][-1]+1)]]]

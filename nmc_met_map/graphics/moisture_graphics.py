@@ -19,6 +19,7 @@ import locale
 import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
+import nmc_met_graphics.cmap.cm as dk_ctables2
 import nmc_met_map.lib.gy_ctables as gy_ctables
 import os
 import pkg_resources
@@ -73,11 +74,12 @@ def draw_gh_uv_pwat(gh=None, uv=None, pwat=None,
         x, y = np.meshgrid(pwat['lon'], pwat['lat'])
         z=np.squeeze(pwat['data'])
         pos=np.concatenate((np.arange(25), np.arange(26, 84, 2)))
-        cmap,norm=dk_ctables.cm_precipitable_water_nws(pos=pos)
+        # cmap,norm=dk_ctables.cm_precipitable_water_nws(pos=pos)
+        cmap=dk_ctables2.ncl_cmaps('MPL_GnBu')
         cmap.set_under(color=[0,0,0,0],alpha=0.0)
 
         plots['pwat'] = ax.pcolormesh(
-            x, y, z, norm=norm,
+            x, y, z, #norm=norm,
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
 
     # draw -hPa wind bards
@@ -135,7 +137,7 @@ def draw_gh_uv_pwat(gh=None, uv=None, pwat=None,
         cb = plt.colorbar(plots['pwat'], cax=cax, orientation='horizontal',
                       extend='max',extendrect=False)
         cb.ax.tick_params(labelsize='x-large')                      
-        cb.set_label('(%)',size=20)
+        cb.set_label('(mm)',size=20)
 
     # add south China sea
     if south_China_sea:

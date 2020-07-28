@@ -26,12 +26,17 @@ import scipy.ndimage as ndimage
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import sys
 import nmc_met_graphics.cmap.ctables as dk_ctables
+import nmc_met_graphics.cmap.cm as dk_ctables2
 import nmc_met_graphics.cmap.wrf as wrf_ctables
 import nmc_met_map.lib.utility as utl
 from metpy.plots import add_metpy_logo, add_timestamp, colortables
 import nmc_met_graphics.mask as dk_mask
 import os
 from scipy.ndimage import gaussian_filter
+import matplotlib.patheffects as path_effects
+import cartopy.io.img_tiles as cimg
+from matplotlib.font_manager import FontProperties
+import matplotlib.patches as mpatches
 
 def OBS_Sounding_GeopotentialHeight(IR=None,Sounding=None,HGT=None,
         map_extent=None,city=True,south_China_sea=True,output_dir=None,
@@ -203,13 +208,13 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
 # set figure
     plt.figure(figsize=(16,9))
 
-    plotcrs = ccrs.AlbersEqualArea(central_latitude=(map_extent[2]+map_extent[3])/2., 
-        central_longitude=(map_extent[0]+map_extent[1])/2., standard_parallels=[30., 60.])
+    # plotcrs = ccrs.AlbersEqualArea(central_latitude=(map_extent[2]+map_extent[3])/2., 
+    #     central_longitude=(map_extent[0]+map_extent[1])/2., standard_parallels=[30., 60.])
     plotcrs=ccrs.PlateCarree()
     datacrs = ccrs.PlateCarree()
 
     ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
-    map_extent2=map_extent
+    ax.set_extent(map_extent, crs=datacrs)
     #map_extent2=utl.adjust_map_ratio(ax,map_extent=map_extent,datacrs=datacrs)
 
     # define return plots
@@ -225,10 +230,9 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
     # draw -hPa geopotential height
     if days_rain is not None:
         x, y = np.meshgrid(days_rain['lon'], days_rain['lat'])
-        clevs_days = np.arange(4,np.nanmax(days_rain.values)+1)
+        clevs_days = np.arange(2,np.nanmax(days_rain.values)+1)
         z = gaussian_filter(np.squeeze(days_rain.values),5)
         #z=z*mask
-        z[z<0]=np.nan
         plots['days_rain'] = ax.contour(
             x, y, z, clevs_days, colors='black',
             linewidths=2, transform=datacrs, zorder=3)
@@ -237,19 +241,23 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
     if cu_rain is not None:
         x, y = np.meshgrid(cu_rain['lon'], cu_rain['lat'])
         z=np.squeeze(cu_rain.values)
-        #cmap,norm=dk_ctables.cm_qpf_nws(atime=24)
-        #cmap,norm=dk_ctables.cm_precipitation_nws(atime=24)
-        #cmap,norm=dk_ctables.cm_rain_nws(atime=24)
-        cmap,norm=utl.cm_heavy_rain_nws(atime=24)
-        cmap.set_under(color=[0,0,0,0],alpha=0.0)
-        #z=z*mask
-        z[z<25]=np.nan
-        plots['rain'] = ax.contourf(x,y,z,clevs=norm.boundaries,
-            cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
-        #plots['rain'] = ax.pcolormesh(
-        #    x,y,z, norm=norm,
-        #    cmap=cmap, zorder=1,transform=datacrs,alpha=0.2)
-        clip_rain=utl.gy_China_maskout(plots['rain'],ax)            
+        clevs = [50, 100, 200, 300, 400, 500, 600]
+        colors = ['#6ab4f1', '#0001f6', '#f405ee', '#ffa900', '#fc6408', '#e80000', '#9a0001']
+        linewidths = [1, 1, 2, 2, 3, 4, 4]
+        cmap, norm = mpl.colors.from_levels_and_colors(clevs, colors, extend='max')
+        plots['rain']=ax.contourf(
+            x, y, z, clevs, norm=norm,
+            cmap=cmap, transform=datacrs, extend='max', alpha=0.1)
+        plots['rain2']=ax.contour(
+            x, y, z, clevs, norm=norm,
+            cmap=cmap, transform=datacrs, linewidths=linewidths)
+        plt.setp(plots['rain2'].collections, path_effects=[
+            path_effects.SimpleLineShadow(), path_effects.Normal()])
+
+        # plots['rain'] = ax.contourf(x,y,z,
+        #     cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
+        clip_rain=utl.gy_China_maskout(plots['rain'],ax)
+        clip_rain2=utl.gy_China_maskout(plots['rain2'],ax)
 
 #additional information
     plt.title('过去'+str(int(days_rain.attrs['rn_ndays']))+'天降水日数, '+
@@ -267,6 +275,8 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
         utl.add_china_map_2cartopy_public(
             ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=3,alpha=0.5)
 
+    stamen_terrain = cimg.Stamen('terrain-background')
+    ax.add_image(stamen_terrain, 6)
 
     # grid lines
     gl = ax.gridlines(
@@ -275,6 +285,8 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
     #utl.add_cartopy_background(ax,name='RD')
+    ax.add_feature(cfeature.LAND,color='#F5E19F')
+    ax.add_feature(cfeature.OCEAN)
 
     l, b, w, h = ax.get_position().bounds
 
@@ -295,12 +307,17 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
     plt.text(1.5, 5.5,'观测截止时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(1.5, 0.5,'www.nmc.cn',size=18)
 
-    # add color bar
-    if(cu_rain is not None):
-        cax=plt.axes([l,b-0.04,w,.02])
-        cb = plt.colorbar(plots['rain'], cax=cax, orientation='horizontal')
-        cb.ax.tick_params(labelsize='x-large')                      
-        cb.set_label('累积降水量 (mm)',size=20)
+    # # add color bar
+    # if(cu_rain is not None):
+    #     cax=plt.axes([l,b-0.04,w,.02])
+    #     cb = plt.colorbar(plots['rain2'], cax=cax, orientation='horizontal')
+    #     cb.ax.tick_params(labelsize='x-large')                      
+    #     cb.set_label('累积降水量 (mm)',size=20)
+
+    font = FontProperties(family='Microsoft YaHei', size=16)
+    ax.legend([mpatches.Patch(color=b) for b in colors],[
+        '50~100 毫米', '100~200 毫米', '200-300 毫米', '300~400 毫米', '400~500 毫米', '500~600 毫米', '>=600毫米'],
+        prop=font,loc='lower left')
 
     # add south China sea
     if south_China_sea:
@@ -310,7 +327,7 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
     #if(map_extent2[1]-map_extent2[0] < 25):
     #    small_city=True
     if city:
-        utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=2,size=13,small_city=small_city)
+        utl.add_city_on_map(ax,map_extent=map_extent,transform=datacrs,zorder=2,size=13,small_city=small_city)
 
     utl.add_logo_extra_in_axes(pos=[l-0.01,b+h-0.05,.06,.05],which='nmc', size='Xlarge')
 
