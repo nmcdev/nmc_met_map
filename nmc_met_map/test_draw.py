@@ -14,20 +14,115 @@ import nmc_met_map.local_scale as draw_local_scale
 import nmc_met_map.observation as draw_observation
 import nmc_met_map.synoptic_verification as draw_synoptic_verification
 import nmc_met_map.observation2 as draw_observation2
+import nmc_met_map.graphics2.pallete_set as ps
 
+input_file='L:/Temp/test.h5'
+import pandas as pd
+test_file=pd.read_hdf(input_file)
+from nmc_met_map.sta import sta_graphics
+import numpy as np
+sta_graphics.draw_AQI_points(test_file,AQI_scatter_kwargs={'levels':np.arange(0,200)},output_dir='L:/Temp/')
+
+draw_elements.T2m_mx24(model='中央气象台中短期指导',data_source ='MICAPS',map_ratio=9/9,city=True,area='华北')
+
+output_dir='L:/RoutineJob/20200827/'
+
+extra_info={
+    'output_head_name':'SEVP_NMC_RFFC_SCMOC_EME_A01_LNO_P9_',
+    'output_tail_name':'24003',
+    'point_name':'纪念馆'}
+draw_sta.Station_Synthetical_Forecast_From_Cassandra(
+    model='中央气象台中短期指导',
+    points={'lon':[116.225], 'lat':[39.8522]},
+    t_range=[0,240],
+    drw_thr=False,
+    output_dir=output_dir,extra_info=extra_info
+    )
+
+
+extra_info={
+    'output_head_name':'SEVP_NMC_RFFC_SCMOC_EME_A02_LNO_P9_',
+    'output_tail_name':'24003',
+    'point_name':'会场'}
+draw_sta.Station_Synthetical_Forecast_From_Cassandra(
+    model='中央气象台中短期指导',
+    points={'lon':[116.3820], 'lat':[40.0007]},
+    t_range=[0,240],
+    drw_thr=False,
+    output_dir=output_dir,extra_info=extra_info
+    ) 
+
+draw_QPF.cumulated_precip_evo(output_dir='L:/新建文件夹/',
+    initTime='20082508',t_range=[30,60],t_gap=6,map_ratio=9/14,
+    zoom_ratio=15, cntr_pnt=[120,39],
+    data_source='MICAPS')
+
+for i in range(24,96,6):
+    draw_QPF.cumulated_precip(output_dir='L:/新建文件夹/GRAPES/',
+        initTime='20082520',t_range=[18,i+1],t_gap=6,map_ratio=16/14,
+        zoom_ratio=6, cntr_pnt=[122,40.5],model='GRAPES_GFS',
+        data_source='MICAPS')#加等值线、白边突显、固定4个时次
+
+    draw_QPF.cumulated_precip(output_dir='L:/新建文件夹/EC/',
+        initTime='20082520',t_range=[18,i+1],t_gap=6,map_ratio=16/14,
+        zoom_ratio=6, cntr_pnt=[122,40.5],
+        data_source='MICAPS')#加等值线、白边突显、固定4个时次
+
+
+draw_sta2.MICAPS.SCMOC.point_uv_gust_tmp_rh_rn_fcst(
+            t_range=[24,84],
+            t_gap=3,
+            points={'lon':[120], 'lat':[50]},
+            initTime=None,day_back=0,
+            extra_info={
+                'output_head_name':' ',
+                'output_tail_name':' ',
+                'point_name':'test'}
+                )
+
+# draw_thermal.TMP850_extreme_uv()
+draw_observation.CREF_Sounding_GeopotentialHeight(CREF_time='20082008',
+    HGT_initTime='20081920',Sounding_time='20082008',fhour=12,zoom_ratio=20,map_ratio=4/3,area='全国')
+
+draw_thermal.TMP850_anomaly_uv()
+
+draw_synoptic.gh500_anomaly_uv()
+
+draw_synoptic.gh_uv_wsp(model='GRAPES_GFS',initTime='20081220',fhour=0,map_ratio=12/9,area='华北',gh_lev=850,uv_lev=850)
+
+draw_dynamic.gh_uv_VVEL(data_source='CIMISS',model='ECMWF',initTime='20081120',
+                        fhour=24,map_ratio=12/9,gh_lev=700,uvw_lev=850)
+
+draw_isentropic.isentropic_uv(initTime='20081220',fhour=0,map_ratio=12/9,area='华北',isentlev=360,city=True)
+
+draw_crossection.Crosssection_Wind_Temp_RH(model='ECMWF',initTime='20081220',fhour=0,
+                                               lw_ratio=[25,9],map_extent=[112,123,34,42],
+                                                st_point=[41.5,116.6], ed_point=[36.8,117.0],
+                                               levels=[1000, 950, 925, 900, 850, 800, 700])
+
+draw_synoptic.PV_Div_uv(data_source='CIMISS',map_ratio=12/10)
+
+draw_QPF.gh_rain(model='GRAPES_3KM',initTime='20081020',fhour=60,map_ratio=12/9)
+
+draw_elements2.MICAPS.SCMOC.dT2m_mx24(initTime='20072908',fhour=48,area='全国',city=True)
+
+draw_synoptic.gh_uv_mslp(model='ECMWF',city=True,area='全国',fhour=12)
+
+draw_observation2.MICAPS.CLDAS.Tmx2m24(
+    endtime='20072908', cu_ndays=7,area='全国',
+    south_China_sea=True,city=True)
 
 draw_crossection.Crosssection_Wind_Theta_e_absv(model='ECMWF',data_source='CIMISS',lw_ratio=[16,9])
 draw_crossection.Crosssection_Wind_Temp_RH(model='ECMWF',fhour=60,lw_ratio=[25,9],
     st_point=[43.5,111.5], ed_point=[33,125.0])
 
-draw_isentropic.isentropic_uv(data_source='CIMISS',fhour=72)
+
 draw_observation2.MICAPS.CLDAS.cumulative_precip_and_rain_days(
     endtime='20072308', cu_ndays=7, rn_ndays=7,area='全国',
     south_China_sea=True,city=False)
 
 draw_elements.mslp_gust10m_uv10m(model='ECMWF',area='全国',data_source='CIMISS',t_gap=6)
 draw_synoptic.gh_uv_r6(initTime='20062620',model='ECMWF',data_source='CIMISS',fhour=12)
-draw_synoptic.PV_Div_uv(data_source='CIMISS',map_ratio=12/10)
 
 draw_observation.IR_Sounding_GeopotentialHeight(Sounding_time='2020062720',
     HGT_initTime='20062720',IR_time='20200628060000',fhour=12,zoom_ratio=20,map_ratio=4/3,
@@ -116,21 +211,6 @@ draw_sta2.MICAPS.ECMWF_ENSEMBLE.point_fcst_tmp_according_to_3D_field_box_line(
                 )
 
 draw_QPF.Rain_evo(initTime='20051908',data_source='CIMISS',t_range=[6,36],area='江南',fcs_lvl=13,t_gap=6,map_ratio=16/9)#加等值线、白边突显、固定4个时次
-draw_QPF.cumulated_precip_evo(output_dir='L:/新建文件夹/',
-    initTime='20051908',t_range=[6,36],t_gap=6,map_ratio=16/9,
-    data_source='MICAPS')#加等值线、白边突显、固定4个时次
-draw_sta2.MICAPS.SCMOC.point_uv_gust_tmp_rh_rn_fcst(
-            t_range=[24,84],
-            t_gap=3,
-            points={'lon':[120], 'lat':[50]},
-            initTime=None,day_back=0,
-            extra_info={
-                'output_head_name':' ',
-                'output_tail_name':' ',
-                'point_name':'test'}
-                )
-draw_elements.T2m_mx24(model='中央气象台中短期指导',data_source ='MICAPS',
-        zoom_ratio=5, cntr_pnt=[111,30],map_ratio=20/9,city=True)
 
 draw_crossection.Crosssection_Wind_Temp_RH(model='ECMWF',fhour=60,lw_ratio=[16,9],data_source='CIMISS')
 
@@ -166,17 +246,14 @@ draw_crossection.Crosssection_Wind_Theta_e_RH(model='GRAPES_GFS',data_source='CI
 draw_synthetical.Miller_Composite_Chart(map_ratio=8/5)
 #draw_elements.low_level_wind(model='ECMWF',day_back=1,data_source='CIMISS')
 draw_QPF.mslp_rain_snow(model='ECMWF',fhour=24,data_source='CIMISS')
-draw_QPF.gh_rain(model='GRAPES_GFS')
 draw_thermal.gh_uv_tmp(model='GRAPES_GFS',map_ratio=5/3,data_source='CIMISS')
 draw_thermal.gh_uv_thetae(model='GRAPES_GFS',data_source='CIMISS',map_ratio=4/3)
 draw_moisture.gh_uv_wvfl(model='GRAPES_GFS')
 draw_moisture.gh_uv_spfh(model='ECMWF',data_source='CIMISS')
 draw_moisture.gh_uv_rh(model='ECMWF',data_source='CIMISS',map_ratio=12/10)
 draw_moisture.gh_uv_pwat(model='ECMWF',data_source='CIMISS',map_ratio=12/10)
-draw_dynamic.gh_uv_VVEL(model='ECMWF',data_source='CIMISS',map_ratio=12/10)
 
 draw_synoptic.gh_uv_wsp(model='ECMWF',map_ratio=12/9,output_dir='L:/Download/',data_source='CIMISS')
-draw_synoptic.gh_uv_mslp(initTime='20031608',model='ECMWF',map_ratio=15/9,city=True,area='华北')
 ###############################-重新梳理
 
 draw_sta.Station_Synthetical_Forecast_From_Cassandra(model='GRAPES_GFS',points={'lon':[113.59], 'lat':[22.14]},t_range=[0,84],drw_thr=True)

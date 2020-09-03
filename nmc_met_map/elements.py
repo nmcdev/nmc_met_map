@@ -12,6 +12,7 @@ from metpy.units import units
 import metpy.calc as mpcalc
 import xarray as xr
 import pkg_resources
+import nmc_met_map.product.diagnostic.elements.horizontal.SCMOC as draw_SCMOC
 
 def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
@@ -82,9 +83,8 @@ def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象�
         output_dir=output_dir,Global=Global)
 
 def T2m_mx24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
-    south_China_sea=True,area = None,city=False,output_dir=None,
-    Global=False):
+    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',area=None,
+    **kargws):
 
 # prepare data
     if(data_source =='MICAPS'):    
@@ -153,15 +153,18 @@ def T2m_mx24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
     Tmx_2m=Tmx_2m.where(mask1,drop=True)
 
 #- to solve the problem of labels on all the contours
+    Tmx2=xr.DataArray(np.squeeze(Tmx_2m['data'].values,axis=0),name='data',
+                    coords={'time':('time',[Tmx_2m['time'].values[0]]),
+                            'fhour':('time',[fhour]),
+                            'lat':('lat',Tmx_2m['lat'].values),
+                            'lon':('lon',Tmx_2m['lon'].values)
+                            },
+                    dims=('time','lat','lon'),
+                    attrs={'model_name':'中央气象台中短期指导',
+                           'var_name':'2米最高温度',
+                           'vhours':24})
 
-    Tmx_2m.attrs['model']=model
-    Tmx_2m.attrs['title']='2米最高温度'
-
-    elements_graphics.draw_T_2m(
-        T_2m=Tmx_2m,T_type='T_mx',
-        map_extent=map_extent, regrid_shape=20,
-        city=city,south_China_sea=south_China_sea,
-        output_dir=output_dir,Global=Global)
+    draw_SCMOC.draw_TMP2(TMP2=Tmx2,map_extent=map_extent,**kargws)
 
 
 def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',

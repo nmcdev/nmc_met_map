@@ -12,6 +12,7 @@ import nmc_met_map.lib.utility as utl
 from metpy.units import units
 import metpy.calc as mpcalc
 import xarray as xr
+from scipy.ndimage import gaussian_filter
 
 def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uvw_lev=850,
@@ -28,7 +29,8 @@ def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=gh_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=uvw_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=uvw_lev),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VVEL',lvl=uvw_lev)]
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VVEL',lvl=uvw_lev),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
         except KeyError:
             raise ValueError('Can not find all directories needed')
 
@@ -52,6 +54,17 @@ def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
             return
         w = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
         
+        psfc = MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
+        
+        if(model == 'GRAPES_GFS'):
+            data_dir2=utl.Cassandra_dir(data_type='high',data_source=model,var_name='SPFH',lvl=uvw_lev)
+            data_dir3=utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=uvw_lev)
+            SPFH = MICAPS_IO.get_model_grid(data_dir2, filename=filename)
+            TMP = MICAPS_IO.get_model_grid(data_dir3, filename=filename)
+            temp=mpcalc.vertical_velocity_pressure((w['data'].values/100)*units('m/s'),
+                        (np.zeros_like(w['data'].values)+uvw_lev)*units.hPa,
+                        TMP['data'].values*units.degC, mixing=SPFH['data'].values*units['g/kg']).magnitude*100.
+            w['data'].values=temp
         init_time = gh.coords['forecast_reference_time'].values
 
     if(data_source =='CIMISS'):
@@ -93,39 +106,43 @@ def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
             if w is None:
                 return
             w['data'].values=w['data'].values*100
+
+            psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
         except KeyError:
             raise ValueError('Can not find all data needed')
     # prepare data
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
+    map_extent=utl.get_map_extent(cntr_pnt, zoom_ratio, map_ratio)
 
-    map_extent=[0,0,0,0]
-    map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
-    map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
-    map_extent[2]=cntr_pnt[1]-zoom_ratio*1
-    map_extent[3]=cntr_pnt[1]+zoom_ratio*1
+    w['data'].values=gaussian_filter(w['data'].values,5)
 
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
+
 
 #+ to solve the problem of labels on all the contours
 
-    mask1 = (gh['lon'] > map_extent[0]-delt_x) & (gh['lon'] < map_extent[1]+delt_x) & (gh['lat'] > map_extent[2]-delt_y) & (gh['lat'] < map_extent[3]+delt_y)
 
-    mask2 = (u['lon'] > map_extent[0]-delt_x) & (u['lon'] < map_extent[1]+delt_x) & (u['lat'] > map_extent[2]-delt_y) & (u['lat'] < map_extent[3]+delt_y)
+    gh=utl.mask_terrian(gh_lev,psfc,gh)
+    u=utl.mask_terrian(uvw_lev,psfc,u)
+    v=utl.mask_terrian(uvw_lev,psfc,v)
+    w=utl.mask_terrian(uvw_lev,psfc,w)
 
-    mask3 = (w['lon'] > map_extent[0]-delt_x) & (w['lon'] < map_extent[1]+delt_x) & (w['lat'] > map_extent[2]-delt_y) & (w['lat'] < map_extent[3]+delt_y)
+    delt_x=(map_extent[1]-map_extent[0])*0.2
+    delt_y=(map_extent[3]-map_extent[2])*0.1
+    gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
+    u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)
+    v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
+    VVEL=utl.cut_xrdata(map_extent, w, delt_x=delt_x, delt_y=delt_y)
 
-    gh=gh.where(mask1,drop=True)
     gh.attrs['model']=model
-    u=u.where(mask2,drop=True)
-    v=v.where(mask2,drop=True)
-    VVEL=w.where(mask3,drop=True)
+
     VVEL.attrs['units']='0.01Pa.s-1'
     uv=xr.merge([u.rename({'data': 'u'}),v.rename({'data': 'v'})])
 #- to solve the problem of labels on all the contours
-
     dynamic_graphics.draw_gh_uv_VVEL(
         VVEL=VVEL, gh=gh, uv=uv,
         map_extent=map_extent, regrid_shape=20,

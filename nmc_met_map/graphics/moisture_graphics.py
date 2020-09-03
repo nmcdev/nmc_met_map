@@ -74,12 +74,12 @@ def draw_gh_uv_pwat(gh=None, uv=None, pwat=None,
         x, y = np.meshgrid(pwat['lon'], pwat['lat'])
         z=np.squeeze(pwat['data'])
         pos=np.concatenate((np.arange(25), np.arange(26, 84, 2)))
-        # cmap,norm=dk_ctables.cm_precipitable_water_nws(pos=pos)
-        cmap=dk_ctables2.ncl_cmaps('MPL_GnBu')
+        cmap,norm=dk_ctables.cm_precipitable_water_nws(pos=pos)
+        #cmap=dk_ctables2.ncl_cmaps('MPL_GnBu')
         cmap.set_under(color=[0,0,0,0],alpha=0.0)
 
         plots['pwat'] = ax.pcolormesh(
-            x, y, z, #norm=norm,
+            x, y, z, norm=norm,
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
 
     # draw -hPa wind bards

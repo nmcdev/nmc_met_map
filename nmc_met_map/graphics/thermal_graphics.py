@@ -16,6 +16,7 @@ from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
 import nmc_met_graphics.cmap.cm as dk_ctables2
 import nmc_met_map.lib.gy_ctables as gy_ctables
+import nmc_met_map.graphics2 as GF
 
 def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
                     map_extent=(50, 150, 0, 65),
@@ -271,9 +272,77 @@ def draw_gh_uv_tmp(gh=None, uv=None, tmp=None,
 
 # show figure
     if(output_dir != None):
-        plt.savefig(output_dir+'位势高度场_风场_温度_预报_'+
+        plt.savefig(output_dir+'温度异常_风场_温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()                        
+
+def draw_gh_uv_tmp_anm(tmp_anm=None, uv=None, tmp=None,
+                    map_extent=(50, 150, 0, 65),
+                    regrid_shape=20,
+                    add_china=True,city=True,south_China_sea=True,
+                    output_dir=None,**kargws):
+
+    initTime = pd.to_datetime(tmp.coords['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime()
+    fhour = int(tmp['forecast_period'].values[0])
+    fcstTime = initTime + timedelta(hours=fhour)
+    title = '['+tmp.attrs['model']+'] '+str(int(uv['level'].values[0]))+'hPa 风场, '+str(int(tmp['level'].values[0]))+'hPa 温度及异常'
+    forcast_info = '起报时间: {0:%Y}年{0:%m}月{0:%d}日{0:%H}时\n预报时间: {1:%Y}年{1:%m}月{1:%d}日{1:%H}时\n预报时效: {2}小时\nwww.nmc.cn'.format(initTime, fcstTime, fhour)
+    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete((18, 9),map_extent=map_extent, title=title, forcast_info=forcast_info,info_zorder=4,
+                                             add_china=True, add_city=city, add_background=True, south_China_sea=south_China_sea)
+
+    tmp_anm_pcolormesh=GF.draw_method.anm_pcolormesh(ax, tmp_anm['lon'].values, tmp_anm['lat'].values, np.squeeze(tmp_anm['data'].values),vmin=-25,vmax=25,zorder=1)
+    tmp_contour=GF.draw_method.tmp_contour(ax,tmp['lon'].values,tmp['lat'].values,np.squeeze(tmp['data'].values),zorder=2)
+    tmp_contour=GF.draw_method.tmp_contour(ax,tmp['lon'].values,tmp['lat'].values,np.squeeze(tmp['data'].values),levels=[0],linewidths=4,zorder=2)
+    tmp_contour=GF.draw_method.tmp_contour(ax,tmp['lon'].values,tmp['lat'].values,np.squeeze(tmp['data'].values),levels=np.arange(-48,0,4),zorder=2,linestyle='--')
+
+    wind_barbs = GF.draw_method.wind_barbs(ax,tmp_anm['lon'].values, tmp_anm['lat'].values, np.squeeze(uv['u'].values), np.squeeze(uv['v'].values),zorder=3)
+
+    l, b, w, h = ax.get_position().bounds
+    # add color bar
+    cax=plt.axes([l,b-0.04,w,.02])
+    cb = plt.colorbar(tmp_anm_pcolormesh, cax=cax, orientation='horizontal',extend='both')
+    cb.ax.tick_params(labelsize='x-large')                      
+    cb.set_label('Temperature Anomaly ('+u'°C'+')',size=20)
+
+    if output_dir:
+        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测|分析'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(tmp['data'].attrs['vhours'])))
+        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+    else:
+        plt.show()
+
+def draw_gh_uv_tmp_extr(tmp_extr=None, uv=None, tmp=None,
+                    map_extent=(50, 150, 0, 65),
+                    regrid_shape=20,
+                    add_china=True,city=True,south_China_sea=True,
+                    output_dir=None,**kargws):
+
+    initTime = pd.to_datetime(tmp.coords['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime()
+    fhour = int(tmp['forecast_period'].values[0])
+    fcstTime = initTime + timedelta(hours=fhour)
+    title = '['+tmp.attrs['model']+'] '+str(int(uv['level'].values[0]))+'hPa 风场, '+str(int(tmp['level'].values[0]))+'hPa 温度及极端性'
+    forcast_info = '起报时间: {0:%Y}年{0:%m}月{0:%d}日{0:%H}时\n预报时间: {1:%Y}年{1:%m}月{1:%d}日{1:%H}时\n预报时效: {2}小时\nwww.nmc.cn'.format(initTime, fcstTime, fhour)
+    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete((18, 9),map_extent=map_extent, title=title, forcast_info=forcast_info,info_zorder=4,
+                                             add_china=True, add_city=city, add_background=True, south_China_sea=south_China_sea)
+
+    tmp_extr_pcolormesh=GF.draw_method.anm_pcolormesh(ax, tmp_extr['lon'].values, tmp_extr['lat'].values, np.squeeze(tmp_extr['data'].values),vmin=-5,vmax=5,zorder=1)
+    tmp_contour=GF.draw_method.tmp_contour(ax,tmp['lon'].values,tmp['lat'].values,np.squeeze(tmp['data'].values),zorder=2)
+    tmp_contour=GF.draw_method.tmp_contour(ax,tmp['lon'].values,tmp['lat'].values,np.squeeze(tmp['data'].values),levels=[0],linewidths=4,zorder=2)
+    tmp_contour=GF.draw_method.tmp_contour(ax,tmp['lon'].values,tmp['lat'].values,np.squeeze(tmp['data'].values),levels=np.arange(-48,0,4),zorder=2,linestyle='--')
+
+    wind_barbs = GF.draw_method.wind_barbs(ax,tmp_extr['lon'].values, tmp_extr['lat'].values, np.squeeze(uv['u'].values), np.squeeze(uv['v'].values),zorder=3)
+
+    l, b, w, h = ax.get_position().bounds
+    # add color bar
+    cax=plt.axes([l,b-0.04,w,.02])
+    cb = plt.colorbar(tmp_extr_pcolormesh, cax=cax, orientation='horizontal',extend='both')
+    cb.ax.tick_params(labelsize='x-large')                      
+    cb.set_label('Sigma',size=20)
+
+    if output_dir:
+        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测|分析'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(tmp['data'].attrs['vhours'])))
+        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+    else:
+        plt.show()

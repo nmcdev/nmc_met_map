@@ -101,7 +101,7 @@ def isentropic_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',data_source='
     isentlev = isentlev * units.kelvin
 
     isent_anal = mpcalc.isentropic_interpolation(isentlev, pres, tmp,
-                                                 relh, uwnd, vwnd, axis=0)
+                                                 relh, uwnd, vwnd, axis=0,bottom_up_search=False)
 
     isentprs, isentrh, isentu, isentv = isent_anal
 

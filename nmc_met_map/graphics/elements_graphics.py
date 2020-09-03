@@ -19,7 +19,7 @@ import nmc_met_graphics.cmap.ctables as dk_ctables
 from scipy.ndimage import gaussian_filter
 import matplotlib.patheffects as mpatheffects
 
-def draw_T_2m(T_2m=None,T_type='Tmx',
+def draw_T_2m(T_2m=None,
             map_extent=(50, 150, 0, 65),
             regrid_shape=20,
             add_china=True,city=True,south_China_sea=True,

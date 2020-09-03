@@ -20,6 +20,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 import math
 from nmc_met_map.graphics import observation_graphics
+from nmc_met_map.product.observation.horizontal.CLDAS import draw_TMP2
+import cartopy.crs as ccrs
 
 def cumulative_precip_and_rain_days(endtime=None, cu_ndays=5, rn_ndays=7,
     map_ratio=19/11,zoom_ratio=20,cntr_pnt=[102,34],
@@ -87,3 +89,59 @@ def cumulative_precip_and_rain_days(endtime=None, cu_ndays=5, rn_ndays=7,
         map_extent=map_extent, regrid_shape=20,
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)
+
+def Tmx2m24(endtime, cu_ndays=1,
+    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],area=None,
+    **kargws):
+
+# prepare data
+    data_dir = [utl.Cassandra_dir(data_type='surface',data_source='CLDAS',var_name='Tmx_2m') ]
+
+    # get filename
+    cu_days = np.arange(0, cu_ndays)
+    filenames_cu=[(datetime.strptime('20'+endtime,'%Y%m%d%H')-timedelta(days=int(icu_days))).strftime('%Y%m%d%H')[2:]+'.000'
+            for icu_days in cu_days]
+
+    # retrieve data from micaps server
+    Tmx2m_all = MICAPS_IO.get_model_grids(data_dir[0], filenames=filenames_cu)
+    
+    coords=MICAPS_IO.get_model_grid(data_dir[0], filename=filenames_cu[0])
+
+    # set map extent
+    if(area != None):
+        if(area != '全国'):
+            south_China_sea=False
+        cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
+
+    map_extent=[0,0,0,0]
+    map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
+    map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
+    map_extent[2]=cntr_pnt[1]-zoom_ratio*1
+    map_extent[3]=cntr_pnt[1]+zoom_ratio*1
+
+    delt_x=(map_extent[1]-map_extent[0])*0.2
+    delt_y=(map_extent[3]-map_extent[2])*0.1
+
+    mask1 = ((Tmx2m_all['lon'] > map_extent[0]-delt_x) & 
+            (Tmx2m_all['lon'] < map_extent[1]+delt_x) & 
+            (Tmx2m_all['lat'] > map_extent[2]-delt_y) & 
+            (Tmx2m_all['lat'] < map_extent[3]+delt_y))
+    
+    coords=coords.where(mask1,drop=True)
+    Tmx2m_all=Tmx2m_all.where(mask1,drop=True)
+    mask11=(Tmx2m_all['data'] == 9999.)
+    Tmx2m_all['data'].values[mask11.values]=np.nan
+
+
+    Tmx2= xr.DataArray(np.max(Tmx2m_all['data'].values,axis=0),name='data',
+                    coords={'time':('time',[Tmx2m_all['time'].values[0]]),
+                            'lat':('lat',Tmx2m_all['lat'].values),
+                            'lon':('lon',Tmx2m_all['lon'].values)
+                            },
+                    dims=('time','lat','lon'),
+                    attrs={'model_name':'CLDAS',
+                           'var_name':'最高温度',
+                           'vhours':cu_ndays*24})
+# draw
+
+    draw_TMP2(TMP2=Tmx2,map_extent=map_extent,**kargws)

@@ -17,7 +17,7 @@ from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
 from scipy.stats import norm
 from scipy.interpolate import LinearNDInterpolator
-
+import skextremes as ske
 
 def Station_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
@@ -73,30 +73,15 @@ def Station_Synthetical_Forecast_From_Cassandra(
     #+get all the directories needed
 
     if(initTime == None):
-        last_file={model:get_latest_initTime(dir_rqd[0]),
-                    'SCMOC':get_latest_initTime(dir_rqd[6]),
+        last_file={model:get_latest_initTime(dir_rqd[7]),
+                    'SCMOC':get_latest_initTime(dir_rqd[0]),
                     }
     else:
         last_file={model:initTime[0],
                     'SCMOC':initTime[1],
                     }        
 
-    y_s={model:int('20'+last_file[model][0:2]),
-        'SCMOC':int('20'+last_file['SCMOC'][0:2])}
-    m_s={model:int(last_file[model][2:4]),
-        'SCMOC':int(last_file['SCMOC'][2:4])}
-    d_s={model:int(last_file[model][4:6]),
-        'SCMOC':int(last_file['SCMOC'][4:6])}
-    h_s={model:int(last_file[model][6:8]),
-        'SCMOC':int(last_file['SCMOC'][6:8])}
-
     fhours = np.arange(t_range[0], t_range[1], t_gap)
-
-    for ifhour in fhours:
-        if (ifhour == fhours[0] ):
-            time_all=datetime(y_s['SCMOC'],m_s['SCMOC'],d_s['SCMOC'],h_s['SCMOC'])+timedelta(hours=int(ifhour))
-        else:
-            time_all=np.append(time_all,datetime(y_s['SCMOC'],m_s['SCMOC'],d_s['SCMOC'],h_s['SCMOC'])+timedelta(hours=int(ifhour)))            
 
     filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
     t2m=utl.get_model_points_gy(dir_rqd[9], filenames, points,allExists=False)
@@ -116,55 +101,69 @@ def Station_Synthetical_Forecast_From_Cassandra(
     u10m=utl.get_model_points_gy(dir_rqd[10], filenames, points,allExists=False)
     v10m=utl.get_model_points_gy(dir_rqd[11], filenames, points,allExists=False)
     wsp10m=(u10m['data']**2+v10m['data']**2)**0.5
-    AT=1.07*t2m['data'].values+0.2*p_vapor-0.65*wsp10m-2.7      
-    if((t_range[1]) > 72):
+    AT=1.07*t2m['data'].values+0.2*p_vapor-0.65*wsp10m-2.7
+
+    if((fhours[-1]) > 72):
         fhours = np.arange(6, t_range[1], 6)
         filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
         r03=utl.get_model_points_gy(dir_rqd[8], filenames, points,allExists=False)
     else:
         r03=utl.get_model_points_gy(dir_rqd[7], filenames, points,allExists=False)
 
+    # if(last_file['SCMOC'] == last_file[model] and t_range[1] > 72):
+    #     fhours = np.append(np.arange(3,72,3),np.arange(72, (t_range[1]), 6))
+    #     filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
+    #     filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]            
+
+    # if(last_file['SCMOC'] != last_file[model] and t_range[1] > 60):
+    #     fhours = np.append(np.arange(3,60,3),np.arange(60, (t_range[1]), 6))
+    #     filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
+    #     filenames2 = [last_file['SCMOC']+'.'+str(fhour).zfill(3) for fhour in fhours]
+
+    # if(last_file['SCMOC'] != last_file[model] and t_range[1] <= 60):
+    #     fhours = np.arange(t_range[0], t_range[1], t_gap)
+    #     filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
+    #     filenames2 = [last_file['SCMOC']+'.'+str(fhour).zfill(3) for fhour in fhours]
+
+    # if(last_file['SCMOC'] == last_file[model] and t_range[1] <= 72):
+    #     fhours = np.arange(t_range[0], t_range[1], t_gap)
+    #     filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
+    #     filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
+
     fhours = np.arange(t_range[0], t_range[1], t_gap)
-    filenames = [last_file['SCMOC']+'.'+str(fhour).zfill(3) for fhour in fhours]
-    VIS=utl.get_model_points_gy(dir_rqd[6], filenames, points,allExists=False,fill_null=True,Null_value=-0.001)     
-
-    if(last_file['SCMOC'] == last_file[model] and t_range[1] > 72):
-        fhours = np.append(np.arange(3,72,3),np.arange(72, (t_range[1]), 6))
-        filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
-        filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]            
-
-    if(last_file['SCMOC'] != last_file[model] and t_range[1] > 60):
-        fhours = np.append(np.arange(3,60,3),np.arange(60, (t_range[1]), 6))
-        filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
-        filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
-
-    if(last_file['SCMOC'] != last_file[model] and t_range[1] <= 60):
-        fhours = np.arange(t_range[0], t_range[1], t_gap)
-        filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
-        filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
-
-    if(last_file['SCMOC'] == last_file[model] and t_range[1] <= 72):
-        fhours = np.arange(t_range[0], t_range[1], t_gap)
-        filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
-        filenames2 = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
-
+    filenames2 = [last_file['SCMOC']+'.'+str(fhour).zfill(3) for fhour in fhours]
+    VIS=utl.get_model_points_gy(dir_rqd[6], filenames2, points,allExists=False,fill_null=True,Null_value=-0.001)
     TCDC=utl.get_model_points_gy(dir_rqd[2], filenames2, points,allExists=False)
     LCDC=utl.get_model_points_gy(dir_rqd[3], filenames2, points,allExists=False)
     u100m=utl.get_model_points_gy(dir_rqd[4], filenames2, points,allExists=False)
     v100m=utl.get_model_points_gy(dir_rqd[5], filenames2, points,allExists=False)
     wsp100m=(u100m['data']**2+v100m['data']**2)**0.5
-
     if(fhours[-1] < 120):
-        gust10m=utl.get_model_points_gy(dir_rqd[0], filenames, points,allExists=False)
+        gust10m=utl.get_model_points_gy(dir_rqd[0], filenames2, points,allExists=False)
     if(fhours[-1] > 120):
-        if(last_file['SCMOC'] == last_file[model]):
-            fhours = np.arange(0, t_range[1], 6)
-            filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
-        if(last_file['SCMOC'] != last_file[model]):
-            fhours = np.arange(0, t_range[1], 6)
-            filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
-        gust10m=utl.get_model_points_gy(dir_rqd[1], filenames, points,allExists=False)        
+        gust10m=utl.get_model_points_gy(dir_rqd[1], filenames2, points,allExists=False)        
+
+    # if(fhours[-1] < 120):
+    #     gust10m=utl.get_model_points_gy(dir_rqd[0], filenames2, points,allExists=False)
+    # if(fhours[-1] > 120):
+    #     if(last_file['SCMOC'] == last_file[model]):
+    #         fhours = np.arange(0, t_range[1], 6)
+    #         filenames = [last_file[model]+'.'+str(fhour).zfill(3) for fhour in fhours]
+    #     if(last_file['SCMOC'] != last_file[model]):
+    #         fhours = np.arange(0, t_range[1], 6)
+    #         filenames = [last_file[model]+'.'+str(fhour+12).zfill(3) for fhour in fhours]
+    #     gust10m=utl.get_model_points_gy(dir_rqd[1], filenames2, points,allExists=False)        
         
+    time_all=gust10m.time.values[np.in1d(gust10m.time.values,t2m.time.values)]
+
+    time_new=[pd.to_datetime(time_all[0]).replace(tzinfo=None).to_pydatetime()+timedelta(hours=int(ihour)) for ihour in np.arange(0,(time_all[-1]-time_all[0])/np.timedelta64(1,'h')+1)]
+    VIS_hourly=VIS.interp(time=time_new).rename({'data':'VIS'}).to_dataframe().drop(columns=['lon', 'lat','forecast_reference_time','forecast_period'])
+    wsp10m_hourly=wsp10m.interp(time=time_new).to_dataframe(name='wsp10m').drop(columns=['lon', 'lat','forecast_reference_time','forecast_period'])
+    r03_hourly=r03.interp(time=time_new).rename({'data':'r03'}).to_dataframe().drop(columns=['lon', 'lat','forecast_reference_time','forecast_period'])
+    t2m_hourly=t2m.interp(time=time_new).rename({'data':'t2m'}).to_dataframe().drop(columns=['lon', 'lat','forecast_reference_time','forecast_period'])
+    pd_output=VIS_hourly.merge(wsp10m_hourly,on='time').merge(r03_hourly,on='time').merge(t2m_hourly,on='time')
+    pd_output.to_csv(output_dir+pd.to_datetime(wsp10m['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime().strftime('%Y%m%d%H')+'_起报.csv')
+
     sta_graphics.draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=t2m,Td2m=Td2m,AT=AT,u10m=u10m,v10m=v10m,u100m=u100m,v100m=v100m,
             gust10m=gust10m,wsp10m=wsp10m,wsp100m=wsp100m,r03=r03,TCDC=TCDC,LCDC=LCDC,
@@ -925,7 +924,6 @@ def point_fcst_according_to_3D_field_VS_zd_plot(
     V_interped_xr['data'].values=V_interped.reshape(V_interped.size,1,1)
     TMP_interped_xr=coords_info_2D.copy()
     TMP_interped_xr['data'].values=TMP_interped.reshape(TMP_interped.size,1,1)
-    
     
     sta_graphics.draw_point_fcst_VS_obs(t2m=TMP_interped_xr,u10m=U_interped_xr,v10m=V_interped_xr,rn=rn,
         obs_all=obs_all,obs_r=obs_r,

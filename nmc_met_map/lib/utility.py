@@ -34,6 +34,8 @@ import nmc_met_graphics.cmap.cm as cm_collected
 from scipy.interpolate import LinearNDInterpolator
 from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import Point as ShapelyPoint
+from scipy.ndimage.filters import minimum_filter, maximum_filter
+import xarray as xr
 
 
 def obs_radar_filename(time='none', product_name='CREF'):
@@ -181,7 +183,7 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
     for i in range(0,len(city_names)):
         if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
         (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
-            if(city_names[i] != '香港' and city_names[i] != '南京' and city_names[i] != '石家庄' and  city_names[i] != '天津'):
+            if((np.array(['香港','南京','石家庄','天津','济南','上海'])!=city_names[i]).all()):
                 r = city_names[i]
                 t=ax.text(lon[i],lat[i],city_names[i], family='SimHei',ha='right',va='top',size=size,zorder=zorder,**kwargs)
             else:
@@ -189,7 +191,9 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
                 zorder=zorder,**kwargs)
             t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='#D9D9D9'),
                        mpatheffects.Normal()])
-            ax.scatter(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60., c='black', s=25, zorder=zorder,**kwargs)
+            s=ax.scatter(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60., c='black', s=25, zorder=zorder,**kwargs)
+            s.set_path_effects([mpatheffects.Stroke(linewidth=5, foreground='#D9D9D9'),
+                       mpatheffects.Normal()])
     return
 
 def add_city_and_number_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=10,
@@ -260,6 +264,47 @@ def add_city_and_number_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=Fa
                        mpatheffects.Normal()])
             ax.scatter(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60., c='black', s=25, zorder=zorder,**kwargs)
     return
+
+
+def add_city_values_on_map(ax,data,map_extent=[70,140,15,55],size=13,zorder=10,cmap=None,transform=ccrs.PlateCarree(),**kwargs):
+    
+    dlon=map_extent[1]-map_extent[0]
+    dlat=map_extent[3]-map_extent[2]
+    #province city
+    try:
+        fname = 'city_province.000'
+        fpath = "resource/" + fname
+    except KeyError:
+        raise ValueError('can not find the file city_province.000 in the resources')
+
+    city = read_micaps_17(pkg_resources.resource_filename(
+        'nmc_met_map', fpath))
+
+    lon=city['lon'].values.astype(np.float)/100.
+    lat=city['lat'].values.astype(np.float)/100.
+    city_names=city['Name'].values
+    
+    number_city=data.interp(lon=('points',lon),lat=('points',lat))
+
+     # 步骤一（替换sans-serif字体） #得删除C:\Users\HeyGY\.matplotlib 然后重启vs，刷新该缓存目录获得新的字体
+    plt.rcParams['font.sans-serif'] = ['SimHei']     
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+    for i in range(0,len(city_names)):
+        if((lon[i] > map_extent[0]+dlon*0.05) and (lon[i] < map_extent[1]-dlon*0.05) and
+        (lat[i] > map_extent[2]+dlat*0.05) and (lat[i] < map_extent[3]-dlat*0.05)):
+            if((np.array(['香港','南京','石家庄','天津','济南','上海'])!=city_names[i]).all()):
+                r = city_names[i]
+                num=ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.
+                    ,'%.1f'%np.squeeze(number_city.values)[i],
+                     family='SimHei',ha='right',va='bottom',size=size,zorder=zorder,transform=transform,**kwargs)
+            else:
+                num=ax.text(int(lon[i])+100*(lon[i]-int(lon[i]))/60., int(lat[i])+100*(lat[i]-int(lat[i]))/60.
+                    ,'%.1f'%np.squeeze(number_city.values)[i],
+                     family='SimHei',ha='left',va='bottom',size=size,zorder=zorder,transform=transform,**kwargs)
+            num.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='#D9D9D9'),
+                       mpatheffects.Normal()])
+    return
+
 
 def add_china_map_2cartopy_public(ax, name='province', facecolor='none',
                            edgecolor='c', lw=2, **kwargs):
@@ -364,6 +409,7 @@ def adjust_map_ratio(ax,map_extent=None,datacrs=None):
     map_ratio=(map_extent[1]-map_extent[0])/(map_extent[3]-map_extent[2])
     ax.set_extent(map_extent, crs=datacrs)
     d_y=map_extent[3]-map_extent[2]
+    map_extent2=[]
     for i in range(0,10000):
         map_ratio_real=(ax.get_extent()[1]-ax.get_extent()[0])/2./((ax.get_extent()[3]-ax.get_extent()[2])/2.)
         if(abs(map_ratio_real-map_ratio) < 0.001):
@@ -386,7 +432,10 @@ def adjust_map_ratio(ax,map_extent=None,datacrs=None):
             top=(map_extent2[2]+map_extent2[3])/2+d_y/2
             map_extent2=[map_extent2[0],map_extent2[1],bottom,top]
         ax.set_extent(map_extent2, crs=datacrs)
-    return map_extent2
+    if(map_extent2 == []):
+        return map_extent
+    else:
+        return map_extent2
 
 def add_public_title_obs(title=None, initTime=None,valid_hour=0, fontsize=20, multilines=False,
                            shw_period=True):
@@ -680,21 +729,33 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'SPFH':'GRAPES_GFS/SPFH/',
                     'TMP':'GRAPES_GFS/TMP/',
                     'WVFL':'GRAPES_GFS/WVFL/',
-                    'THETAE':'GRAPES_GFS/THETASE/'
+                    'THETAE':'GRAPES_GFS/THETASE/',
+                    'VVEL':'GRAPES_GFS/VVEL_GEOMETRIC/'
                     },
             'NCEP_GFS':{
-                    'HGT':'NCEP_GFS/HGT/',
-                    'UGRD':'NCEP_GFS/UGRD/',
-                    'VGRD':'NCEP_GFS/VGRD/',
-                    'VVEL':'NCEP_GFS/VVEL/',
-                    'RH':'NCEP_GFS/RH/',
-                    'TMP':'NCEP_GFS/TMP/',
+                    'HGT':'NCEP_GFS_HR/HGT/',
+                    'UGRD':'NCEP_GFS_HR/UGRD/',
+                    'VGRD':'NCEP_GFS_HR/VGRD/',
+                    'VVEL':'NCEP_GFS_HR/VVEL/',
+                    'RH':'NCEP_GFS_HR/RH/',
+                    'TMP':'NCEP_GFS_HR/TMP/',
                     },
             'ECMWF_ENSEMBLE':{
                     'UGRD_RAW':'ECMWF_ENSEMBLE/RAW/UGRD/',
                     'VGRD_RAW':'ECMWF_ENSEMBLE/RAW/VGRD/',
                     'HGT_RAW':'ECMWF_ENSEMBLE/RAW/HGT/',
                     'TMP_RAW':'ECMWF_ENSEMBLE/RAW/TMP/'
+                    },
+            'GRAPES_3KM':{
+                    'HGT':'GRAPES_3KM/HGT/',
+                    'UGRD':'GRAPES_3KM/UGRD/',
+                    'VGRD':'GRAPES_3KM/VGRD/',
+                    'IR':'GRAPES_3KM/INFRARED_BRIGHTNESS_TEMPERATURE/',
+                    'RH':'GRAPES_3KM/RH/',
+                    'SPFH':'GRAPES_3KM/SPFH/',
+                    'TMP':'GRAPES_3KM/TMP/',
+                    'WVFL':'GRAPES_3KM/WVFL/',
+                    'THETAE':'GRAPES_3KM/THETASE/'
                     },
             'OBS':{            
                     'TLOGP':'UPPER_AIR/TLOGP/',
@@ -753,23 +814,45 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'ORO':'GRAPES_GFS/HGT/SURFACE/'
                     },
             'NCEP_GFS':{
-                    'u10m':'NCEP_GFS/UGRD/10M_ABOVE_GROUND/',
-                    'v10m':'NCEP_GFS/VGRD/10M_ABOVE_GROUND/',
-                    'wind10m':'NCEP_GFS/WIND/10M_ABOVE_GROUND/',
-                    'PRMSL':'NCEP_GFS/PRMSL/',
-                    'RAIN24':'NCEP_GFS/RAIN24/',
-                    'RAIN03':'NCEP_GFS/RAIN03/',
-                    'RAIN06':'NCEP_GFS/RAIN06/',
-                    'RAINC06':'NCEP_GFS/RAINC06/',
-                    'TCWV':'NCEP_GFS/PWAT/ENTIRE_ATMOSPHERE/',
-                    'T2m':'NCEP_GFS/TMP/2M_ABOVE_GROUND/',
-                    'Tmx3_2m':'NCEP_GFS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
-                    'Tmn3_2m':'mdfs:///NCEP_GFS/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
-                    'rh2m':'NCEP_GFS/RH/2M_ABOVE_GROUND/',
-                    'Td2m':'NCEP_GFS/DPT/2M_ABOVE_GROUND/',
-                    'BLI':'NCEP_GFS/BLI/',
-                    'PSFC':'NCEP_GFS/PRES/SURFACE/',
-                    'ORO':'NCEP_GFS/HGT/SURFACE/'
+                    'u10m':'NCEP_GFS_HR/UGRD/10M_ABOVE_GROUND/',
+                    'v10m':'NCEP_GFS_HR/VGRD/10M_ABOVE_GROUND/',
+                    'wind10m':'NCEP_GFS_HR/WIND/10M_ABOVE_GROUND/',
+                    'PRMSL':'NCEP_GFS_HR/PRMSL/',
+                    'RAIN24':'NCEP_GFS_HR/RAIN24/',
+                    'RAIN03':'NCEP_GFS_HR/RAIN03/',
+                    'RAIN06':'NCEP_GFS_HR/RAIN06/',
+                    'RAINC06':'NCEP_GFS_HR/RAINC06/',
+                    'TCWV':'NCEP_GFS_HR/PWAT/ENTIRE_ATMOSPHERE/',
+                    'T2m':'NCEP_GFS_HR/TMP/2M_ABOVE_GROUND/',
+                    'Tmx3_2m':'NCEP_GFS_HR/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'Tmn3_2m':'NCEP_GFS_HR/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'rh2m':'NCEP_GFS_HR/RH/2M_ABOVE_GROUND/',
+                    'Td2m':'NCEP_GFS_HR/DPT/2M_ABOVE_GROUND/',
+                    'BLI':'NCEP_GFS_HR/BLI/',
+                    'PSFC':'NCEP_GFS_HR/PRES/SURFACE/',
+                    'ORO':'NCEP_GFS_HR/HGT/SURFACE/'
+                    },
+            'GRAPES_3KM':{
+                    'u10m':'GRAPES_3KM/UGRD/10M_ABOVE_GROUND/',
+                    'v10m':'GRAPES_3KM/VGRD/10M_ABOVE_GROUND/',
+                    'wind10m':'GRAPES_3KM/WIND/10M_ABOVE_GROUND/',
+                    'PRMSL':'GRAPES_3KM/PRMSL/',
+                    'RAIN24':'GRAPES_3KM/RAIN24/',
+                    'RAIN03':'GRAPES_3KM/RAIN03/',                    
+                    'RAIN06':'GRAPES_3KM/RAIN06/',
+                    'RAINC06':'GRAPES_3KM/RAINC06/',
+                    'SNOW03':'GRAPES_3KM/SNOW03/',
+                    'SNOW06':'GRAPES_3KM/SNOW06/',
+                    'SNOW24':'GRAPES_3KM/SNOW024/',
+                    'TCWV':'GRAPES_3KM/PWAT/ENTIRE_ATMOSPHERE/',
+                    'T2m':'GRAPES_3KM/TMP/2M_ABOVE_GROUND/',
+                    'Tmx3_2m':'GRAPES_3KM/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'Tmn3_2m':'GRAPES_3KM/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'rh2m':'GRAPES_3KM/RH/2M_ABOVE_GROUND/',
+                    'Td2m':'GRAPES_3KM/DPT/2M_ABOVE_GROUND/',
+                    'BLI':'GRAPES_3KM/BLI/',
+                    'PSFC':'GRAPES_3KM/PRES/SURFACE/',
+                    'ORO':'GRAPES_3KM/HGT/SURFACE/'
                     },
             'ECMWF_ENSEMBLE':{
                     'RAIN06_RAW':'ECMWF_ENSEMBLE/RAW/RAIN06/'
@@ -1253,8 +1336,130 @@ def gy_shp2clip_China(originfig,ax,shpfile,lbs_originfig=None):
 
     return clip
 
+def gy_shp2clip(originfig,ax,shpfile,lbs_originfig=None):
+    
+    sf = shapefile.Reader(shpfile,encoding='utf-8')
+    vertices = []
+    codes = []
+    for shape_rec in sf.shapeRecords():
+        pts = shape_rec.shape.points
+        prt = list(shape_rec.shape.parts) + [len(pts)]
+        for i in range(len(prt) - 1):
+            for j in range(prt[i], prt[i+1]):
+                vertices.append((pts[j][0], pts[j][1]))
+            codes += [Path.MOVETO]
+            codes += [Path.LINETO] * (prt[i+1] - prt[i] -2)
+            codes += [Path.CLOSEPOLY]
+    #codes = [Path.MOVETO] + [Path.LINETO]*2 + [Path.CLOSEPOLY]
+    #vertices = [(120, 50), (120, 20), (70, 20), (70, 50)]
+    clip = Path(vertices, codes)
+    clip = PathPatch(clip, transform=ax.transData, facecolor='orange', lw=2,alpha=0.5)
+    #clip=ax.add_patch(clip)
+    # for contour in originfig.collections:
+    #     contour.set_clip_path(clip)
+
+    if(lbs_originfig is not None):
+        clip_map_shapely = ShapelyPolygon(vertices)
+        for text_object in lbs_originfig:
+            if not clip_map_shapely.contains(ShapelyPoint(text_object.get_position())):
+                text_object.set_visible(False)
+
+    return clip
+
 def gy_China_maskout(originfig,ax,lbs_originfig=None):
     shpfile = pkg_resources.resource_filename(
         'nmc_met_graphics', "resources/maps/country1.shp")
     clip=gy_shp2clip_China(originfig,ax,shpfile,lbs_originfig=lbs_originfig)
     return clip
+    
+def gy_continent_maskout(originfig,ax,lbs_originfig=None):
+    shpfile = pkg_resources.resource_filename(
+        'nmc_met_graphics', "resources/maps/country1.shp")
+    clip=gy_shp2clip(originfig,ax,shpfile,lbs_originfig=lbs_originfig)
+    return clip
+
+def extrema(mat,mode='wrap',window=50):
+        mn = minimum_filter(mat, size=window, mode=mode)
+        mx = maximum_filter(mat, size=window, mode=mode)
+        return np.nonzero(mat == mn), np.nonzero(mat == mx)
+
+def get_map_regions():
+    """
+    Get the map region lon/lat limits.
+    Returns:
+        Dictionary: the region limits, 'name': [lonmin, lonmax, latmin, latmax]
+    """
+    map_region = {
+        '中国': [70, 140, 8, 60], '中国陆地': [73, 136, 15, 56],
+        '中国及周边': [50, 160, 0, 70], '华北': [103, 129, 30, 50],
+        '东北': [103, 140, 32, 58], '华东': [107, 130, 20, 41],
+        '华中': [100, 123, 22, 42], '华南': [100, 126, 12, 30],
+        '西南': [90, 113, 18, 38], '西北': [89, 115, 27, 47],
+        '新疆': [70, 101, 30, 52], '青藏': [68, 105, 18, 46]}
+    return map_region
+
+def mask_terrian(prs_lev,psfc,xr_input):
+    psfc_new=psfc.interp(lon =xr_input['lon'].values, 
+                        lat = xr_input['lat'].values, 
+                        kwargs={"fill_value": "extrapolate"})
+    idx_terrian=np.expand_dims((psfc_new['data'].values-prs_lev)<0,axis=0)
+    if(idx_terrian.any()):
+        xr_input['data'].values[idx_terrian]=np.nan
+    return xr_input
+
+def cut_xrdata(map_extent,xr_input,delt_x=0,delt_y=0):
+            
+    mask =  ((xr_input['lon'] > map_extent[0]-delt_x) & 
+            (xr_input['lon'] < map_extent[1]+delt_x) & 
+            (xr_input['lat'] > map_extent[2]-delt_y) & 
+            (xr_input['lat'] < map_extent[3]+delt_y))
+    xr_output=xr_input.where(mask,drop=True)
+    return xr_output
+
+def get_map_extent(cntr_pnt,zoom_ratio,map_ratio):
+    map_extent=[0,0,0,0]
+    map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
+    map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
+    map_extent[2]=cntr_pnt[1]-zoom_ratio*1
+    map_extent[3]=cntr_pnt[1]+zoom_ratio*1
+    return map_extent
+
+def get_var_anm(input_var=None,Var_name='gh500'):
+    clm_file_name={'gh500':'mean_hourly_from_1979_to_2020_gh500.nc',
+                    't850':'mean_hourly_from_1979_to_2020_t850.nc',}
+    clm_unit_change_ratio={'gh500':10*9.80665,
+                    't850':1,}
+    Var_name_ERA={'gh500':'z',
+            't850':'t'}
+
+    clm_file = pkg_resources.resource_filename(
+        'nmc_met_map', "/resource/climate_data/"+clm_file_name[Var_name])
+    clm_data=xr.open_dataset(clm_file).load()
+    input_var_time=pd.to_datetime(input_var.time.values[0]-np.timedelta64(8,'h'))
+    clm_data_slt=clm_data.sel(time=((clm_data.time.dt.month==input_var_time.month) &
+            (clm_data.time.dt.day==input_var_time.day) & 
+            (clm_data.time.dt.hour==input_var_time.hour)))
+    clm_data_slt_regrided=clm_data_slt.interp(longitude=input_var['lon'].values, latitude=input_var['lat'].values)
+    clm_data.close()
+    var_anm=input_var.copy()
+    var_anm['data'].values=var_anm['data'].values-clm_data_slt_regrided[Var_name_ERA[Var_name]].values[:,np.newaxis,:,:]/clm_unit_change_ratio[Var_name]
+    return var_anm
+
+def get_var_extr(input_var=None,Var_name='gh500'):
+    clm_file_name={'gh500':'STD_hourly_from_1979_to_2020_gh500.nc',
+                    't850':'STD_hourly_from_1979_to_2020_t850.nc',}
+    clm_unit_change_ratio={'gh500':10*9.80665,
+                    't850':1,}
+
+    clm_file = pkg_resources.resource_filename(
+        'nmc_met_map', "/resource/climate_data/"+clm_file_name[Var_name])
+    clm_data=xr.open_dataset(clm_file).load()
+    input_var_time=pd.to_datetime(input_var.time.values[0]-np.timedelta64(8,'h'))
+    clm_data_slt=clm_data.sel(time=((clm_data.time.dt.month==input_var_time.month) &
+            (clm_data.time.dt.day==input_var_time.dayofyear) & 
+            (clm_data.time.dt.hour==input_var_time.hour)))
+    clm_data_slt_regrided=clm_data_slt.interp(longitude=input_var['lon'].values, latitude=input_var['lat'].values)
+    clm_data.close()
+    var_extr=input_var.copy()
+    var_extr['data'].values=var_extr['data'].values/(clm_data_slt_regrided[Var_name].values[:,np.newaxis,:,:]/clm_unit_change_ratio[Var_name])
+    return var_extr

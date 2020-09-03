@@ -19,7 +19,9 @@ import nmc_met_graphics.cmap.ctables as dk_ctables
 from scipy.ndimage import gaussian_filter
 import matplotlib.patches as mpatches
 from matplotlib.animation import FuncAnimation
+import matplotlib.animation as animation
 import os
+from celluloid import Camera
 
 def draw_gh_rain(gh=None, rain=None,
                     map_extent=(50, 150, 0, 65),
@@ -109,7 +111,7 @@ def draw_gh_rain(gh=None, rain=None,
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(int(gh.coords['forecast_period'].values[0]))+'小时',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(gh.coords['forecast_period'].values[0]))+'小时'+'(降水'+str(int(gh.coords['forecast_period'].values[0]+12))+'小时)',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add color bar
@@ -434,15 +436,150 @@ def draw_cumulated_precip_evo(
         z[z<0.1]=np.nan
         znan=np.zeros(shape=x.shape)
         znan[:]=np.nan
-        cmap,norm=dk_ctables.cm_qpf_nws(atime=rain.attrs['t_gap'])
+        cmap,norm=dk_ctables.cm_qpf_nws(atime=24)
         cmap.set_under(color=[0,0,0,0],alpha=0.0)
         plots['rain'] = ax.pcolormesh(
             x,y,znan, norm=norm,
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
 #additional information
     plt.title('['+rain.attrs['model']+'] '+
-    str(int(rain.coords['forecast_period'].values[0]))+'至'+str(int(rain.coords['forecast_period'].values[-1]))+'时效预报'+
-    '逐'+str(rain.attrs['t_gap'])+'小时降水演变',
+    str(int(rain.coords['forecast_period'].values[0])-rain.attrs['t_gap'])+
+        '至'+str(int(rain.coords['forecast_period'].values[-1]))+'时效累积降水预报',
+        loc='left', fontsize=25)
+
+    ax.add_feature(cfeature.OCEAN)
+    utl.add_china_map_2cartopy_public(
+        ax, name='coastline', edgecolor='gray', lw=0.8, zorder=3,alpha=0.5)
+    if add_china:
+        utl.add_china_map_2cartopy_public(
+            ax, name='province', edgecolor='gray', lw=0.5, zorder=3)
+        utl.add_china_map_2cartopy_public(
+            ax, name='nation', edgecolor='black', lw=0.8, zorder=3)
+        utl.add_china_map_2cartopy_public(
+            ax, name='river', edgecolor='#74b9ff', lw=0.8, zorder=3,alpha=0.5)
+
+    # grid lines
+    gl = ax.gridlines(
+        crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=1)
+    gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
+    gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
+
+    utl.add_cartopy_background(ax,name='RD')
+
+    l, b, w, h = ax.get_position().bounds
+
+    #forecast information
+
+
+    initTime = pd.to_datetime(
+    str(rain.coords['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+
+    #发布时间
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')
+
+    # add color bar
+    cax=plt.axes([l,b-0.04,w,.02])
+    cb = plt.colorbar(plots['rain'], cax=cax, orientation='horizontal')
+    cb.ax.tick_params(labelsize='x-large')                      
+    cb.set_label('Precipitation (mm)',size=20)
+    fcst_time=initTime+timedelta(hours=rain.coords['forecast_period'].values[0])
+    bax=plt.axes([l,b+h-0.1,.25,.1])
+    bax.set_yticks([])
+    bax.set_xticks([])
+    bax.axis([0, 10, 0, 10])   
+    fcst_time1=initTime+timedelta(hours=rain.coords['forecast_period'].values[0]-6)
+    bax.text(2.5, 7.5,'起始时间: '+fcst_time1.strftime("%Y年%m月%d日%H时"),size=15)
+    bax.text(2.5, 0.5,'www.nmc.cn',size=15)
+    valid_fhour=bax.text(2.5, 5,'截至时间: ',size=15)
+    txt_fhour=bax.text(2.5, 2.5,'预报时效: ',size=15)
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
+    # add south China sea
+    if south_China_sea:
+        utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
+
+    small_city=False
+    if(map_extent2[1]-map_extent2[0] < 25):
+        small_city=True
+    if city:
+        utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=2,size=13,small_city=small_city)
+
+    def update(frame_number):
+        fcst_time2=initTime+timedelta(hours=rain.coords['forecast_period'].values[frame_number])
+        valid_fhour.set_text('截至时间: '+fcst_time2.strftime("%Y年%m月%d日%H时"))
+        txt_fhour.set_text('预报时效: '+str(int(rain.coords['forecast_period'].values[frame_number]))+'小时')
+        return ax.pcolormesh(
+            x,y,np.squeeze(z[frame_number,:,:]), norm=norm,
+            cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
+    nframes=rain['data'].shape[0]
+    animation1 = FuncAnimation(fig, update, frames=nframes,interval=1000)
+    # ffmpegpath = os.path.abspath(r"C:\Users\HEYGY\Desktop\ffmpeg-20200824-3477feb-win64-static\bin\ffmpeg.exe")
+    # import matplotlib
+    # matplotlib.rcParams["animation.ffmpeg_path"] = ffmpegpath
+    # writer = animation.FFMpegWriter()
+    # show figure
+    plt.subplots_adjust(top=1, bottom=0, right=0.93, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+    if(output_dir != None):
+        animation1.save(output_dir+'累积降水演变_'+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(int(rain.coords['forecast_period'].values[-1]))+'小时_'+
+        '['+rain.attrs['model']+'] '+'.gif',writer='pillow')
+
+    if(output_dir == None):
+        #animation.save('rain.gif', fps=75, writer='imagemagick')
+        plt.show()
+        #plt.draw()
+        #plt.pause(0.1)
+
+
+def draw_cumulated_precip(
+        rain=None,
+        map_extent=(50, 150, 0, 65),
+        regrid_shape=20,
+        add_china=True,city=True,south_China_sea=True,
+        output_dir=None,Global=False):
+# set font
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+
+# set figure
+    fig = plt.figure(figsize=(9,14))
+    camera = Camera(fig)
+    nframe=rain['data'].shape[0]
+    plotcrs = ccrs.AlbersEqualArea(central_latitude=(map_extent[2]+map_extent[3])/2., 
+        central_longitude=(map_extent[0]+map_extent[1])/2., standard_parallels=[30., 60.])
+
+    datacrs = ccrs.PlateCarree()
+
+    ax = plt.axes([0.01,0.1,.98,.84], projection=plotcrs)
+    map_extent2=utl.adjust_map_ratio(ax,map_extent=map_extent,datacrs=datacrs)
+
+    # define return plots
+    plots = {}
+    # draw mean sea level pressure
+    if rain is not None:
+        x, y = np.meshgrid(rain['lon'], rain['lat'])
+        z=np.squeeze(rain['data'].values)
+        z[z<0.1]=np.nan
+        znan=np.zeros(shape=x.shape)
+        znan[:]=np.nan
+        # cmap,norm=dk_ctables.cm_qpf_nws(atime=None,
+        #         pos=np.concatenate((
+        #         np.array([0, 0.1, 0.5, 1]), np.arange(2.5, 25, 2.5),
+        #         np.arange(25, 50, 5), np.arange(50, 150, 10),
+        #         np.arange(150, 800, 50))))
+        cmap,norm=dk_ctables.cm_qpf_nws(atime=24)
+
+        cmap.set_under(color=[0,0,0,0],alpha=0.0)
+        plots['rain'] = ax.pcolormesh(
+            x,y,znan, norm=norm,
+            cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
+#additional information
+    plt.title('['+rain.attrs['model']+'] '+
+    str(int(rain.coords['forecast_period'].values[0]))+'至'+str(int(rain.coords['forecast_period'].values[-1]))+'时效累积降水预报',
         loc='left', fontsize=30)
 
     ax.add_feature(cfeature.OCEAN)
@@ -482,17 +619,18 @@ def draw_cumulated_precip_evo(
     cax=plt.axes([l,b-0.04,w,.02])
     cb = plt.colorbar(plots['rain'], cax=cax, orientation='horizontal')
     cb.ax.tick_params(labelsize='x-large')                      
-    cb.set_label(str(int(rain.attrs['t_gap']))+'h precipitation (mm)',size=20)
+    cb.set_label('Precipitation (mm)',size=20)
     fcst_time=initTime+timedelta(hours=rain.coords['forecast_period'].values[0])
-    bax=plt.axes([l,b+h-0.1,.25,.1])
+    bax=plt.axes([l,b+h-0.07,.45,.07])
     bax.set_yticks([])
     bax.set_xticks([])
     bax.axis([0, 10, 0, 10])   
-    bax.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
+    fcst_time1=initTime+timedelta(hours=rain.coords['forecast_period'].values[0]-6)
+    bax.text(2.5, 7.5,'起始时间: '+fcst_time1.strftime("%Y年%m月%d日%H时"),size=15)
     bax.text(2.5, 0.5,'www.nmc.cn',size=15)
-    valid_fhour=bax.text(2.5, 5,'预报时间: ',size=15)
+    valid_fhour=bax.text(2.5, 5,'截至时间: ',size=15)
     txt_fhour=bax.text(2.5, 2.5,'预报时效: ',size=15)
-    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h-0.1,.1,.1],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.0,b+h-0.085,.1,.1],which='nmc', size='Xlarge')
     # add south China sea
     if south_China_sea:
         utl.add_south_China_sea(pos=[l+w-0.091,b,.1,.2])
@@ -503,23 +641,14 @@ def draw_cumulated_precip_evo(
     if city:
         utl.add_city_on_map(ax,map_extent=map_extent2,transform=datacrs,zorder=2,size=13,small_city=small_city)
 
-    def update(frame_number):
-        fcst_time=initTime+timedelta(hours=rain.coords['forecast_period'].values[frame_number])
-        valid_fhour.set_text('预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"))
-        txt_fhour.set_text('预报时效: '+str(int(rain.coords['forecast_period'].values[frame_number]))+'小时')
-        return ax.pcolormesh(
-            x,y,np.squeeze(z[frame_number,:,:]), norm=norm,
+    fcst_time2=initTime+timedelta(hours=rain.coords['forecast_period'].values[-1])
+    valid_fhour.set_text('截至时间: '+fcst_time2.strftime("%Y年%m月%d日%H时"))
+    txt_fhour.set_text('预报时效: '+str(int(rain.coords['forecast_period'].values[-1]))+'小时')
+    ax.pcolormesh(
+    x,y,np.squeeze(z[-1,:,:]), norm=norm,
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
-
-    animation = FuncAnimation(fig, update, frames=4,interval=1000)
-    # show figure
-    if(output_dir != None):
-        animation.save(output_dir+'高度场_降水_预报_'+
+    
+    # plt.draw()
+    plt.savefig(output_dir+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(int(rain.coords['forecast_period'].values[0]))+'小时'+'.gif')
-
-    if(output_dir == None):
-        #animation.save('rain.gif', fps=75, writer='imagemagick')
-        plt.show()
-        #plt.draw()
-        #plt.pause(0.1)
+        '预报时效_'+str(int(rain.coords['forecast_period'].values[-1]))+'小时_'+rain.attrs['model']+'.png', dpi=200,bbox_inches='tight')

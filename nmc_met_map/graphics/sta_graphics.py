@@ -16,6 +16,8 @@ import math
 from metpy.units import units
 import meteva.base.tool.time_tools as ch_tools
 import matplotlib.patches as mpatches
+import nmc_met_map.graphics2 as GF
+import cartopy.crs as ccrs
 
 def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,u10m=None,v10m=None,u100m=None,v100m=None,
             gust10m=None,wsp10m=None,wsp100m=None,r03=None,TCDC=None,LCDC=None,
@@ -38,43 +40,35 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,
         locale.setlocale(locale.LC_CTYPE, 'chinese')       
 
     initTime1=pd.to_datetime(str(t2m['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
-    initTime2=pd.to_datetime(str(VIS['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
 
     # draw figure
     fig=plt.figure(figsize=(12,16))
     # draw main figure
     #温度————————————————————————————————————————————————
     ax = plt.axes([0.05,0.83,.94,.15])
-    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime1, fontsize=23)
+    # utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime1, fontsize=23)
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name'],initTime=initTime1, fontsize=23)
 
-    for ifhour in t2m['forecast_period'].values:
-        if (ifhour == t2m['forecast_period'].values[0] ):
-            t2m_t=(initTime1
-                +timedelta(hours=ifhour))
-        else:
-            t2m_t=np.append(t2m_t,
-                            (initTime1
-                            +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
     ax.xaxis.set_major_locator(xaxis_intaval)
     ax.set_xticklabels([' '])
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), -100,facecolor='#3D5AFE')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), -5,facecolor='#2979FF')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 0,facecolor='#00B0FF')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 5,facecolor='#00E5FF')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 13,facecolor='#1DE9B6')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 18,facecolor='#00E676')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 22,facecolor='#76FF03')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 28,facecolor='#C6FF00')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 33,facecolor='#FFEA00')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 35,facecolor='#FFC400')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 37,facecolor='#FF9100')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 40,facecolor='#FF3D00')
-    ax.fill_between(t2m_t, np.squeeze(t2m['data']), 100,facecolor='#FFFFFF')
-    ax.plot(t2m_t,np.squeeze(t2m['data']),label='2米温度')
-    ax.plot(t2m_t, np.squeeze(Td2m), dashes=[6, 2],linewidth=4,c='#00796B',label='2米露点温度')
-    ax.plot(t2m_t, np.squeeze(AT), dashes=[6, 2],linewidth=3,c='#FF9933',label='2米体感温度')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), -100,facecolor='#3D5AFE')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), -5,facecolor='#2979FF')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 0,facecolor='#00B0FF')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 5,facecolor='#00E5FF')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 13,facecolor='#1DE9B6')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 18,facecolor='#00E676')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 22,facecolor='#76FF03')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 28,facecolor='#C6FF00')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 33,facecolor='#FFEA00')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 35,facecolor='#FFC400')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 37,facecolor='#FF9100')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 40,facecolor='#FF3D00')
+    ax.fill_between(t2m.time, np.squeeze(t2m['data']), 100,facecolor='#FFFFFF')
+    ax.plot(t2m.time,np.squeeze(t2m['data']),label='2米温度')
+    ax.plot(t2m.time, np.squeeze(Td2m), dashes=[6, 2],linewidth=4,c='#00796B',label='2米露点温度')
+    ax.plot(t2m.time, np.squeeze(AT), dashes=[6, 2],linewidth=3,c='#FF9933',label='2米体感温度')
     ax.tick_params(length=10)
     ax.grid()
     ax.grid(axis='x',c='black')
@@ -92,51 +86,25 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,
                       
     #10米风——————————————————————————————————————
     ax = plt.axes([0.05,0.66,.94,.15])
-    for ifhour in u10m['forecast_period'].values:
-        if (ifhour == u10m['forecast_period'].values[0] ):
-            uv10m_t=(initTime1
-                +timedelta(hours=ifhour))
-        else:
-            uv10m_t=np.append(uv10m_t,
-                            (initTime1
-                            +timedelta(hours=ifhour)))
 
-    for ifhour in u100m['forecast_period'].values:
-        if (ifhour == u100m['forecast_period'].values[0] ):
-            uv100m_t=(initTime1
-                +timedelta(hours=ifhour))
-        else:
-            uv100m_t=np.append(uv100m_t,
-                            (initTime1
-                            +timedelta(hours=ifhour)))
-            
-    for ifhour in gust10m['forecast_period'].values:
-        if (ifhour == gust10m['forecast_period'].values[0] ):
-            gust10m_t=(initTime1
-                +timedelta(hours=ifhour))
-        else:
-            gust10m_t=np.append(gust10m_t,
-                            (initTime1
-                            +timedelta(hours=ifhour)))
-
-    ax.plot(uv10m_t, np.squeeze(wsp10m), c='#40C4FF',label='10米风',linewidth=3)
-    ax.plot(uv100m_t,np.squeeze(wsp100m),c='#FF6F00',label='100米风',linewidth=3)
-    ax.plot(gust10m_t,np.squeeze(gust10m['data']),c='#7C4DFF',label='10米阵风',linewidth=3)
+    ax.plot(wsp10m.time, np.squeeze(wsp10m), c='#40C4FF',label='10米风',linewidth=3)
+    ax.plot(wsp100m.time,np.squeeze(wsp100m),c='#FF6F00',label='100米风',linewidth=3)
+    ax.plot(gust10m.time,np.squeeze(gust10m['data']),c='#7C4DFF',label='10米阵风',linewidth=3)
     if(drw_thr == True):
-        ax.plot([uv10m_t[0],uv10m_t[-1]],[5.5,5.5],c='#4CAE50',label='10米平均风一般影响',linewidth=1)
-        ax.plot([uv10m_t[0],uv10m_t[-1]],[8,8],c='#FFEB3B',label='10米平均风较大影响',linewidth=1)
-        ax.plot([uv10m_t[0],uv10m_t[-1]],[10.8,10.8],c='#F44336',label='10米平均风高影响',linewidth=1)
+        ax.plot([u10m.time.values[0],u10m.time.values[-1]],[5.5,5.5],c='#4CAE50',label='10米平均风一般影响',linewidth=1)
+        ax.plot([u10m.time.values[0],u10m.time.values[-1]],[8,8],c='#FFEB3B',label='10米平均风较大影响',linewidth=1)
+        ax.plot([u10m.time.values[0],u10m.time.values[-1]],[10.8,10.8],c='#F44336',label='10米平均风高影响',linewidth=1)
 
-        ax.plot([gust10m_t[0],gust10m_t[-1]],[10.8,10.8],c='#4CAE50',label='10米阵风一般影响', dashes=[6, 2],linewidth=1)
-        ax.plot([gust10m_t[0],gust10m_t[-1]],[13.9,13.9],c='#FFEB3B',label='10米阵风较大影响', dashes=[6, 2],linewidth=1)
-        ax.plot([gust10m_t[0],gust10m_t[-1]],[17.2,17.2],c='#F44336',label='10米阵风高影响', dashes=[6, 2],linewidth=1)
+        ax.plot([gust10m.time.values[0],gust10m.time.values[-1]],[10.8,10.8],c='#4CAE50',label='10米阵风一般影响', dashes=[6, 2],linewidth=1)
+        ax.plot([gust10m.time.values[0],gust10m.time.values[-1]],[13.9,13.9],c='#FFEB3B',label='10米阵风较大影响', dashes=[6, 2],linewidth=1)
+        ax.plot([gust10m.time.values[0],gust10m.time.values[-1]],[17.2,17.2],c='#F44336',label='10米阵风高影响', dashes=[6, 2],linewidth=1)
 
-    ax.barbs(uv10m_t[0:-1], wsp10m[0:-1], 
-            np.squeeze(u10m['data'])[0:-1], np.squeeze(v10m['data'])[0:-1],
+    ax.barbs(u10m.time, wsp10m, 
+            np.squeeze(u10m['data']), np.squeeze(v10m['data']),
             fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
 
-    ax.barbs(uv100m_t[0:-1], wsp100m[0:-1], 
-            np.squeeze(u100m['data'])[0:-1], np.squeeze(v100m['data'])[0:-1],
+    ax.barbs(u100m.time, wsp100m, 
+            np.squeeze(u100m['data']), np.squeeze(v100m['data']),
             fill_empty=True,color='gray',barb_increments={'half':2,'full':4,'flag':20})
 
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -155,24 +123,16 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,
     #降水——————————————————————————————————————
     # draw main figure
     ax = plt.axes([0.05,0.49,.94,.15])
-    for ifhour in r03['forecast_period'].values:
-        if (ifhour == r03['forecast_period'].values[0] ):
-            r03_t=(initTime1
-                +timedelta(hours=ifhour))
-        else:
-            r03_t=np.append(r03_t,
-                            (initTime1
-                            +timedelta(hours=ifhour)))
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
     ax.xaxis.set_major_locator(xaxis_intaval)
     ax.set_xticklabels([' '])
-    ax.bar(r03_t,np.squeeze(r03['data']),width=0.12,color='#1E88E5')
+    ax.bar(r03.time,np.squeeze(r03['data']),width=0.12,color='#1E88E5')
     gap_hour_r03=int(r03['forecast_period'].values[1]-r03['forecast_period'].values[0])
 
     if(drw_thr == True):
-        ax.plot([r03_t[0],r03_t[-1]],[1*gap_hour_r03,1*gap_hour_r03],c='#FFEB3B',label=str(gap_hour_r03)+'小时降水较大影响',linewidth=1)
-        ax.plot([r03_t[0],r03_t[-1]],[10*gap_hour_r03,10*gap_hour_r03],c='#F44336',label=str(gap_hour_r03)+'小时降水高影响',linewidth=1)
+        ax.plot([r03.time.values[0],r03.time.values[-1]],[1*gap_hour_r03,1*gap_hour_r03],c='#FFEB3B',label=str(gap_hour_r03)+'小时降水较大影响',linewidth=1)
+        ax.plot([r03.time.values[0],r03.time.values[-1]],[10*gap_hour_r03,10*gap_hour_r03],c='#F44336',label=str(gap_hour_r03)+'小时降水高影响',linewidth=1)
         ax.legend(fontsize=10,loc='upper right')
     ax.tick_params(length=10)    
     ax.grid()
@@ -186,31 +146,13 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,
     #总量云——————————————————————————————————————
     # draw main figure
     ax = plt.axes([0.05,0.32,.94,.15])
-    for ifhour in TCDC['forecast_period'].values:
-        if (ifhour == TCDC['forecast_period'].values[0] ):
-            TCDC_t=(initTime1
-                +timedelta(hours=ifhour))
-        else:
-            TCDC_t=np.append(TCDC_t,
-                            (initTime1
-                            +timedelta(hours=ifhour)))
-    # draw main figure
-    for ifhour in LCDC['forecast_period'].values:
-        if (ifhour == LCDC['forecast_period'].values[0] ):
-            LCDC_t=(initTime1
-                +timedelta(hours=ifhour))
-        else:
-            LCDC_t=np.append(LCDC_t,
-                            (initTime1
-                            +timedelta(hours=ifhour)))
-
     #开启自适应
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
     ax.xaxis.set_major_locator(xaxis_intaval)
     ax.set_xticklabels([' '])
 
-    ax.bar(TCDC_t,np.squeeze(TCDC['data']),width=0.20,color='#82B1FF',label='总云量')
-    ax.bar(LCDC_t,np.squeeze(LCDC['data']),width=0.125,color='#2962FF',label='低云量')
+    ax.bar(TCDC.time,np.squeeze(TCDC['data']),width=0.20,color='#82B1FF',label='总云量')
+    ax.bar(LCDC.time,np.squeeze(LCDC['data']),width=0.125,color='#2962FF',label='低云量')
     ax.tick_params(length=10)    
     ax.grid()
     ax.grid(axis='x',c='black')
@@ -241,36 +183,26 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,
         # draw main figure
         ax = plt.axes([0.05,0.15,.94,.15])
 
-        #VIS=pd.read_csv(dir_all['VIS_SC']+last_file[model])
-        for ifhour in VIS['forecast_period'].values:
-            if (ifhour == VIS['forecast_period'].values[0] ):
-                VIS_t=(initTime2
-                    +timedelta(hours=ifhour))
-            else:
-                VIS_t=np.append(VIS_t,
-                                (initTime2
-                                +timedelta(hours=ifhour)))
-
         #开启自适应
         xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
         ax.xaxis.set_major_locator(xaxis_intaval)
 
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), -100,facecolor='#B3E5FC')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 1,facecolor='#81D4FA')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 3,facecolor='#4FC3F7')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 5,facecolor='#29B6F6')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 10,facecolor='#03A9F4')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 15,facecolor='#039BE5')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 20,facecolor='#0288D1')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 25,facecolor='#0277BD')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 30,facecolor='#01579B')
-        ax.fill_between(VIS_t, np.squeeze(VIS['data']), 100,facecolor='#FFFFFF')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), -100,facecolor='#B3E5FC')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 1,facecolor='#81D4FA')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 3,facecolor='#4FC3F7')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 5,facecolor='#29B6F6')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 10,facecolor='#03A9F4')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 15,facecolor='#039BE5')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 20,facecolor='#0288D1')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 25,facecolor='#0277BD')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 30,facecolor='#01579B')
+        ax.fill_between(VIS.time, np.squeeze(VIS['data']), 100,facecolor='#FFFFFF')
 
-        ax.plot(VIS_t,np.squeeze(VIS['data']))
+        ax.plot(VIS.time,np.squeeze(VIS['data']))
         if(drw_thr == True):
-            ax.plot([VIS_t[0],VIS_t[-1]],[5,5],c='#4CAF50',label='能见度一般影响',linewidth=1)
-            ax.plot([VIS_t[0],VIS_t[-1]],[3,3],c='#FFEB3B',label='能见度较大影响',linewidth=1)
-            ax.plot([VIS_t[0],VIS_t[-1]],[1,1],c='#F44336',label='能见度高影响',linewidth=1)
+            ax.plot([VIS.time[0],VIS.time[-1]],[5,5],c='#4CAF50',label='能见度一般影响',linewidth=1)
+            ax.plot([VIS.time[0],VIS.time[-1]],[3,3],c='#FFEB3B',label='能见度较大影响',linewidth=1)
+            ax.plot([VIS.time[0],VIS.time[-1]],[1,1],c='#F44336',label='能见度高影响',linewidth=1)
             ax.legend(fontsize=10,loc='upper right')
 
         xstklbls = mpl.dates.DateFormatter('%m月%d日%H时')
@@ -293,7 +225,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,
         ax.axis('off')
         utl.add_logo_extra_in_axes(pos=[0.7,0.06,.05,.05],which='nmc', size='Xlarge')
         ax.text(7.5, 0.1,
-                (initTime2 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
+                (initTime1 - timedelta(hours=2)).strftime("%Y年%m月%d日%H时")+'发布',size=15)
 
     #出图——————————————————————————————————————————————————————————
     if(output_dir != None ):
@@ -945,7 +877,8 @@ def draw_point_uv_tmp_rh_rn_fcst(
     #2米温度——————————————————————————————————————
     if(model == '中央台指导'):
         model='智能网格'
-    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime, fontsize=21)
+    # utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name']+' ['+str(points['lon'][0])+','+str(points['lat'][0])+']',initTime=initTime, fontsize=21)
+    utl.add_public_title_sta(title=model+'预报 '+extra_info['point_name'],initTime=initTime, fontsize=21)
     for ifhour in t2m['forecast_period'].values:
         if (ifhour == t2m['forecast_period'].values[0] ):
             t2m_t=(initTime
@@ -1065,11 +998,11 @@ def draw_point_uv_tmp_rh_rn_fcst(
         if not isExists:
             os.makedirs(output_dir)
 
-        output_dir2=output_dir+model+'_起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+'/'
-        if(os.path.exists(output_dir2) == False):
-            os.makedirs(output_dir2)
+        # output_dir2=output_dir+model+'_起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+'/'
+        # if(os.path.exists(output_dir2) == False):
+        #     os.makedirs(output_dir2)
 
-        plt.savefig(output_dir2+extra_info['point_name']+
+        plt.savefig(output_dir+
         extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
@@ -1677,5 +1610,35 @@ def draw_point_fcst_VS_obs(t2m=None,u10m=None,v10m=None,rn=None,
         extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()
+
+def draw_AQI_points(AQI_input,title=None,
+                    map_extent=(70, 135, 15, 55),
+                    add_china=True,city=True,south_China_sea=True,
+                    output_dir=None,output_name='test',AQI_scatter_kwargs={}):
+        
+    initTime = pd.to_datetime(AQI_input['time'].values[0]).to_pydatetime()
+    fhour = int(AQI_input['dtime'].values[0])
+    fcstTime = initTime + timedelta(hours=fhour)
+    forcast_info = '起报时间: {0:%Y}年{0:%m}月{0:%d}日{0:%H}时\n预报时间: {1:%Y}年{1:%m}月{1:%d}日{1:%H}时\n预报时效: {2}小时\nwww.nmc.cn'.format(initTime, fcstTime, fhour)
+    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete((18, 9),plotcrs=ccrs.PlateCarree(),map_extent=map_extent, title=title, forcast_info=forcast_info,info_zorder=4,
+                                             add_china=True, add_city=city, add_background=True, south_China_sea=south_China_sea)
+
+    AQI_scatter = GF.draw_method.AQI_scatter(ax, AQI_input['lon'].values, AQI_input['lat'].values, np.squeeze(AQI_input['AQI'].values),
+                **AQI_scatter_kwargs)
+
+    l, b, w, h = ax.get_position().bounds
+    cax=plt.axes([l,b-0.04,w,.02])
+    cb = plt.colorbar(AQI_scatter, cax=cax, orientation='horizontal',extend='both')
+    cb.ax.tick_params(labelsize='x-large')                      
+    cb.set_label('AQI',size=20)
+
+    if(output_dir != None ):
+        isExists=os.path.exists(output_dir)
+        if not isExists:
+            os.makedirs(output_dir)
+
+        plt.savefig(output_dir+output_name+'.jpg', dpi=200,bbox_inches='tight')
     else:
         plt.show()

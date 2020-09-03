@@ -85,7 +85,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
     # Set the titles and axes labels
     ax_inset.set_title('')
 
-    ax.set_title('相当位温, 绝对涡度, 水平风场', loc='right', fontsize=25)
+    ax.set_title('相当位温, 绝对涡度, 沿剖面风', loc='right', fontsize=25)
     ax.set_ylabel('Pressure (hPa)')
     ax.set_xlabel('Longitude')
     absv_colorbar.set_label('Absolute Vorticity (dimensionless)')
@@ -108,7 +108,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
 
     # show figure
     if(output_dir != None):
-        plt.savefig(output_dir+'相当位温_绝对涡度_水平风场_预报_'+
+        plt.savefig(output_dir+'相当位温_绝对涡度_沿剖面风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
@@ -172,7 +172,7 @@ def draw_Crosssection_Wind_Theta_e_RH(
     # Set the titles and axes labels
     ax_inset.set_title('')
 
-    ax.set_title('相当位温, 相对湿度, 水平风场', loc='right', fontsize=25)
+    ax.set_title('相当位温, 相对湿度, 沿剖面风', loc='right', fontsize=25)
     ax.set_ylabel('Pressure (hPa)')
     ax.set_xlabel('Longitude')
     rh_colorbar.set_label('Relative Humidity')
@@ -193,7 +193,7 @@ def draw_Crosssection_Wind_Theta_e_RH(
 
     # show figure
     if(output_dir != None):
-        plt.savefig(output_dir+'相当位温_相对湿度_水平风场_预报_'+
+        plt.savefig(output_dir+'相当位温_相对湿度_沿剖面风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
@@ -258,7 +258,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
     # Set the titles and axes labels
     ax_inset.set_title('')
 
-    ax.set_title('相当位温, 绝对湿度, 水平风场', loc='right', fontsize=25)
+    ax.set_title('相当位温, 绝对湿度, 沿剖面风', loc='right', fontsize=25)
     ax.set_ylabel('Pressure (hPa)')
     ax.set_xlabel('Longitude')
     Qv_colorbar.set_label('Specific Humidity (g/kg)')
@@ -281,7 +281,7 @@ def draw_Crosssection_Wind_Theta_e_Qv(
 
     # show figure
     if(output_dir != None):
-        plt.savefig(output_dir+'相当位温_绝对湿度_水平风场_预报_'+
+        plt.savefig(output_dir+'相当位温_绝对湿度_沿剖面风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     
@@ -476,8 +476,11 @@ def draw_Crosssection_Wind_Temp_RH(
     Temp_zero_contour = ax.contour(cross_Temp['lon'], cross_Temp['level'],cross_Temp['data'].values,
                             levels=[0], colors='k', linewidths=3)
 
-    Temp_zero_contour.clabel([0], fontsize=22, colors='k', inline=1,
-                        inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)                            
+    try:
+        Temp_zero_contour.clabel([0], fontsize=22, colors='k', inline=1,
+                            inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)
+    except:
+        print('No Zero Line')                            
 
     wind_slc_vert = list(range(0, len(levels), 1))
     wind_slc_horz = slice(5, 100, 5)
@@ -517,7 +520,7 @@ def draw_Crosssection_Wind_Temp_RH(
     # Set the titles and axes labels
     ax_inset.set_title('')
 
-    ax.set_title('['+model+'] '+'温度, 相对湿度, 水平风场', loc='right', fontsize=25)
+    ax.set_title('['+model+'] '+'温度, 相对湿度, 沿剖面风', loc='right', fontsize=25)
     ax.set_ylabel('Pressure (hPa)')
     ax.set_xlabel('Longitude')
     rh_colorbar.set_label('Relative Humidity (%)')
@@ -540,7 +543,7 @@ def draw_Crosssection_Wind_Temp_RH(
 
     # show figure
     if(output_dir != None):
-        plt.savefig(output_dir+'温度_相对湿度_水平风场_预报_'+
+        plt.savefig(output_dir+'温度_相对湿度_沿剖面风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
     

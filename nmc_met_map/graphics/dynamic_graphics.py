@@ -75,7 +75,7 @@ def draw_gh_uv_VVEL(gh=None, uv=None, VVEL=None,
             -30, -20, -10, -5, -2.5, -1, -0.5,
             0.5, 1, 2.5, 5, 10, 20, 30]
 
-        z=gaussian_filter(np.squeeze(VVEL['data']/10.), 5)
+        z=np.squeeze(VVEL['data']/10.)
 
         cmap,norm=dk_ctables.cm_vertical_velocity_nws(pos=clevs_VVEL)
         #cmap.set_under(color=[0,0,0,0],alpha=0.0)

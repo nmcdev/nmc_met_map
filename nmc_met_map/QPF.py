@@ -334,7 +334,7 @@ def Rain_evo(initTime=None, t_gap=6,t_range=[6,36], fcs_lvl=4,day_back=0,model='
 def cumulated_precip_evo(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model='ECMWF',
     data_source='MICAPS',
     map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area = None,city=False,output_dir=None,
     Global=False):
     fhours = np.arange(t_range[0], t_range[1]+1, t_gap)
 # prepare data
@@ -348,8 +348,9 @@ def cumulated_precip_evo(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model=
         filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
         # retrieve data from micaps server
         rain = MICAPS_IO.get_model_grids(data_dir[0], filenames=filenames)
+        rain2=rain.copy(deep=True)
         for itime in range(1,len(rain['forecast_period'].values)):
-            rain['data'].values[itime,:,:]=np.sum(rain['data'].values[0:itime+1,:,:],axis=0)
+            rain2['data'].values[itime,:,:]=np.sum(rain['data'].values[0:itime+1,:,:],axis=0)
 
 
     if(data_source =='CIMISS'):
@@ -374,21 +375,85 @@ def cumulated_precip_evo(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model=
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
-
-    map_extent=[0,0,0,0]
-    map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
-    map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
-    map_extent[2]=cntr_pnt[1]-zoom_ratio*1
-    map_extent[3]=cntr_pnt[1]+zoom_ratio*1
+    else:
+        map_extent=[0,0,0,0]
+        map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
+        map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
+        map_extent[2]=cntr_pnt[1]-zoom_ratio*1
+        map_extent[3]=cntr_pnt[1]+zoom_ratio*1
+        
     delt_x=(map_extent[1]-map_extent[0])*0.2
     delt_y=(map_extent[3]-map_extent[2])*0.1
     mask1 = (rain['lon'] > map_extent[0]-delt_x) & (rain['lon'] < map_extent[1]+delt_x) & (rain['lat'] > map_extent[2]-delt_y) & (rain['lat'] < map_extent[3]+delt_y)
-    rain=rain.where(mask1,drop=True)
-    rain.attrs['model']=model
-    rain.attrs['t_gap']=t_gap
+    rain2=rain2.where(mask1,drop=True)
+    rain2.attrs['model']=model
+    rain2.attrs['t_gap']=t_gap
 # draw
     QPF_graphics.draw_cumulated_precip_evo(
-        rain=rain,
+        rain=rain2,
+        map_extent=map_extent, regrid_shape=20,
+        city=city,south_China_sea=south_China_sea,
+        output_dir=output_dir,Global=Global)                
+
+def cumulated_precip(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model='ECMWF',
+    data_source='MICAPS',
+    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    south_China_sea=True,area = None,city=False,output_dir=None,
+    Global=False):
+    fhours = np.arange(t_range[0], t_range[1]+1, t_gap)
+# prepare data
+    if(data_source =='MICAPS'):
+        try:
+            data_dir = [utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN'+ '%02d'%t_gap)]
+        except KeyError:
+            raise ValueError('Can not find all directories needed')
+        if(initTime==None):
+            initTime = MICAPS_IO.get_latest_initTime(data_dir[0])
+        filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+        # retrieve data from micaps server
+        rain = MICAPS_IO.get_model_grids(data_dir[0], filenames=filenames)
+        rain2=rain.copy(deep=True)
+        for itime in range(1,len(rain['forecast_period'].values)):
+            rain2['data'].values[itime,:,:]=np.sum(rain['data'].values[0:itime+1,:,:],axis=0)
+
+
+    if(data_source =='CIMISS'):
+        if(initTime != None):
+            filename = utl.model_filename(initTime, 0,UTC=True)
+        else:
+            filename=utl.filename_day_back_model(day_back=0,fhour=0,UTC=True)
+        try:
+            TPE1=CMISS_IO.cimiss_model_by_times('20'+filename[0:8],valid_times=fhours,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='TPE'),
+                        levattrs={'long_name':'Height above Ground', 'units':'m', '_CoordinateAxisType':'-'},
+                        fcst_level=0, fcst_ele="TPE", units='kg*m^-2')
+        except KeyError:
+            raise ValueError('Can not find all data needed')
+        rain=TPE1.copy(deep=True)
+        rain['data'].values=(TPE1['data'].values)*1000
+
+
+# set map extent
+    if(area != '全国'):
+        south_China_sea=False
+
+    if(area != None):
+        cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
+    else:
+        map_extent=[0,0,0,0]
+        map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
+        map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
+        map_extent[2]=cntr_pnt[1]-zoom_ratio*1
+        map_extent[3]=cntr_pnt[1]+zoom_ratio*1
+    delt_x=(map_extent[1]-map_extent[0])*0.2
+    delt_y=(map_extent[3]-map_extent[2])*0.1
+    mask1 = (rain['lon'] > map_extent[0]-delt_x) & (rain['lon'] < map_extent[1]+delt_x) & (rain['lat'] > map_extent[2]-delt_y) & (rain['lat'] < map_extent[3]+delt_y)
+    rain2=rain2.where(mask1,drop=True)
+    rain2.attrs['model']=model
+    rain2.attrs['t_gap']=t_gap
+# draw
+    QPF_graphics.draw_cumulated_precip(
+        rain=rain2,
         map_extent=map_extent, regrid_shape=20,
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)                
