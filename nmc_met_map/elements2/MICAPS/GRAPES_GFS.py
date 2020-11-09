@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 import pkg_resources
 
 def dT2m_mx24(initTime=None, fhour=48, day_back=0,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
+    south_China_sea=True,area = None,city=False,output_dir=None,
     Global=False):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='GRAPES_GFS',var_name='Tmx3_2m')]
@@ -78,8 +78,8 @@ def dT2m_mx24(initTime=None, fhour=48, day_back=0,
         output_dir=output_dir,Global=Global)        
 
 def dT2m_mn24(initTime=None, fhour=48, day_back=0,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='GRAPES_GFS',var_name='Tmn3_2m')]
@@ -146,8 +146,8 @@ def dT2m_mn24(initTime=None, fhour=48, day_back=0,
         output_dir=output_dir,Global=Global)
 
 def dT2m_mean24(initTime=None, fhour=48, day_back=0,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
+    south_China_sea=True,area = None,city=False,output_dir=None,
     Global=False):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='GRAPES_GFS',var_name='T2m')]
@@ -205,7 +205,7 @@ def dT2m_mean24(initTime=None, fhour=48, day_back=0,
 #- to solve the problem of labels on all the contours
 
     dTmn_2m.attrs['model']='GRAPES_GFS'
-    dTmn_2m.attrs['title']='2米最低温度24小时变温'
+    dTmn_2m.attrs['title']='2米平均温度24小时变温'
 
     elements_graphics.draw_dT_2m(
         dT_2m=dTmn_2m,T_type='dT2m_meann',

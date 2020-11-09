@@ -29,7 +29,6 @@ import nmc_met_graphics.cmap.ctables as dk_ctables
 import nmc_met_graphics.cmap.cm as dk_ctables2
 import nmc_met_graphics.cmap.wrf as wrf_ctables
 import nmc_met_map.lib.utility as utl
-from metpy.plots import add_metpy_logo, add_timestamp, colortables
 import nmc_met_graphics.mask as dk_mask
 import os
 from scipy.ndimage import gaussian_filter
@@ -38,8 +37,8 @@ import cartopy.io.img_tiles as cimg
 from matplotlib.font_manager import FontProperties
 import matplotlib.patches as mpatches
 
-def Horizontal_Pallete(figsize=(16, 9), plotcrs=None, datacrs=ccrs.PlateCarree(),map_extent=(60, 145, 15, 55), title='', forcast_info='',
-                       add_china=False, add_city=False, add_background=False, south_China_sea=False,info_zorder=10):
+def Horizontal_Pallete(figsize=(16, 9), plotcrs=ccrs.PlateCarree(), datacrs=ccrs.PlateCarree(),map_extent=(60, 145, 15, 55), title='', forcast_info='',
+                       add_china=True, add_city=False, add_background=True, south_China_sea=True,info_zorder=10):
     
     plt.rcParams['font.sans-serif'] = ['SimHei']  # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）

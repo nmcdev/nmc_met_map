@@ -21,7 +21,7 @@ import matplotlib.patches as mpatches
 from matplotlib.animation import FuncAnimation
 import matplotlib.animation as animation
 import os
-from celluloid import Camera
+# from celluloid import Camera
 
 def draw_gh_rain(gh=None, rain=None,
                     map_extent=(50, 150, 0, 65),
@@ -180,7 +180,7 @@ def draw_mslp_rain_snow(
         #cmap.set_under(color=[0,0,0,0],alpha=0.0)
         plots['rain'] = ax.pcolormesh(
             x,y,z, norm=norm,
-            cmap=cmap, zorder=3,transform=datacrs,alpha=0.5)
+            cmap=cmap, zorder=3,transform=datacrs,alpha=0.8)
 
     if snow is not None:
         x, y = np.meshgrid(snow['lon'], snow['lat'])
@@ -189,7 +189,7 @@ def draw_mslp_rain_snow(
         #cmap.set_under(color=[0,0,0,0],alpha=0.0)
         plots['snow'] = ax.pcolormesh(
             x,y,z, norm=norm,
-            cmap=cmap, zorder=3,transform=datacrs,alpha=0.5)
+            cmap=cmap, zorder=3,transform=datacrs,alpha=0.8)
     
     if sleet is not None:
         x, y = np.meshgrid(sleet['lon'], sleet['lat'])
@@ -198,7 +198,7 @@ def draw_mslp_rain_snow(
         #cmap.set_under(color=[0,0,0,0],alpha=0.0)
         plots['sleet'] = ax.pcolormesh(
             x,y,z, norm=norm,
-            cmap=cmap, zorder=3,transform=datacrs,alpha=0.5)
+            cmap=cmap, zorder=3,transform=datacrs,alpha=0.8)
 
     if mslp is not None:
         x, y = np.meshgrid(mslp['lon'], mslp['lat'])
@@ -226,8 +226,10 @@ def draw_mslp_rain_snow(
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    utl.add_cartopy_background(ax,name='RD')
-
+    # utl.add_cartopy_background(ax,name='RD')
+    ax.add_feature(cfeature.LAND,color='#F5E19F')
+    ax.add_feature(cfeature.OCEAN)
+    
     l, b, w, h = ax.get_position().bounds
 
     #forecast information
@@ -251,19 +253,21 @@ def draw_mslp_rain_snow(
 
     # add color bar
     if(sleet is not None):
-        cax=plt.axes([l,b-0.04,w/4,.02])
+        cax=plt.axes([l-0.03,b-0.04,w/3,.02])
         cb = plt.colorbar(plots['sleet'], cax=cax, orientation='horizontal')
         cb.ax.tick_params(labelsize='x-large')                      
         cb.set_label('雨夹雪 (mm)',size=20)
 
     if(snow is not None):
-        cax=plt.axes([l+0.32,b-0.04,w/4,.02])
+        # cax=plt.axes([l+0.32,b-0.04,w/4,.02])
+        cax=plt.axes([l+w/3,b-0.04,w/3,.02])
         cb = plt.colorbar(plots['snow'], cax=cax, orientation='horizontal')
         cb.ax.tick_params(labelsize='x-large')                      
         cb.set_label('雪 (mm)',size=20)
 
     if(rain is not None):
-        cax=plt.axes([l+0.65,b-0.04,w/4,.02])
+        # cax=plt.axes([l+0.65,b-0.04,w/4,.02])
+        cax=plt.axes([l+w*2/3+0.03,b-0.04,w/3,.02])
         cb = plt.colorbar(plots['rain'], cax=cax, orientation='horizontal')
         cb.ax.tick_params(labelsize='x-large')                      
         cb.set_label('雨 (mm)',size=20)
@@ -284,7 +288,8 @@ def draw_mslp_rain_snow(
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_降水_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(int(mslp.coords['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
+        '预报时效_'+str(int(mslp.coords['forecast_period'].values[0]))+'小时'+'.png',
+         dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()
@@ -547,7 +552,7 @@ def draw_cumulated_precip(
 
 # set figure
     fig = plt.figure(figsize=(9,14))
-    camera = Camera(fig)
+    # camera = Camera(fig)
     nframe=rain['data'].shape[0]
     plotcrs = ccrs.AlbersEqualArea(central_latitude=(map_extent[2]+map_extent[3])/2., 
         central_longitude=(map_extent[0]+map_extent[1])/2., standard_parallels=[30., 60.])
@@ -649,6 +654,9 @@ def draw_cumulated_precip(
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
     
     # plt.draw()
-    plt.savefig(output_dir+
-        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(int(rain.coords['forecast_period'].values[-1]))+'小时_'+rain.attrs['model']+'.png', dpi=200,bbox_inches='tight')
+    if(output_dir is not None):
+        plt.savefig(output_dir+
+            '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+            '预报时效_'+str(int(rain.coords['forecast_period'].values[-1]))+'小时_'+rain.attrs['model']+'.png', dpi=200,bbox_inches='tight')
+    else:
+        plt.show()

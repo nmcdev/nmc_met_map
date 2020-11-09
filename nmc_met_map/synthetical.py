@@ -16,7 +16,6 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import metpy.calc
-from netCDF4 import num2date
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -25,20 +24,19 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import metpy.calc as mpcalc
 from metpy.units import units
-from netCDF4 import num2date
 import numpy as np
 import numpy.ma as ma
 from scipy.ndimage import gaussian_filter
 from nmc_met_map.graphics import synthetical_graphics
 
 def Miller_Composite_Chart(initTime=None, fhour=24, day_back=0,model='GRAPES_GFS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     Global=False,
     south_China_sea=True,area = '全国',city=False,output_dir=None
      ):
 
     # micaps data directory
-    if(data_source is 'MICAPS'):
+    if(data_source == 'MICAPS'):
         try:
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl='700'),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl='300'),

@@ -11,10 +11,8 @@ import nmc_met_map.lib.utility as utl
 import xarray as xr
 from nmc_met_map.lib.read_micaps_16 import read_micaps_16
 import pkg_resources
-from nmc_met_publish_map.source.lib.match_two_array import match_two_array
 from scipy.interpolate import Rbf
 from scipy.interpolate import griddata
-import regionmask
 import nmc_met_io.retrieve_micaps_server as MICAPS_IO
 import pandas as pd
 from datetime import datetime, timedelta
@@ -91,7 +89,7 @@ def cumulative_precip_and_rain_days(endtime=None, cu_ndays=5, rn_ndays=7,
         output_dir=output_dir,Global=Global)
 
 def Tmx2m24(endtime, cu_ndays=1,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],area=None,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],area=None,
     **kargws):
 
 # prepare data

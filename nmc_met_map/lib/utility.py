@@ -97,7 +97,7 @@ def add_logo_extra(fig, x=10, y=10, zorder=100,
     fname_prefix = {'nmc': 'nmc', 'cma': 'cma','wmo': 'wmo'}
     try:
         fname = fname_prefix[which] + fname_suffix[size]
-        fpath = "resource/logo/" + fname
+        fpath = "resources/logo/" + fname
     except KeyError:
         raise ValueError('Unknown logo size or selection')
 
@@ -122,7 +122,7 @@ def add_logo_extra_in_axes(pos=[0.1,0.1,.2,.4],
     fname_prefix = {'nmc': 'nmc', 'cma': 'cma','wmo': 'wmo'}
     try:
         fname = fname_prefix[which] + fname_suffix[size]
-        fpath = "resource/logo/" + fname
+        fpath = "resources/logo/" + fname
     except KeyError:
         raise ValueError('Unknown logo size or selection')
     logo = plt.imread(pkg_resources.resource_filename(
@@ -147,7 +147,7 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
     # if(small_city):
     #     try:
     #         fname = 'small_city.000'
-    #         fpath = "resource/" + fname
+    #         fpath = "resources/" + fname
     #     except KeyError:
     #         raise ValueError('can not find the file small_city.000 in the resources')
     #     city = read_micaps_17(pkg_resources.resource_filename(
@@ -166,7 +166,7 @@ def add_city_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=False,zorder=
     #province city
     try:
         fname = 'city_province.000'
-        fpath = "resource/" + fname
+        fpath = "resources/" + fname
     except KeyError:
         raise ValueError('can not find the file city_province.000 in the resources')
 
@@ -206,7 +206,7 @@ def add_city_and_number_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=Fa
     if(small_city):
         try:
             fname = 'small_city.000'
-            fpath = "resource/" + fname
+            fpath = "resources/" + fname
         except KeyError:
             raise ValueError('can not find the file small_city.000 in the resources')
         city = read_micaps_17(pkg_resources.resource_filename(
@@ -225,7 +225,7 @@ def add_city_and_number_on_map(ax,map_extent=[70,140,15,55],size=7,small_city=Fa
     #province city
     try:
         fname = 'city_province.000'
-        fpath = "resource/" + fname
+        fpath = "resources/" + fname
     except KeyError:
         raise ValueError('can not find the file city_province.000 in the resources')
 
@@ -273,7 +273,7 @@ def add_city_values_on_map(ax,data,map_extent=[70,140,15,55],size=13,zorder=10,c
     #province city
     try:
         fname = 'city_province.000'
-        fpath = "resource/" + fname
+        fpath = "resources/" + fname
     except KeyError:
         raise ValueError('can not find the file city_province.000 in the resources')
 
@@ -332,7 +332,7 @@ def add_china_map_2cartopy_public(ax, name='province', facecolor='none',
 
     # get shape filename
     shpfile = pkg_resources.resource_filename(
-        'nmc_met_map', "/resource/shapefile/" + names[name] + ".shp")
+        'nmc_met_map', "/resources/shapefile/" + names[name] + ".shp")
 
     # add map
     ax.add_geometries(
@@ -778,7 +778,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'RAINC06':'ECMWF_HR/RAINC06/',
                     'SNOW03':'ECMWF_HR/SNOW03/',
                     'SNOW06':'ECMWF_HR/SNOW06/',
-                    'SNOW24':'ECMWF_HR/SNOW024/',
+                    'SNOW24':'ECMWF_HR/SNOW24/',
                     'TCWV':'ECMWF_HR/TCWV/',
                     '10M_GUST_3H':'ECMWF_HR/10_METRE_WIND_GUST_IN_THE_LAST_3_HOURS/',
                     '10M_GUST_6H':'ECMWF_HR/10_METRE_WIND_GUST_IN_THE_LAST_6_HOURS/',
@@ -802,7 +802,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'RAINC06':'GRAPES_GFS/RAINC06/',
                     'SNOW03':'GRAPES_GFS/SNOW03/',
                     'SNOW06':'GRAPES_GFS/SNOW06/',
-                    'SNOW24':'GRAPES_GFS/SNOW024/',
+                    'SNOW24':'GRAPES_GFS/SNOW24/',
                     'TCWV':'GRAPES_GFS/PWAT/ENTIRE_ATMOSPHERE/',
                     'T2m':'GRAPES_GFS/TMP/2M_ABOVE_GROUND/',
                     'Tmx3_2m':'GRAPES_GFS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
@@ -861,6 +861,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                 'Tmx_2m':'SURFACE/TMP_MAX_24H_ALL_STATION/',
                 'PLOT_ALL':'SURFACE/PLOT_ALL/',
                 'RAIN06_ALL':'SURFACE/RAIN06_ALL_STATION/',
+                'RAIN03_ALL':'SURFACE/RAIN06_ALL_STATION/',
                 'PLOT_GLOBAL_3H':'SURFACE/PLOT_GLOBAL_3H/',
                 'CREF':'RADARMOSAIC/CREF/',
                 'PLOT_GUST':'SURFACE/MAX_WIND/'
@@ -878,7 +879,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'VIS':'NWFD_SCMOC/VIS/',
                     'rh2m':'NWFD_SCMOC/RH/2M_ABOVE_GROUND/'
                     },
-            '中央气象台智能网格预报':{
+            '中央气象台智能网格':{
                     'u10m':'NWFD_SMERGE/UGRD/10M_ABOVE_GROUND/',
                     'v10m':'NWFD_SMERGE/VGRD/10M_ABOVE_GROUND/',
                     'RAIN24':'NWFD_SMERGE/RAIN24/',
@@ -1190,7 +1191,7 @@ def CMISS_data_code(
 def add_cartopy_background(ax,name='RD'):
     #http://earthpy.org/cartopy_backgroung.html
     #C:\ProgramData\Anaconda3\Lib\site-packages\cartopy\data\raster\natural_earth
-    bg_dir=pkg_resources.resource_filename('nmc_met_map','resource/backgrounds/')
+    bg_dir=pkg_resources.resource_filename('nmc_met_map','resources/backgrounds/')
     os.environ["CARTOPY_USER_BACKGROUNDS"] = bg_dir
     ax.background_img(name=name, resolution='high')
 
@@ -1289,7 +1290,7 @@ def cm_heavy_rain_nws(atime=24, pos=None):
     else:
         _pos = pos
     cmap, norm = mpl.colors.from_levels_and_colors(_pos, _colors, extend='neither')
-    return cmap, norm 
+    return cmap, norm
 
 
     #coding=utf-8
@@ -1357,7 +1358,9 @@ def gy_shp2clip(originfig,ax,shpfile,lbs_originfig=None):
     #clip=ax.add_patch(clip)
     # for contour in originfig.collections:
     #     contour.set_clip_path(clip)
-
+    for contour in originfig.collections:
+        contour.set_clip_path(clip)
+        
     if(lbs_originfig is not None):
         clip_map_shapely = ShapelyPolygon(vertices)
         for text_object in lbs_originfig:
@@ -1433,7 +1436,7 @@ def get_var_anm(input_var=None,Var_name='gh500'):
             't850':'t'}
 
     clm_file = pkg_resources.resource_filename(
-        'nmc_met_map', "/resource/climate_data/"+clm_file_name[Var_name])
+        'nmc_met_map', "/resources/climate_data/"+clm_file_name[Var_name])
     clm_data=xr.open_dataset(clm_file).load()
     input_var_time=pd.to_datetime(input_var.time.values[0]-np.timedelta64(8,'h'))
     clm_data_slt=clm_data.sel(time=((clm_data.time.dt.month==input_var_time.month) &
@@ -1452,7 +1455,7 @@ def get_var_extr(input_var=None,Var_name='gh500'):
                     't850':1,}
 
     clm_file = pkg_resources.resource_filename(
-        'nmc_met_map', "/resource/climate_data/"+clm_file_name[Var_name])
+        'nmc_met_map', "/resources/climate_data/"+clm_file_name[Var_name])
     clm_data=xr.open_dataset(clm_file).load()
     input_var_time=pd.to_datetime(input_var.time.values[0]-np.timedelta64(8,'h'))
     clm_data_slt=clm_data.sel(time=((clm_data.time.dt.month==input_var_time.month) &

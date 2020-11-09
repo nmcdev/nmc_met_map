@@ -654,8 +654,15 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
         x, y = np.meshgrid(div['lon'], div['lat'])
         z=np.squeeze(div['data'])
         clevs_div = np.arange(-15, 16, 1)
+        # plots['div'] = ax.contourf(
+        #     x, y, z*1e5,clevs_div,cmap=plt.cm.PuOr,
+        #     transform=datacrs,alpha=0.5, zorder=1,extend='both')
+
+        cmap=dk_ctables2.ncl_cmaps('hotcolr_19lev')
         plots['div'] = ax.contourf(
-            x, y, z*1e5,clevs_div,cmap=plt.cm.PuOr,
+            x, y, z*1e5,
+            levels=clevs_div[:],
+            vmin=-15,vmax=15,cmap=cmap,
             transform=datacrs,alpha=0.5, zorder=1,extend='both')
 
     # draw -hPa wind bards
@@ -709,7 +716,7 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
     if(div != None):
         cax=plt.axes([l,b-0.04,w,.02])
         cb = plt.colorbar(plots['div'], cax=cax, orientation='horizontal',
-                      ticks=clevs_div[:],
+                       ticks=clevs_div[:],
                       extend='both',extendrect=False)
         cb.ax.tick_params(labelsize='x-large')                      
         cb.set_label('Divergence ($10^5$ s$^{-1}$)',size=20)

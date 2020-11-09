@@ -17,7 +17,6 @@ from metpy.plots import add_metpy_logo, SkewT
 from metpy.units import units
 from scipy.stats import norm
 from scipy.interpolate import LinearNDInterpolator
-import skextremes as ske
 
 def Station_Synthetical_Forecast_From_Cassandra(
         model='ECMWF',
@@ -162,7 +161,8 @@ def Station_Synthetical_Forecast_From_Cassandra(
     r03_hourly=r03.interp(time=time_new).rename({'data':'r03'}).to_dataframe().drop(columns=['lon', 'lat','forecast_reference_time','forecast_period'])
     t2m_hourly=t2m.interp(time=time_new).rename({'data':'t2m'}).to_dataframe().drop(columns=['lon', 'lat','forecast_reference_time','forecast_period'])
     pd_output=VIS_hourly.merge(wsp10m_hourly,on='time').merge(r03_hourly,on='time').merge(t2m_hourly,on='time')
-    pd_output.to_csv(output_dir+pd.to_datetime(wsp10m['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime().strftime('%Y%m%d%H')+'_起报.csv')
+    if(output_dir is not None):
+        pd_output.to_csv(output_dir+pd.to_datetime(wsp10m['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime().strftime('%Y%m%d%H')+'_起报.csv')
 
     sta_graphics.draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=t2m,Td2m=Td2m,AT=AT,u10m=u10m,v10m=v10m,u100m=u100m,v100m=v100m,
@@ -534,7 +534,8 @@ def point_fcst(
         dir_rqd=[utl.Cassandra_dir(data_type='surface',data_source=model,var_name='T2m'),
                         utl.Cassandra_dir(data_type='surface',data_source=model,var_name='u10m'),
                         utl.Cassandra_dir(data_type='surface',data_source=model,var_name='v10m'),
-                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN'+str(t_gap).zfill(2))]
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN'+str(t_gap).zfill(2)),
+                        ]
     except KeyError:
         raise ValueError('Can not find all required directories needed')
     
@@ -555,10 +556,67 @@ def point_fcst(
         output_dir=output_dir,
         points=points,
         extra_info=extra_info
-            )                 
+            )
+
+def point_fcst_ecgust(
+        model='ECMWF',
+        output_dir=None,
+        t_range=[0,60],
+        t_gap=3,
+        points={'lon':[116.3833], 'lat':[39.9], 'altitude':[1351]},
+        initTime=None,day_back=0,
+        extra_info={
+            'output_head_name':' ',
+            'output_tail_name':' ',
+            'point_name':' '}
+            ):
+
+    #+get all the directories needed
+    try:
+        dir_rqd=[utl.Cassandra_dir(data_type='surface',data_source=model,var_name='T2m'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='u10m'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='v10m'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN'+str(t_gap).zfill(2)),
+                        utl.Cassandra_dir(data_type='surface',data_source='ECMWF',var_name='10M_GUST_3H')
+                        ]
+    except KeyError:
+        raise ValueError('Can not find all required directories needed')
+    
+    #-get all the directories needed
+    if(initTime == None):
+        initTime = get_latest_initTime(dir_rqd[0])
+        initTime_ec = get_latest_initTime(dir_rqd[-1])
+        #initTime=utl.filename_day_back_model(day_back=day_back,fhour=0)[0:8]
+
+    directory=dir_rqd[0][0:-1]
+    fhours = np.arange(t_range[0], t_range[1], t_gap)
+    filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
+    if(model == '中央气象台中短期指导'):
+        fhours_ec = np.arange(t_range[0]+12, t_range[1]+12, t_gap)
+    else:
+        fhours_ec=fhours
+    if(fhours[0]==0 and fhours_ec[0] !=0):
+        fhours_ec=fhours_ec[1:]
+    filenames_ec=[initTime_ec+'.'+str(fhour).zfill(3) for fhour in fhours_ec]
+    t2m=utl.get_model_points_gy(dir_rqd[0], filenames, points,allExists=False)
+    u10m=utl.get_model_points_gy(dir_rqd[1], filenames, points,allExists=False)
+    v10m=utl.get_model_points_gy(dir_rqd[2], filenames, points,allExists=False)
+    rn=utl.get_model_points_gy(dir_rqd[3], filenames, points,allExists=False)
+    gust=utl.get_model_points_gy(dir_rqd[4], filenames_ec, points,allExists=False)
+    wind_dir=mpcalc.wind_direction(u10m['data'].values* units.meter / units.second,v10m['data'].values* units.meter / units.second)
+    u10m_ec,v10m_ec=mpcalc.wind_components(np.squeeze(gust['data'].values)* units.meter / units.second,np.squeeze(wind_dir))
+    u10m['data'].values[:,0,0]=u10m_ec
+    v10m['data'].values[:,0,0]=v10m_ec
+
+    sta_graphics.draw_point_fcst(t2m=t2m,u10m=u10m,v10m=v10m,rn=rn,
+        model=model,
+        output_dir=output_dir,
+        points=points,
+        extra_info=extra_info
+            )
 
 def point_uv_tmp_rh_rn_fcst(
-        model='ECMWF',
+        model='中央气象台中短期指导',
         output_dir=None,
         t_range=[0,60],
         t_gap=3,
@@ -599,6 +657,8 @@ def point_uv_tmp_rh_rn_fcst(
         points=points,
         extra_info=extra_info
             )
+
+
 
 def point_fcst_according_to_3D_field(
         model='ECMWF',

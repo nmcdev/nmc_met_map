@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 import pkg_resources
 import nmc_met_map.product.diagnostic.elements.horizontal.SCMOC as draw_SCMOC
 
-def dT2m_mx24(initTime=None, fhour=48,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],area=None,south_China_sea=True,
+def dT2m_mx24(initTime=None, fhour=48,day_back=0,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],area=None,south_China_sea=True,
     **kargws):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='中央气象台中短期指导',var_name='Tmx_2m')]
@@ -64,13 +64,13 @@ def dT2m_mx24(initTime=None, fhour=48,
 
 #- to solve the problem of labels on all the contours
     dTmx2=xr.DataArray(np.squeeze(dTmx_2m['data'].values,axis=0),name='data',
-                    coords={'time':('time',[dTmx_2m['time'].values[0]]),
+                    coords={'time':('time',[dTmx_2m['forecast_reference_time'].values]),
                             'fhour':('time',[fhour]),
                             'lat':('lat',dTmx_2m['lat'].values),
                             'lon':('lon',dTmx_2m['lon'].values)
                             },
                     dims=('time','lat','lon'),
-                    attrs={'model_name':'中央气象台中短期指导',
+                    attrs={'model_name':'智能网格预报',
                            'var_name':'2米最高温度24小时变温',
                            'vhours':24})
 

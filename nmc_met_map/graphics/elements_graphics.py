@@ -17,7 +17,7 @@ import sys
 from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
 from scipy.ndimage import gaussian_filter
-import matplotlib.patheffects as mpatheffects
+import matplotlib.patheffects as path_effects
 
 def draw_T_2m(T_2m=None,
             map_extent=(50, 150, 0, 65),
@@ -58,16 +58,16 @@ def draw_T_2m(T_2m=None,
             linewidths=2, transform=datacrs, zorder=2)
         cl_zero=plt.clabel(plots['T_2m_zero'], inline=1, fontsize=15, fmt='%i',colors='#232B99')
         for t in cl_zero:
-            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='white'),
-                       mpatheffects.Normal()])
+            t.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                       path_effects.Normal()])
 
         plots['T_2m_35'] = ax.contour(
             x, y, z, levels=[35,37,40], colors=['#FF8F00','#FF6200','#FF0000'],
             linewidths=2, transform=datacrs, zorder=2)
         cl_35=plt.clabel(plots['T_2m_35'], inline=1, fontsize=15, fmt='%i',colors='#FF0000')
         for t in cl_35:
-            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='white'),
-                       mpatheffects.Normal()])
+            t.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                       path_effects.Normal()])
 
 
     plt.title('['+T_2m.attrs['model']+']'+' '+T_2m.attrs['title'], 
@@ -136,7 +136,7 @@ def draw_T_2m(T_2m=None,
     if(output_dir != None):
         plt.savefig(output_dir+'最低温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(T_2m.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(T_2m.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     if(output_dir == None):
         plt.show()
 
@@ -185,8 +185,8 @@ def draw_dT_2m(dT_2m=None,T_type='Tmx',
 
         cl=plt.clabel(plots['T_2m_contour'], inline=1, fontsize=15, fmt='%i',colors=clev_colors)
         for t in cl:
-            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='#D9D9D9'),
-                       mpatheffects.Normal()])
+            t.set_path_effects([path_effects.Stroke(linewidth=3, foreground='#D9D9D9'),
+                       path_effects.Normal()])
                        
         '''
         z=gaussian_filter(z,5)
@@ -195,16 +195,16 @@ def draw_dT_2m(dT_2m=None,T_type='Tmx',
             linewidths=2, transform=datacrs, zorder=2)
         cl_zero=plt.clabel(plots['T_2m_zero'], inline=1, fontsize=15, fmt='%i',colors='#232B99')
         for t in cl_zero:
-            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='white'),
-                       mpatheffects.Normal()])
+            t.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                       path_effects.Normal()])
 
         plots['T_2m_35'] = ax.contour(
             x, y, z, levels=[35,37,40], colors=['#FF8F00','#FF6200','#FF0000'],
             linewidths=2, transform=datacrs, zorder=2)
         cl_35=plt.clabel(plots['T_2m_35'], inline=1, fontsize=15, fmt='%i',colors='#FF0000')
         for t in cl_35:
-            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='white'),
-                       mpatheffects.Normal()])
+            t.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                       path_effects.Normal()])
         '''
 
     plt.title('['+dT_2m.attrs['model']+']'+' '+dT_2m.attrs['title'], 
@@ -523,7 +523,7 @@ def draw_mslp_gust10m(gust=None, mslp=None,
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_逐6小时最大风速_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()                           
@@ -576,13 +576,61 @@ def draw_mslp_gust10m_uv10m(gust=None, mslp=None,uv10m=None,
             linewidths=1, transform=datacrs, zorder=2,alpha=0.5)
         cl=plt.clabel(plots['mslp'], inline=1, fontsize=15, fmt='%.1f',colors='black')
         for t in cl:
-            t.set_path_effects([mpatheffects.Stroke(linewidth=3, foreground='white'),
-                       mpatheffects.Normal()])
+            t.set_path_effects([path_effects.Stroke(linewidth=3, foreground='white'),
+                       path_effects.Normal()])
+        #+画高低压中心
+        res = mslp['lon'].values[1] - mslp['lon'].values[0]
+        nwindow = int(9.5 / res)
+        mslp_hl = np.ma.masked_invalid(mslp['data'].values).squeeze()
+        local_min, local_max = utl.extrema(mslp_hl, mode='wrap', window=nwindow)
+        #Get location of extrema on grid
+        xmin, xmax, ymin, ymax = map_extent2
+        lons2d, lats2d = x,y
+        transformed = datacrs.transform_points(datacrs, lons2d, lats2d)
+        x = transformed[..., 0]
+        y = transformed[..., 1]
+        xlows = x[local_min]; xhighs = x[local_max]
+        ylows = y[local_min]; yhighs = y[local_max]
+        lowvals = mslp_hl[local_min]; highvals = mslp_hl[local_max]
+        yoffset = 0.022*(ymax-ymin)
+        dmin = yoffset
+        #Plot low pressures
+        xyplotted = []
+        for x,y,p in zip(xlows, ylows, lowvals):
+            if x < xmax-yoffset and x > xmin+yoffset and y < ymax-yoffset and y > ymin+yoffset:
+                dist = [np.sqrt((x-x0)**2+(y-y0)**2) for x0,y0 in xyplotted]
+                if not dist or min(dist) > dmin: #,fontweight='bold'
+                    a = ax.text(x,y,'L',fontsize=28,
+                            ha='center',va='center',color='r',fontweight='normal', transform=datacrs)
+                    b = ax.text(x,y-yoffset,repr(int(p)),fontsize=14,
+                            ha='center',va='top',color='r',fontweight='normal', transform=datacrs)
+                    a.set_path_effects([path_effects.Stroke(linewidth=1.5, foreground='black'),
+                        path_effects.SimpleLineShadow(),path_effects.Normal()])
+                    b.set_path_effects([path_effects.Stroke(linewidth=1.0, foreground='black'),
+                        path_effects.SimpleLineShadow(),path_effects.Normal()])
+                    xyplotted.append((x,y))
+                    
+        #Plot high pressures
+        xyplotted = []
+        for x,y,p in zip(xhighs, yhighs, highvals):
+            if x < xmax-yoffset and x > xmin+yoffset and y < ymax-yoffset and y > ymin+yoffset:
+                dist = [np.sqrt((x-x0)**2+(y-y0)**2) for x0,y0 in xyplotted]
+                if not dist or min(dist) > dmin:
+                    a = ax.text(x,y,'H',fontsize=28,
+                            ha='center',va='center',color='b',fontweight='normal', transform=datacrs)
+                    b = ax.text(x,y-yoffset,repr(int(p)),fontsize=14,
+                            ha='center',va='top',color='b',fontweight='normal', transform=datacrs)
+                    a.set_path_effects([path_effects.Stroke(linewidth=1.5, foreground='black'),
+                        path_effects.SimpleLineShadow(),path_effects.Normal()])
+                    b.set_path_effects([path_effects.Stroke(linewidth=1.0, foreground='black'),
+                        path_effects.SimpleLineShadow(),path_effects.Normal()])
+                    xyplotted.append((x,y))
+        #-画高低压中心
 
 #additional information
     plt.title('['+mslp.attrs['model']+'] '+
         '海平面气压, '+
-        '逐'+'%i'%gust.attrs['t_gap']+'小时10米最大阵风和10米平均风', 
+        '过去'+'%i'%gust.attrs['t_gap']+'小时10米最大阵风和10米平均风', 
         loc='left', fontsize=30)
 
     utl.add_china_map_2cartopy_public(
@@ -650,7 +698,7 @@ def draw_mslp_gust10m_uv10m(gust=None, mslp=None,uv10m=None,
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_逐6小时最大风速_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
     
     if(output_dir == None):
         plt.show()                           

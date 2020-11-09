@@ -3,9 +3,9 @@
 Other required packages:
 
 - numpy
-- matplotlib
+- matplotlib==3.2.1
 - pandas
-- cartopy
+- cartopy==0.17.0
 - metpy
 - nmc_met_io          请预先安装, 见https://github.com/nmcdev/nmc_met_io
 - nmc_met_graphics    请预先安装, 见https://github.com/nmcdev/nmc_met_graphics

@@ -18,7 +18,7 @@ import copy
 
 def gh_rain(initTime=None, fhour=24, day_back=0,model='ECMWF',
     gh_lev=500,atime=6,data_source='MICAPS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -123,8 +123,8 @@ def gh_rain(initTime=None, fhour=24, day_back=0,model='ECMWF',
 
 def mslp_rain_snow(initTime=None, fhour=24, day_back=0,model='ECMWF',
     atime=6,data_source='MICAPS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False):
     '''
     issues:
@@ -268,7 +268,7 @@ def mslp_rain_snow(initTime=None, fhour=24, day_back=0,model='ECMWF',
 
 def Rain_evo(initTime=None, t_gap=6,t_range=[6,36], fcs_lvl=4,day_back=0,model='ECMWF',
     data_source='MICAPS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -333,7 +333,7 @@ def Rain_evo(initTime=None, t_gap=6,t_range=[6,36], fcs_lvl=4,day_back=0,model='
 
 def cumulated_precip_evo(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model='ECMWF',
     data_source='MICAPS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = None,city=False,output_dir=None,
     Global=False):
     fhours = np.arange(t_range[0], t_range[1]+1, t_gap)
@@ -397,7 +397,7 @@ def cumulated_precip_evo(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model=
 
 def cumulated_precip(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model='ECMWF',
     data_source='MICAPS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = None,city=False,output_dir=None,
     Global=False):
     fhours = np.arange(t_range[0], t_range[1]+1, t_gap)

@@ -15,7 +15,7 @@ import xarray as xr
 
 def gh_uv_pwat(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
     Global=False):
 
@@ -134,7 +134,7 @@ def gh_uv_pwat(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
 def gh_uv_rh(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,rh_lev=850,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
     Global=False):
 
@@ -250,7 +250,7 @@ def gh_uv_rh(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
 def gh_uv_spfh(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,spfh_lev=850,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
     Global=False):
 
@@ -363,7 +363,7 @@ def gh_uv_spfh(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
 def gh_uv_wvfl(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     gh_lev=500,uv_lev=850,wvfl_lev=850,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
     Global=False):
 

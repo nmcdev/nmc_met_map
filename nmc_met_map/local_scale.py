@@ -22,7 +22,7 @@ def wind_rh_according_to_4D_data(initTime=None, fhour=6, day_back=0,
         'name':['健美乡','项脚乡','\n锦屏镇','\n马道镇','S9005  ']},
     draw_zd=True,
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500],
-    map_ratio=19/9,zoom_ratio=1,
+    map_ratio=14/9,zoom_ratio=1,
     south_China_sea=False,area = '全国',city=False,output_dir=None,
     bkgd_type='satellite',
     data_source='MICAPS'):
@@ -512,15 +512,8 @@ def wind_temp_rn_according_to_4D_data(initTime=None, fhour=6, day_back=0,
     wsp_sta=(u_sta**2+v_sta**2)**0.5
     u10m_2D=u10m.interp(lon=('points', sta_fcs['lon']), lat=('points', sta_fcs['lat']))
     v10m_2D=v10m.interp(lon=('points', sta_fcs['lon']), lat=('points', sta_fcs['lat']))
-    if(model=='GRAPES_GFS' and data_source=='CIMISS'):
-        rh2m_2D=rh2m.interp(lon=('points', sta_fcs['lon']), lat=('points', sta_fcs['lat']))['data'].values
-    else:
-        td2m_2D=td2m.interp(lon=('points', sta_fcs['lon']), lat=('points', sta_fcs['lat']))
-        t2m_2D=t2m.interp(lon=('points', sta_fcs['lon']), lat=('points', sta_fcs['lat']))
-        if(data_source=='MICAPS'):
-            rh2m_2D=mpcalc.relative_humidity_from_dewpoint(t2m_2D['data'].values*units('degC'),td2m_2D['data'].values*units('degC'))*100
-        else:
-            rh2m_2D=mpcalc.relative_humidity_from_dewpoint(t2m_2D['data'].values*units('kelvin'),td2m_2D['data'].values*units('kelvin'))*100
+    td2m_2D=td2m.interp(lon=('points', sta_fcs['lon']), lat=('points', sta_fcs['lat']))
+    t2m_2D=t2m.interp(lon=('points', sta_fcs['lon']), lat=('points', sta_fcs['lat']))
         
     wsp10m_2D=(u10m_2D['data'].values**2+v10m_2D['data'].values**2)**0.5
     winddir10m=mpcalc.wind_direction(u10m_2D['data'].values* units('m/s'),v10m_2D['data'].values* units('m/s'))

@@ -29,7 +29,6 @@ import nmc_met_graphics.cmap.ctables as dk_ctables
 import nmc_met_graphics.cmap.cm as dk_ctables2
 import nmc_met_graphics.cmap.wrf as wrf_ctables
 import nmc_met_map.lib.utility as utl
-from metpy.plots import add_metpy_logo, add_timestamp, colortables
 import nmc_met_graphics.mask as dk_mask
 import os
 from scipy.ndimage import gaussian_filter

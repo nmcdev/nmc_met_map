@@ -15,7 +15,7 @@ import pkg_resources
 import nmc_met_map.product.diagnostic.elements.horizontal.SCMOC as draw_SCMOC
 
 def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -83,7 +83,7 @@ def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象�
         output_dir=output_dir,Global=Global)
 
 def T2m_mx24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',area=None,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',area=None,
     **kargws):
 
 # prepare data
@@ -168,8 +168,8 @@ def T2m_mx24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
 
 
 def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False):
 
 # prepare data
@@ -244,13 +244,13 @@ def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
     Tmn_2m.attrs['title']='2米最低温度'
 
     elements_graphics.draw_T_2m(
-        T_2m=Tmn_2m,T_type='T_mn',
+        T_2m=Tmn_2m,#T_type='T_mn',
         map_extent=map_extent, regrid_shape=20,
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)                
 
 def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -304,13 +304,13 @@ def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短�
     Tmean_2m.attrs['title']='2米平均温度'
 
     elements_graphics.draw_T_2m(
-        T_2m=Tmean_2m,T_type='T_mean',
+        T_2m=Tmean_2m,
         map_extent=map_extent, regrid_shape=20,
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)  
 
 def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -408,7 +408,7 @@ def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
         output_dir=output_dir,Global=Global)        
 
 def mslp_gust10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -493,7 +493,7 @@ def mslp_gust10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
         output_dir=output_dir,Global=Global)
 
 def mslp_gust10m_uv10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],data_source='MICAPS',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -584,7 +584,7 @@ def mslp_gust10m_uv10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
         output_dir=output_dir,Global=Global)        
 
 def low_level_wind(initTime=None, fhour=6, day_back=0,model='ECMWF',wind_level='100m',data_source='MICAPS',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 

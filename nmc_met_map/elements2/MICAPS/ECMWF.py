@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import pkg_resources
 
 def dT2m_mx24(initTime=None, fhour=48, day_back=0,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -78,7 +78,7 @@ def dT2m_mx24(initTime=None, fhour=48, day_back=0,
         output_dir=output_dir,Global=Global)        
 
 def dT2m_mn24(initTime=None, fhour=48, day_back=0,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 
@@ -146,7 +146,7 @@ def dT2m_mn24(initTime=None, fhour=48, day_back=0,
         output_dir=output_dir,Global=Global)
 
 def dT2m_mean24(initTime=None, fhour=48, day_back=0,
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
     Global=False):
 

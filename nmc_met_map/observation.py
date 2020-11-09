@@ -11,10 +11,8 @@ import nmc_met_map.lib.utility as utl
 import xarray as xr
 from nmc_met_map.lib.read_micaps_16 import read_micaps_16
 import pkg_resources
-from nmc_met_publish_map.source.lib.match_two_array import match_two_array
 from scipy.interpolate import Rbf
 from scipy.interpolate import griddata
-import regionmask
 from nmc_met_io.retrieve_micaps_server import get_model_grid,get_fy_awx,get_station_data,get_radar_mosaic
 import pandas as pd
 from datetime import datetime, timedelta
@@ -23,7 +21,7 @@ from nmc_met_map.graphics import observation_graphics
 
 def IR_Sounding_GeopotentialHeight(Plot_IR=True,Plot_Sounding=True, Plot_HGT=True,
     IR_time=None,Sounding_time=None, HGT_initTime=None,fhour=24, model='ECMWF',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],city=False,Channel='C009',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],city=False,Channel='C009',
     south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS'):
 
     Sounding=None
@@ -82,7 +80,7 @@ def IR_Sounding_GeopotentialHeight(Plot_IR=True,Plot_Sounding=True, Plot_HGT=Tru
 
 def CREF_Sounding_GeopotentialHeight(Plot_CREF=True,Plot_Sounding=True, Plot_HGT=True,
     CREF_time=None,Sounding_time=None, HGT_initTime=None,fhour=24, model='ECMWF',
-    map_ratio=19/9,zoom_ratio=20,cntr_pnt=[102,34],city=False,Channel='C009',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],city=False,Channel='C009',
     south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS'):
 
     Sounding=None
@@ -101,7 +99,7 @@ def CREF_Sounding_GeopotentialHeight(Plot_CREF=True,Plot_Sounding=True, Plot_HGT
                 filename_CREF='ACHN.CREF000.20'+CREF_time[0:6]+'.'+CREF_time[6:8]+'0000.LATLON'
                 CREF = get_radar_mosaic(data_dir[0], filename=filename_CREF)
             else:
-                CREF = get_CREF_mosaic(data_dir[0])
+                CREF = get_radar_mosaic(data_dir[0])
 
         if(Plot_Sounding is True):
             if(Sounding_time != None):

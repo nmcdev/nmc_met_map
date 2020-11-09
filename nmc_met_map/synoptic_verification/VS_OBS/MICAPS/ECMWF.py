@@ -21,7 +21,7 @@ from scipy.interpolate import LinearNDInterpolator
 def point_fcst_uv_tmp_according_to_3D_field_vs_sounding(
         output_dir=None,
         obs_ID='55664',
-        initTime=None,fhour=6,day_back=0,
+        initTime=None,fhour=0,
         extra_info={
             'output_head_name':' ',
             'output_tail_name':' ',
@@ -41,7 +41,7 @@ def point_fcst_uv_tmp_according_to_3D_field_vs_sounding(
         raise ValueError('Can not find all required directories needed')
     
     if(initTime == None):
-        initTime = get_latest_initTime(dir_rqd[0][0:-1]+'/850')
+        initTime = get_latest_initTime(dir_rqd[1][0:-1]+'/850')
     
     filename_obs=(datetime.strptime('20'+initTime,'%Y%m%d%H')+timedelta(hours=fhour)).strftime('%Y%m%d%H%M%S')+'.000'
     obs_pfl_all=MICAPS_IO.get_tlogp(dir_rqd[0][0:-1], filename=filename_obs, cache=False)

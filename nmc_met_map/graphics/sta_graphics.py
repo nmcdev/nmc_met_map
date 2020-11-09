@@ -543,7 +543,7 @@ def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=
     skew.plot(p, Td, 'g')
     skew.plot_barbs(p, u, v)
     skew.ax.set_ylim(1000, 100)
-    skew.ax.set_xlim(-40, 60)
+    skew.ax.set_xlim(-40, 50)
 
     # Calculate LCL height and plot as black dot. Because `p`'s first value is
     # ~1000 mb and its last value is ~250 mb, the `0` index is selected for
@@ -571,7 +571,8 @@ def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=
     skew.plot_mixing_lines()
 
     #forecast information
-    bax=plt.axes([0.12,0.88,.25,.07],facecolor='#FFFFFFCC')
+    l, b, w, h = skew.ax.get_position().bounds
+    bax=plt.axes([l,b+h,.25,.07],facecolor='#FFFFFFCC')
     bax.axis('off')
     bax.axis([0, 10, 0, 10])
 
@@ -586,7 +587,7 @@ def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=
     plt.text(2.5, 2.5,'预报点: '+str(fcst_info.attrs['points']['lon'])+
         ', '+str(fcst_info.attrs['points']['lat']),size=11)
     plt.text(2.5, 0.5,'www.nmc.cn',size=11)
-    utl.add_logo_extra_in_axes(pos=[0.1,0.88,.07,.07],which='nmc', size='Xlarge')
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h,.07,.07],which='nmc', size='Xlarge')
 
     # Show the plot
     if(output_dir != None ):
@@ -744,7 +745,7 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
         label=str(int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0]))+'小时降水',alpha=0.5)
     #curve_rn=ax_rn.plot(rn_t, np.squeeze(rn['data'].values), c='#40C4FF',linewidth=3)
     
-    ax_rn.set_ylim(0,np.nanmax(np.append(10,np.squeeze(rn.values))))
+    ax_rn.set_ylim(0,np.nanmax(np.append(10,np.squeeze(rn.values)+1)))
     ###
 
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -824,11 +825,11 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
         if not isExists:
             os.makedirs(output_dir)
 
-        output_dir2=output_dir+model+'_起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+'/'
-        if(os.path.exists(output_dir2) == False):
-            os.makedirs(output_dir2)
+        # output_dir2=output_dir+model+'_起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+'/'
+        # if(os.path.exists(output_dir2) == False):
+        #     os.makedirs(output_dir2)
 
-        plt.savefig(output_dir2+extra_info['point_name']+
+        plt.savefig(output_dir+#extra_info['point_name']+
         extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
@@ -1388,7 +1389,8 @@ def draw_sta_skewT_model_VS_obs(fcst_pfl=None,obs_pfl=None,
     # isotherm
 
     #forecast information
-    bax=plt.axes([0.12,0.88,.25,.07],facecolor='#FFFFFFCC')
+    l, b, w, h = skew.ax.get_position().bounds
+    bax=plt.axes([l,b+h,.25,.07],facecolor='#FFFFFFCC')
     bax.axis('off')
     bax.axis([0, 10, 0, 10])
 
@@ -1405,8 +1407,7 @@ def draw_sta_skewT_model_VS_obs(fcst_pfl=None,obs_pfl=None,
     plt.text(2.5, 2.5,'经纬度 '+str(fcst_info.attrs['points']['lon'][0])+
         ', '+str(fcst_info.attrs['points']['lat'][0]),size=11)
     plt.text(2.5, 0.5,'www.nmc.cn',size=11)
-    utl.add_logo_extra_in_axes(pos=[0.1,0.88,.07,.07],which='nmc', size='Xlarge')
-
+    utl.add_logo_extra_in_axes(pos=[l-0.02,b+h,.07,.07],which='nmc', size='Xlarge')
     # Show the plot
     if(output_dir != None ):
         isExists=os.path.exists(output_dir)
@@ -1613,17 +1614,14 @@ def draw_point_fcst_VS_obs(t2m=None,u10m=None,v10m=None,rn=None,
     else:
         plt.show()
 
-def draw_AQI_points(AQI_input,title=None,
-                    map_extent=(70, 135, 15, 55),
-                    add_china=True,city=True,south_China_sea=True,
-                    output_dir=None,output_name='test',AQI_scatter_kwargs={}):
+def draw_AQI_points(AQI_input,output_dir=None,output_name='test',
+                    AQI_scatter_kwargs={},pallete_kwargs={'map_extent':(70, 135, 15, 55)}):
         
     initTime = pd.to_datetime(AQI_input['time'].values[0]).to_pydatetime()
     fhour = int(AQI_input['dtime'].values[0])
     fcstTime = initTime + timedelta(hours=fhour)
     forcast_info = '起报时间: {0:%Y}年{0:%m}月{0:%d}日{0:%H}时\n预报时间: {1:%Y}年{1:%m}月{1:%d}日{1:%H}时\n预报时效: {2}小时\nwww.nmc.cn'.format(initTime, fcstTime, fhour)
-    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete((18, 9),plotcrs=ccrs.PlateCarree(),map_extent=map_extent, title=title, forcast_info=forcast_info,info_zorder=4,
-                                             add_china=True, add_city=city, add_background=True, south_China_sea=south_China_sea)
+    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete(forcast_info=forcast_info,**pallete_kwargs)
 
     AQI_scatter = GF.draw_method.AQI_scatter(ax, AQI_input['lon'].values, AQI_input['lat'].values, np.squeeze(AQI_input['AQI'].values),
                 **AQI_scatter_kwargs)

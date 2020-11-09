@@ -347,7 +347,7 @@ def Crosssection_Wind_Theta_e_Qv(
     map_extent=[70,140,15,55],
     h_pos=[0.125, 0.665, 0.25, 0.2] ):
 
-    if(data_source is 'MICAPS'):
+    if(data_source == 'MICAPS'):
         try:
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl=''),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
@@ -516,7 +516,7 @@ def Time_Crossection_rh_uv_t(initTime=None,model='ECMWF',data_source='MICAPS',
         rh_4D=get_model_3D_grids(directory=data_dir[3][0:-1],filenames=filenames,levels=levels, allExists=False)
 
 
-    if(data_source is 'CIMISS'):
+    if(data_source == 'CIMISS'):
         if(initTime != None):
             filename = utl.model_filename(initTime, 0,UTC=True)
         else:
@@ -542,12 +542,12 @@ def Time_Crossection_rh_uv_t(initTime=None,model='ECMWF',data_source='MICAPS',
         except KeyError:
             raise ValueError('Can not find all data needed') 
 
-        TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
-        u_2D=u_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
-        v_2D=v_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
-        rh_2D=rh_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
-        rh_2D.attrs['model']=model
-        rh_2D.attrs['points']=points
+    TMP_2D=TMP_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+    u_2D=u_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+    v_2D=v_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+    rh_2D=rh_4D.interp(lon=('points', points['lon']), lat=('points', points['lat']))
+    rh_2D.attrs['model']=model
+    rh_2D.attrs['points']=points
 
     crossection_graphics.draw_Time_Crossection_rh_uv_t(
                     rh_2D=rh_2D, u_2D=u_2D, v_2D=v_2D,TMP_2D=TMP_2D,lw_ratio=lw_ratio,
@@ -618,7 +618,7 @@ def Crosssection_Wind_Temp_RH(
     lw_ratio=[16,9],
     h_pos=[0.125, 0.665, 0.25, 0.2] ):
 
-    if(data_source is 'MICAPS'):
+    if(data_source == 'MICAPS'):
         try:
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl=''),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
@@ -641,7 +641,7 @@ def Crosssection_Wind_Temp_RH(
         gh=get_model_grid(data_dir[4], filename=filename)
         psfc=get_model_grid(data_dir[5], filename=filename)
 
-    if(data_source is 'CIMISS'):
+    if(data_source == 'CIMISS'):
         if(initTime != None):
             filename = utl.model_filename(initTime, fhour,UTC=True)
         else:
@@ -739,7 +739,7 @@ def Time_Crossection_rh_uv_Temp(initTime=None,model='ECMWF',points={'lon':[116.3
     fhours = np.arange(t_range[0], t_range[1], t_gap)
 
     # 读数据
-    if(data_source is 'MICAPS'):
+    if(data_source == 'MICAPS'):
         try:
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
@@ -758,7 +758,7 @@ def Time_Crossection_rh_uv_Temp(initTime=None,model='ECMWF',points={'lon':[116.3
         rh_4D=get_model_3D_grids(directory=data_dir[3][0:-1],filenames=filenames,levels=levels, allExists=False)
         Psfc_3D=get_model_grids(directory=data_dir[4][0:-1],filenames=filenames,allExists=False)
 
-    if(data_source is 'CIMISS'):
+    if(data_source == 'CIMISS'):
         if(initTime != None):
             filename = utl.model_filename(initTime, 0,UTC=True)
         else:

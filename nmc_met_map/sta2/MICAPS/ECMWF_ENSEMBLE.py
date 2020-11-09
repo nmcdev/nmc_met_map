@@ -236,10 +236,10 @@ def point_fcst_wsp_according_to_3D_field_box_line(
 
 def point_fcst_rn_according_to_3D_field_box_line(
         output_dir=None,
-        t_range=[0,60],
-        t_gap=3,
+        t_range=[6,60],
+        t_gap=6,
         points={'lon':[116.3833], 'lat':[39.9]},
-        initTime=None,obs_ID=54511,day_back=0,
+        initTime=None,obs_ID=54511,
         extra_info={
             'output_head_name':' ',
             'output_tail_name':' ',
@@ -254,7 +254,7 @@ def point_fcst_rn_according_to_3D_field_box_line(
     
     #-get all the directories needed
     if(initTime == None):
-        initTime = get_latest_initTime(dir_rqd[0])
+        initTime = get_latest_initTime(dir_rqd)
         #initTime=utl.filename_day_back_model(day_back=day_back,fhour=0)[0:8]
 
     if(t_range[1] > 72):
