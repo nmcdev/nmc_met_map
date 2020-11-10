@@ -84,7 +84,7 @@ def Horizontal_Pallete(figsize=(16, 9), plotcrs=ccrs.PlateCarree(), datacrs=ccrs
 
     if forcast_info:
         l, b, w, h = ax.get_position().bounds
-        bax = plt.axes([l+0.002, b + h - 0.1, .25, .1], facecolor='#FFFFFFCC')
+        bax = plt.axes([l, b + h - 0.1, .25, .1], facecolor='#FFFFFFCC')
         bax.set_yticks([])
         bax.set_xticks([])
         bax.axis([0, 10, 0, 10])

@@ -20,6 +20,14 @@ from scipy.ndimage import gaussian_filter
 import matplotlib.patheffects as mpatheffects
 import nmc_met_graphics.cmap.cpt as cpt
 
+def gh_contour(ax,x,y,z,colors='black',
+    levels=np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 584, 8), np.arange(580, 604, 4))), np.arange(604, 2000, 8)),
+    alpha=0.5,linewidths=2,transform=ccrs.PlateCarree(),**kwargs):
+    img = ax.contour(x,y,z,levels=levels,linewidths=linewidths,
+        colors=colors, transform=transform,alpha=alpha,**kwargs)
+    plt.clabel(img, inline=1, fontsize=20, fmt='%i',colors=colors)
+    return img
+
 def Tmx_pcolormesh(ax, x, y, z,cmap=dk_ctables.cm_temp(),transform=ccrs.PlateCarree(),
                     vmin=-45, vmax=45,alpha=0.5, **kwargs):
     img = ax.pcolormesh(x,y,z,

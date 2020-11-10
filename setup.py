@@ -37,14 +37,14 @@ setup(
     exclude_package_data={'': ['.gitignore']},
 
     install_requires=['numpy>=1.12.1',
-                      'matplotlib==3.2.1',
+                      'matplotlib==3.2.*',
                       'pandas>=0.22.0',
                       'cartopy==0.17.0',
                       'nmc_met_graphics>=0.1.0',
                       'nmc_met_io>=0.1.0',
                       'metpy >= 0.10.0',
                       'scipy >= 1.2.1',
-                      'meteva == 1.3.*'],
+                      'meteva <= 1.3.*'],
     python_requires='>=3',
     zip_safe = False
 )

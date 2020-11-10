@@ -251,7 +251,7 @@ def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
 
 def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area = None,city=False,output_dir=None,
     Global=False):
 
 # prepare data
