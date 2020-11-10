@@ -11,7 +11,7 @@ import nmc_met_map.isentropic as draw_isentropic
 import nmc_met_map.synthetical as draw_synthetical
 import nmc_met_map.local_scale as draw_local_scale
 import nmc_met_map.observation as draw_observation
-import nmc_met_map.synoptic_verification as draw_synoptic_verification
+import nmc_met_map.syn_ver as draw_synoptic_verification
 import nmc_met_map.observation2 as draw_observation2
 import nmc_met_map.graphics2.pallete_set as ps
 
@@ -20,6 +20,33 @@ import numpy as np
 import pandas as pd
 
 import nmc_met_map.crossection as draw_crossection
+import nmc_met_map.syn_ver.VS_ana as draw_syn_ver_ana
+
+draw_syn_ver_ana.compare_vs_ana.compare_gh_uv(fhour=72)
+
+draw_elements.T2m_mn24(initTime='20110708',fhour=24,area='全国',map_ratio=10/9,
+                        model='中央气象台智能网格',data_source ='MICAPS',city=True,
+                        output_dir='L:/py_develop/test_output/20201107/')
+
+for ihour in [18,24,30,36]:
+    draw_elements.mslp_gust10m_uv10m(model='ECMWF',city=False,area='全国',t_gap=6,fhour=ihour,map_ratio=12/9,
+                            output_dir='L:/py_develop/test_output/20201107/')
+
+draw_synoptic.gh_uv_mslp(model='GRAPES_GFS',city=False,area='全国',fhour=24,map_ratio=12/9,
+                        output_dir='L:/py_develop/test_output/20201107/')
+
+draw_elements.T2m_mn24(initTime='20110708',fhour=24,area='全国',map_ratio=10/9,
+                        model='中央气象台智能网格',data_source ='MICAPS',city=True,
+                        output_dir='L:/py_develop/test_output/20201107/')
+
+
+draw_QPF.mslp_rain_snow(model='GRAPES_GFS',area='东北',fhour=36,atime=24,map_ratio=9/9,
+        output_dir='L:/py_develop/test_output/20201107/')
+
+for ihour in [18,24,30,36]:
+    draw_elements.mslp_gust10m(model='ECMWF',t_gap=6,city=True,
+        fhour=ihour,zoom_ratio=14,cntr_pnt=[115,42],map_ratio=9/9,south_China_sea=False,
+        output_dir='L:/py_develop/test_output/20201107/')
 
 draw_crossection.Time_Crossection_rh_uv_t()
 
@@ -66,21 +93,10 @@ draw_elements.T2m_mx24(fhour=24,
                         data_source ='MICAPS',
                         city=True,zoom_ratio=14,cntr_pnt=[115,42],map_ratio=9/9)
 
-
-# draw_elements.T2m_mn24(initTime='20102708',fhour=24,
-#                         model='中央气象台中短期指导',data_source ='MICAPS',city=True,zoom_ratio=14,cntr_pnt=[115,42],map_ratio=9/9)
-
-for ihour in [18,24,30,36]:
-    draw_elements.mslp_gust10m(model='ECMWF',data_source='CIMISS',t_gap=6,city=True,
-        fhour=ihour,zoom_ratio=14,cntr_pnt=[115,42],map_ratio=9/9,south_China_sea=False,
-        output_dir='L:/py_develop/test_output/20201027/')
-
 draw_elements2.MICAPS.GRAPES_GFS.dT2m_mx24(city=True,fhour=36,zoom_ratio=14,cntr_pnt=[115,42],map_ratio=9/9)
 draw_elements2.MICAPS.GRAPES_GFS.dT2m_mn24(city=True,fhour=36,zoom_ratio=15,cntr_pnt=[115,42],map_ratio=12/9,)
 draw_elements2.MICAPS.GRAPES_GFS.dT2m_mean24(city=True,area='全国',fhour=36,map_ratio=12/9)
 
-
-draw_QPF.mslp_rain_snow(model='GRAPES_GFS',fhour=36,atime=24,map_ratio=12/9,zoom_ratio=10,cntr_pnt=[104,35])
 
 draw_synoptic.gh_uv_wsp(model='GRAPES_GFS',fhour=18,map_ratio=12/9,zoom_ratio=10,gh_lev=500,uv_lev=700,area =None,cntr_pnt=[104,35])
 
@@ -89,8 +105,6 @@ draw_dynamic.fg_uv_tmp(model='GRAPES_GFS',fhour=24,city=True,cntr_pnt=[110,16],z
                      fg_lev=925)
 
 draw_elements2.MICAPS.SCMOC.dT2m_mx24(initTime='20102108',fhour=24,area='全国',city=True,map_ratio=12/9)
-
-draw_synoptic.gh_uv_mslp(model='GRAPES_GFS',city=False,area='全国',fhour=24,map_ratio=16/9)
 
 draw_crossection.Crosssection_Wind_Theta_e_absv(model='GRAPES_GFS',fhour=24,
                                                lw_ratio=[12,9],
