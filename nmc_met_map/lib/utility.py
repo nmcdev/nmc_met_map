@@ -3,7 +3,7 @@
 """
   Some utility funcations.
 """
-
+# _*_ coding: utf-8 _*_
 import itertools
 import string
 import pkg_resources
@@ -1098,8 +1098,8 @@ def read_micaps_17(fname, limit=None):
 
     # read contents
     try:
-        with open(fname, 'r') as f:
-            #txt = f.read().decode('GBK').replace('\n', ' ').split()
+        with open(fname, 'r', encoding='utf_8') as f:
+            # txt = f.read().decode('GBK').replace('\n', ' ').split()
             txt = f.read().replace('\n', ' ').split()
     except IOError as err:
         print("Micaps 17 file error: " + str(err))
