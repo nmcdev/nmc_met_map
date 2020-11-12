@@ -1,6 +1,6 @@
 include README.md
 include LICENSE
-recursive-include nmc_met_map/resource *
+recursive-include nmc_met_map/resources *
 recursive-exclude * __pycache__
 recursive-exclude * *.pyc
 recursive-exclude * *.pyo
