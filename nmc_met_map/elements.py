@@ -251,7 +251,7 @@ def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
 
 def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
-    south_China_sea=True,area = None,city=False,output_dir=None,
+    south_China_sea=True,area = None,city=False,output_dir=None,return_data=False,
     Global=False):
 
 # prepare data
@@ -303,11 +303,14 @@ def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短�
     Tmean_2m.attrs['model']=model
     Tmean_2m.attrs['title']='2米平均温度'
 
-    elements_graphics.draw_T_2m(
-        T_2m=Tmean_2m,
-        map_extent=map_extent, regrid_shape=20,
-        city=city,south_China_sea=south_China_sea,
-        output_dir=output_dir,Global=Global)  
+    if(return_data is True):
+        return Tmean_2m
+    else:
+        elements_graphics.draw_T_2m(
+            T_2m=Tmean_2m,
+            map_extent=map_extent, regrid_shape=20,
+            city=city,south_China_sea=south_China_sea,
+            output_dir=output_dir,Global=Global)  
 
 def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',

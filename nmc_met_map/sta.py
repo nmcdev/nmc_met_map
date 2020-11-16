@@ -41,7 +41,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
                 "ECMWF_HR/LCDC/",
                 "ECMWF_HR/UGRD_100M/",
                 "ECMWF_HR/VGRD_100M/",
-                "NWFD_SCMOC/VIS/",
+                "NWFD_SCMOC/VIS_SURFACE/",
 
                 utl.Cassandra_dir(
                     data_type='surface',data_source=model,var_name='RAIN03'),
@@ -561,7 +561,7 @@ def point_fcst(
 def point_fcst_ecgust(
         model='ECMWF',
         output_dir=None,
-        t_range=[0,60],
+        t_range=[0,61],
         t_gap=3,
         points={'lon':[116.3833], 'lat':[39.9], 'altitude':[1351]},
         initTime=None,day_back=0,

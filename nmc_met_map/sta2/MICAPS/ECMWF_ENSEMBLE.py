@@ -100,7 +100,7 @@ def point_fcst_tmp_according_to_3D_field_box_line(
     for it in range(0,len(time_md)):
         for inum in range(0,len(number_md)):
             alt_md=np.squeeze(HGT_4D_sm.values[it,inum,:,:,:]*10).flatten()
-            coords = np.zeros((len(extra_info['levels_for_interp']),len(lat_md),len(lon_md),3))
+            coords = np.zeros((HGT_4D_sm.level.size,len(lat_md),len(lon_md),3))
             coords[...,1] = lat_md.reshape((1,len(lat_md),1))
             coords[...,2] = lon_md.reshape((1,1,len(lon_md)))
             coords = coords.reshape((alt_md.size,3))
@@ -211,7 +211,7 @@ def point_fcst_wsp_according_to_3D_field_box_line(
     for it in range(0,len(time_md)):
         for inum in range(0,len(number_md)):
             alt_md=np.squeeze(HGT_4D_sm.values[it,inum,:,:,:]*10).flatten()
-            coords = np.zeros((len(extra_info['levels_for_interp']),len(lat_md),len(lon_md),3))
+            coords = np.zeros((HGT_4D_sm.level.size,len(lat_md),len(lon_md),3))
             coords[...,1] = lat_md.reshape((1,len(lat_md),1))
             coords[...,2] = lon_md.reshape((1,1,len(lon_md)))
             coords = coords.reshape((alt_md.size,3))

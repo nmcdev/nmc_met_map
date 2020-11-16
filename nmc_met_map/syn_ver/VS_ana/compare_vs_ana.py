@@ -108,9 +108,9 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
                             levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
                             fcst_level=0, fcst_ele="SSP", units='Pa')
                 mslp_fcst=CMISS_IO.cimiss_model_by_time('20'+filename_fcst[0:8],valid_time=fhour,
-                            data_code=utl.CMISS_data_code(data_source=model,var_name='SSP'),
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
                             levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
-                            fcst_level=0, fcst_ele="SSP", units='Pa')
+                            fcst_level=0, fcst_ele="PRS", units='Pa')
             mslp_ana['data']=mslp_ana['data']/100.
             mslp_fcst['data']=mslp_fcst['data']/100.
         except KeyError:

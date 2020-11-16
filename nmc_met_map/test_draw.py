@@ -14,7 +14,6 @@ import nmc_met_map.observation as draw_observation
 import nmc_met_map.syn_ver as draw_synoptic_verification
 import nmc_met_map.observation2 as draw_observation2
 import nmc_met_map.graphics2.pallete_set as ps
-
 from nmc_met_map.sta import sta_graphics
 import numpy as np
 import pandas as pd
@@ -22,11 +21,37 @@ import pandas as pd
 import nmc_met_map.crossection as draw_crossection
 import nmc_met_map.syn_ver.VS_ana as draw_syn_ver_ana
 
-draw_syn_ver_ana.compare_vs_ana.compare_gh_uv(fhour=72)
+Tmean_2m=draw_elements.T2m_mean24(model='中央气象台智能网格',data_source ='MICAPS',city=True,return_data=True)
 
-draw_elements.T2m_mn24(initTime='20110708',fhour=24,area='全国',map_ratio=10/9,
-                        model='中央气象台智能网格',data_source ='MICAPS',city=True,
-                        output_dir='L:/py_develop/test_output/20201107/')
+draw_elements.T2m_mn24(initTime='20111608',fhour=24,area='全国',map_ratio=10/9,
+                        model='中央气象台智能网格',data_source ='MICAPS',city=True)
+
+sta_all={'lon':[86.92528],
+        'lat':[27.98805],
+        'altitude':[8848],
+        'ID':['A01'],
+        'name':['珠峰']}
+
+draw_sta2.MICAPS.ECMWF_ENSEMBLE.point_fcst_wsp_according_to_3D_field_box_line(
+            t_gap=6,
+            points=sta_all,
+            extra_info={
+                'output_head_name':' ',
+                'output_tail_name':' ',
+                'point_name':sta_all['name'][0],
+                'drw_thr':False,
+                'levels_for_interp':[850, 800, 700, 600, 500,400,300,250,200,150]}
+                )
+
+sta_fcs={'lon':[120],
+    'lat':[36],
+    'altitude':[8848],
+    'name':['健美乡']}
+draw_local_scale.wind_temp_rn_according_to_4D_data(data_source='MICAPS',fhour=3,
+    sta_fcs=sta_fcs,zoom_ratio=0.1,map_ratio=4/3,model='ECMWF',draw_zd=True,
+    bkgd_type='terrain')
+
+draw_syn_ver_ana.compare_vs_ana.compare_gh_uv(fhour=72,city=True)
 
 for ihour in [18,24,30,36]:
     draw_elements.mslp_gust10m_uv10m(model='ECMWF',city=False,area='全国',t_gap=6,fhour=ihour,map_ratio=12/9,
@@ -143,25 +168,6 @@ draw_local_scale.wind_rh_according_to_4D_data(data_source='MICAPS',fhour=3,
 
 draw_sta.sta_SkewT()
 
-sta_all={'lon':[86.92528],
-        'lat':[27.98805],
-        'altitude':[8848],
-        'ID':['A01'],
-        'name':['珠峰']}
-
-draw_sta2.MICAPS.ECMWF_ENSEMBLE.point_fcst_wsp_according_to_3D_field_box_line(
-            initTime='20092220',
-            t_range=[0,241],
-            t_gap=6,
-            points=sta_all,
-            extra_info={
-                'output_head_name':' ',
-                'output_tail_name':' ',
-                'point_name':sta_all['name'][0],
-                'drw_thr':False,
-                'levels_for_interp':[700, 500,300,200]}
-                )
-
 draw_sta2.MICAPS.ECMWF_ENSEMBLE.point_fcst_tmp_according_to_3D_field_box_line(
             initTime='20092220',
             t_range=[0,241],
@@ -255,7 +261,6 @@ draw_QPF.Rain_evo(initTime='20051908',data_source='CIMISS',t_range=[6,36],area='
 
 draw_elements.T2m_mslp_uv10m(model='ECMWF',data_source='CIMISS')
 
-draw_elements.T2m_mean24(model='GRAPES_GFS',data_source ='MICAPS',city=True)
 draw_elements.T2m_zero_heatwaves(model='ECMWF',data_source ='CIMISS',city=True)
 
 draw_elements2.MICAPS.ECMWF.dT2m_mean24(city=True,fhour=60)

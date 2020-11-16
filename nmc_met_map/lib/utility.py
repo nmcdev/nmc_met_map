@@ -876,7 +876,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'Tmx_2m':'NWFD_SCMOC/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'Tmn_2m':'NWFD_SCMOC/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'T2m':'NWFD_SCMOC/TMP/2M_ABOVE_GROUND/',
-                    'VIS':'NWFD_SCMOC/VIS/',
+                    'VIS':'NWFD_SCMOC/VIS_SURFACE/',
                     'rh2m':'NWFD_SCMOC/RH/2M_ABOVE_GROUND/'
                     },
             '中央气象台智能网格':{

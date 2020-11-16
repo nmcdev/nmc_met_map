@@ -79,7 +79,7 @@ def point_fcst_uv_tmp_according_to_3D_field_vs_sounding(
     alt_md=np.squeeze(HGT_4D_sm.values*10).flatten()
     time_md=HGT_4D_sm['forecast_period'].values
 
-    coords = np.zeros((len(extra_info['levels_for_interp']),len(lat_md),len(lon_md),3))
+    coords = np.zeros((HGT_4D_sm.level.size,len(lat_md),len(lon_md),3))
     coords[...,1] = lat_md.reshape((1,len(lat_md),1))
     coords[...,2] = lon_md.reshape((1,1,len(lon_md)))
     coords = coords.reshape((alt_md.size,3))
