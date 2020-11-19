@@ -18,7 +18,7 @@ def isentropic_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',data_source='
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,100],
     Global=False,
-    south_China_sea=True,area = '全国',city=False,output_dir=None
+    south_China_sea=True,area = '全国',city=False,output_dir=None,**kwargs
      ):
     # micaps data directory
     if(data_source =='MICAPS'):    
@@ -61,7 +61,7 @@ def isentropic_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',data_source='
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             rh=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='RHU'),
                         fcst_levels=levels, fcst_ele="RHU", units='%')

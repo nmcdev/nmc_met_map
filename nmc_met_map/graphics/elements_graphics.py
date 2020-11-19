@@ -137,6 +137,7 @@ def draw_T_2m(T_2m=None,
         plt.savefig(output_dir+'最低温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(T_2m.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     if(output_dir == None):
         plt.show()
 
@@ -274,7 +275,8 @@ def draw_dT_2m(dT_2m=None,T_type='Tmx',
     if(output_dir != None):
         plt.savefig(output_dir+'最低温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(dT_2m.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(dT_2m.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     if(output_dir == None):
         plt.show()
         #return(fig)       
@@ -400,7 +402,8 @@ def draw_T2m_mslp_uv10m(t2m=None, mslp=None, uv10m=None,
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_10米风场_2米温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                           
@@ -524,6 +527,7 @@ def draw_mslp_gust10m(gust=None, mslp=None,
         plt.savefig(output_dir+'海平面气压_逐6小时最大风速_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                           
@@ -699,6 +703,7 @@ def draw_mslp_gust10m_uv10m(gust=None, mslp=None,uv10m=None,
         plt.savefig(output_dir+'海平面气压_逐6小时最大风速_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(mslp.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                           
@@ -824,7 +829,8 @@ def draw_low_level_wind(uv=None,
     if(output_dir != None):
         plt.savefig(output_dir+'低层风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(uv.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(uv.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()

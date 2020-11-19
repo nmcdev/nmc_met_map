@@ -183,7 +183,8 @@ def draw_Miller_Composite_Chart(fcst_info=None,
     if(output_dir != None):
         plt.savefig(output_dir+'Miller_综合图_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(fcst_info['forecast_period'])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(fcst_info['forecast_period'])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()

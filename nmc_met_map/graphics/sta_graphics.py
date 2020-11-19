@@ -235,6 +235,7 @@ def draw_Station_Synthetical_Forecast_From_Cassandra(t2m=None,Td2m=None,AT=None,
         plt.savefig(output_dir+extra_info['output_head_name']+
         initTime1.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
         
@@ -525,6 +526,7 @@ def draw_Station_Snow_Synthetical_Forecast_From_Cassandra(
         plt.savefig(output_dir+extra_info['output_head_name']+
         initTime1.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -595,6 +597,7 @@ def draw_sta_skewT(p=None,T=None,Td=None,wind_speed=None,wind_dir=None,u=None,v=
         str(fcst_info['forecast_reference_time'].values)[0:13]+
         '_预报时效_'+str(int(fcst_info.attrs['forecast_period'].values))
         +'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -672,6 +675,7 @@ def draw_point_wind(U=None,V=None,
         plt.savefig(output_dir2+model+'_'+extra_info['point_name']+'_'+extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -833,6 +837,7 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
         extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -1007,6 +1012,7 @@ def draw_point_uv_tmp_rh_rn_fcst(
         extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -1203,6 +1209,7 @@ def draw_point_uv_tmp_rh_rn_gust_fcst(
         extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -1351,6 +1358,7 @@ def draw_point_uv_rh_fcst(rh2m=None,u10m=None,v10m=None,rn=None,
         plt.savefig(output_dir+extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()        
 
@@ -1417,6 +1425,7 @@ def draw_sta_skewT_model_VS_obs(fcst_pfl=None,obs_pfl=None,
         str(fcst_info['forecast_reference_time'].values)[0:13]+
         '_预报时效_'+str(int(fcst_info['forecast_period'].values))
         +'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -1611,6 +1620,7 @@ def draw_point_fcst_VS_obs(t2m=None,u10m=None,v10m=None,rn=None,
         extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -1638,5 +1648,6 @@ def draw_AQI_points(AQI_input,output_dir=None,output_name='test',
             os.makedirs(output_dir)
 
         plt.savefig(output_dir+output_name+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()

@@ -145,7 +145,8 @@ def draw_isentropic_uv(isentrh=None, isentuv=None, isentprs=None,
     if(output_dir != None):
         plt.savefig(output_dir+isentrh['lev']+'等熵面分析_相对湿度_风场_气压_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(isentrh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(isentrh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()              

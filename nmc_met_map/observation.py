@@ -22,7 +22,7 @@ from nmc_met_map.graphics import observation_graphics
 def IR_Sounding_GeopotentialHeight(Plot_IR=True,Plot_Sounding=True, Plot_HGT=True,
     IR_time=None,Sounding_time=None, HGT_initTime=None,fhour=24, model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],city=False,Channel='C009',
-    south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS'):
+    south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS',**kwargs):
 
     Sounding=None
     HGT=None
@@ -81,7 +81,7 @@ def IR_Sounding_GeopotentialHeight(Plot_IR=True,Plot_Sounding=True, Plot_HGT=Tru
 def CREF_Sounding_GeopotentialHeight(Plot_CREF=True,Plot_Sounding=True, Plot_HGT=True,
     CREF_time=None,Sounding_time=None, HGT_initTime=None,fhour=24, model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],city=False,Channel='C009',
-    south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS'):
+    south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS',**kwargs):
 
     Sounding=None
     HGT=None

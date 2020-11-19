@@ -156,6 +156,7 @@ def draw_gh_uv_pwat(gh=None, uv=None, pwat=None,
         plt.savefig(output_dir+'位势高度场_风场_整层可降水量_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()        
@@ -287,7 +288,8 @@ def draw_gh_uv_rh(gh=None, uv=None, rh=None,
     if(output_dir != None):
         plt.savefig(output_dir+'位势高度场_风场_相对湿度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(gh['forecast_period'].values[0])+'小时'+'.png', dpi=200)
+        '预报时效_'+str(gh['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                
@@ -423,6 +425,7 @@ def draw_gh_uv_spfh(gh=None, uv=None, spfh=None,
         plt.savefig(output_dir+'位势高度场_风场_比湿_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                        
@@ -558,6 +561,7 @@ def draw_gh_uv_wvfl(gh=None, uv=None, wvfl=None,
         plt.savefig(output_dir+'位势高度场_风场_水汽通量_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                                

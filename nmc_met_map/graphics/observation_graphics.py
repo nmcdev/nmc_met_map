@@ -193,7 +193,8 @@ def OBS_Sounding_GeopotentialHeight(IR=None,Sounding=None,HGT=None,
         plt.savefig(output_dir+'卫星'+
         #'_'+initial_time.strftime("%Y年%m月%d日%H时")+
         '卫星观测时间_'+
-        pd.to_datetime(IR['time'].values[0]).strftime("%Y年%m月%d日%H时")+'.png', dpi=300)
+        pd.to_datetime(IR['time'].values[0]).strftime("%Y年%m月%d日%H时")+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
 
     if(output_dir == None ):
         plt.show()
@@ -340,7 +341,8 @@ def OBS_CREF_Sounding_GeopotentialHeight(CREF=None,Sounding=None,HGT=None,
         plt.savefig(output_dir+'天气雷达组合反射率_位势高度_探空风'+
         #'_'+initial_time.strftime("%Y年%m月%d日%H时")+
         '雷达观测时间_'+
-        pd.to_datetime(CREF['time'].values[0]).strftime("%Y年%m月%d日%H时")+'.png', dpi=300)
+        pd.to_datetime(CREF['time'].values[0]).strftime("%Y年%m月%d日%H时")+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
 
     if(output_dir == None ):
         plt.show()
@@ -483,7 +485,8 @@ def draw_cumulative_precip_and_rain_days(cu_rain=None, days_rain=None,
     # show figure
     if(output_dir != None):
         plt.savefig(output_dir+'总降水_'+
-        '观测时间_'+initTime.strftime("%Y年%m月%d日%H时")+'.png', dpi=200)
+        '观测时间_'+initTime.strftime("%Y年%m月%d日%H时")+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()

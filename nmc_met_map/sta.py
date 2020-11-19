@@ -30,7 +30,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:
@@ -184,7 +184,7 @@ def Station_Snow_Synthetical_Forecast_From_Cassandra(
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:
@@ -356,7 +356,7 @@ def Station_Snow_Synthetical_Forecast_From_Cassandra(
             
 def sta_SkewT(model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,150,100],
-    fhour=3,output_dir=None,extra_info=None):
+    fhour=3,output_dir=None,extra_info=None,**kwargs):
 
     try:
         data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
@@ -424,7 +424,7 @@ def point_wind_time_fcst_according_to_3D_wind(
             'point_name':' ',
             'drw_thr':True,
             'levels_for_interp':[1000, 950, 925, 900, 850, 800, 700, 600, 500]}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:
@@ -527,7 +527,7 @@ def point_fcst(
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:
@@ -569,7 +569,7 @@ def point_fcst_ecgust(
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:
@@ -626,7 +626,7 @@ def point_uv_tmp_rh_rn_fcst(
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:
@@ -673,7 +673,7 @@ def point_fcst_according_to_3D_field(
             'point_name':' ',
             'drw_thr':True,
             'levels_for_interp':[1000, 950, 925, 900, 850, 800, 700, 600, 500]}
-            ):
+            ,**kwargs):
 
     try:
         dir_rqd=[utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=''),
@@ -774,7 +774,7 @@ def point_uv_rh_fcst_according_to_3D_field(
             'point_name':' ',
             'drw_thr':True,
             'levels_for_interp':[1000, 950, 925, 900, 850, 800, 700, 600, 500]}
-            ):
+            ,**kwargs):
 
     try:
         if(t_range[1] > 72 ):
@@ -879,7 +879,7 @@ def point_fcst_according_to_3D_field_VS_zd_plot(
             'point_name':' ',
             'drw_thr':True,
             'levels_for_interp':[1000, 950, 925, 900, 850, 800, 700, 600, 500]}
-            ):
+            ,**kwargs):
 
     try:
         dir_rqd=[utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=''),

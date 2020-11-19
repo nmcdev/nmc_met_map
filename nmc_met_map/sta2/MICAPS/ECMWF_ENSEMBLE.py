@@ -29,7 +29,7 @@ def point_fcst_tmp_according_to_3D_field_box_line(
             'point_name':' ',
             'drw_thr':True,
             'levels_for_interp':[1000, 925, 850, 700, 500,300,200]}
-            ):
+            ,**kwargs):
 
     try:
         dir_rqd=[utl.Cassandra_dir(data_type='high',data_source='ECMWF_ENSEMBLE',var_name='HGT_RAW',lvl=''),
@@ -135,7 +135,7 @@ def point_fcst_wsp_according_to_3D_field_box_line(
             'point_name':' ',
             'drw_thr':True,
             'levels_for_interp':[1000, 925, 850, 700, 500,300,200]}
-            ):
+            ,**kwargs):
 
     try:
         dir_rqd=[utl.Cassandra_dir(data_type='high',data_source='ECMWF_ENSEMBLE',var_name='HGT_RAW',lvl=''),
@@ -245,7 +245,7 @@ def point_fcst_rn_according_to_3D_field_box_line(
             'output_tail_name':' ',
             'point_name':' ',
             'drw_thr':True}
-            ):
+            ,**kwargs):
 
     try:
         dir_rqd=utl.Cassandra_dir(data_type='surface',data_source='ECMWF_ENSEMBLE',var_name='RAIN'+str(t_gap).zfill(2)+'_RAW')

@@ -128,6 +128,7 @@ def draw_wind_rh_according_to_4D_data(sta_fcs_fcst=None,zd_fcst_obs=None,
         plt.savefig(output_dir+'BSEP_NMC_RFFC_ECMWF_EME_ASC_LNO_P9_'+
         initial_time.strftime("%Y%m%d%H")+
         '00'+str(int(fcst_info['forecast_period'].values[0])).zfill(3)+'03.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
 
     if(output_dir == None):
         plt.show()
@@ -248,6 +249,7 @@ def draw_wind_temp_according_to_4D_data(sta_fcs_fcst=None,zd_fcst_obs=None,
         plt.savefig(output_dir+'BSEP_NMC_RFFC_ECMWF_EME_ASC_LNO_P9_'+
         initial_time.strftime("%Y%m%d%H")+
         '00'+str(int(fcst_info['forecast_period'].values[0])).zfill(3)+'03.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
 
     if(output_dir == None):
         plt.show()

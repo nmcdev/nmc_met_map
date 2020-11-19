@@ -29,7 +29,7 @@ def point_uv_gust_tmp_rh_rn_fcst(
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:
@@ -124,7 +124,7 @@ def point_uv_ecgust_tmp_rh_rn_fcst(
             'output_head_name':' ',
             'output_tail_name':' ',
             'point_name':' '}
-            ):
+            ,**kwargs):
 
     #+get all the directories needed
     try:

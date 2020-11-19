@@ -50,73 +50,65 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
         gh_ana = MICAPS_IO.get_model_grid(data_dir[0], filename=filename_ana)
         u_ana = MICAPS_IO.get_model_grid(data_dir[1], filename=filename_ana)
         v_ana = MICAPS_IO.get_model_grid(data_dir[2], filename=filename_ana)
-        mslp_ana = MICAPS_IO.get_model_grid(data_dir[3], filename=filename_ana)
+        psfc_ana = MICAPS_IO.get_model_grid(data_dir[3], filename=filename_ana)
         gh_fcst = MICAPS_IO.get_model_grid(data_dir[0], filename=filename_fcst)
         u_fcst = MICAPS_IO.get_model_grid(data_dir[1], filename=filename_fcst)
         v_fcst = MICAPS_IO.get_model_grid(data_dir[2], filename=filename_fcst)
-        mslp_fcst = MICAPS_IO.get_model_grid(data_dir[3], filename=filename_fcst)
+        psfc_fcst = MICAPS_IO.get_model_grid(data_dir[3], filename=filename_fcst)
 
     if(data_source =='CIMISS'):
 
         # get filename
         if(anaTime != None):
-            filename_ana = utl.model_filename(anaTime, 0,UTC=True)
-            filename_fcst = utl.model_filename(iniTime, fhour,UTC=True)
+            anaTime = utl.model_filename(anaTime, fhour,UTC=True)[0:8]
+        else:
+            anaTime=utl.filename_day_back_model(fhour=fhour,UTC=True)[0:8]
+        iniTime= (datetime.strptime('20'+anaTime, '%Y%m%d%H')-timedelta(hours=fhour)).strftime("%Y%m%d%H")[2:10]
         try:
-            # retrieve data from CMISS server        
-            gh_ana=CMISS_IO.cimiss_model_by_time('20'+filename_ana[0:8],valid_time=0,
+            # retrieve data from CIMISS server        
+            gh_ana=CMISS_IO.cimiss_model_by_time('20'+anaTime,valid_time=0,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
             gh_ana['data'].values=gh_ana['data'].values/10.
-            gh_fcst=CMISS_IO.cimiss_model_by_time('20'+filename_fcst[0:8],valid_time=fhour,
+            gh_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
             gh_fcst['data'].values=gh_fcst['data'].values/10.
 
-            u_ana=CMISS_IO.cimiss_model_by_time('20'+filename_ana[0:8],valid_time=0,
+            u_ana=CMISS_IO.cimiss_model_by_time('20'+anaTime,valid_time=0,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
-            u_fcst=CMISS_IO.cimiss_model_by_time('20'+filename_fcst[0:8],valid_time=fhour,
+            u_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
 
-            v_ana=CMISS_IO.cimiss_model_by_time('20'+filename_ana[0:8],valid_time=0,
+            v_ana=CMISS_IO.cimiss_model_by_time('20'+anaTime,valid_time=0,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
-            v_fcst=CMISS_IO.cimiss_model_by_time('20'+filename_fcst[0:8],valid_time=fhour,
+            v_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
 
-            if(model == 'ECMWF'):
-                mslp_ana=CMISS_IO.cimiss_model_by_time('20'+filename_ana[0:8], valid_time=0,
-                            data_code=utl.CMISS_data_code(data_source=model,var_name='GSSP'),
-                            levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
-                            fcst_level=0, fcst_ele="GSSP", units='Pa')
-                mslp_fcst=CMISS_IO.cimiss_model_by_time('20'+filename_fcst[0:8], valid_time=fhour,
-                            data_code=utl.CMISS_data_code(data_source=model,var_name='GSSP'),
-                            levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
-                            fcst_level=0, fcst_ele="GSSP", units='Pa')
-            else:
-                mslp_ana=CMISS_IO.cimiss_model_by_time('20'+filename_ana[0:8],valid_time=0,
-                            data_code=utl.CMISS_data_code(data_source=model,var_name='SSP'),
-                            levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
-                            fcst_level=0, fcst_ele="SSP", units='Pa')
-                mslp_fcst=CMISS_IO.cimiss_model_by_time('20'+filename_fcst[0:8],valid_time=fhour,
-                            data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
-                            levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
-                            fcst_level=0, fcst_ele="PRS", units='Pa')
-            mslp_ana['data']=mslp_ana['data']/100.
-            mslp_fcst['data']=mslp_fcst['data']/100.
+            psfc_ana=CMISS_IO.cimiss_model_by_time('20'+anaTime,valid_time=0,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        levattrs={'long_name':'sea_surface_pressure', 'units':'hPa', '_CoordinateAxisType':'-'},
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        levattrs={'long_name':'sea_surface_pressure', 'units':'hPa', '_CoordinateAxisType':'-'},
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc_ana['data']=psfc_ana['data']/100.
+            psfc_fcst['data']=psfc_fcst['data']/100.
         except KeyError:
             raise ValueError('Can not find all data needed')                
     # prepare data
-    if(all([gh_ana,u_ana,v_ana,mslp_ana,gh_fcst,u_fcst,v_fcst,mslp_fcst]) is False):
+    if(all([gh_ana,u_ana,v_ana,psfc_ana,gh_fcst,u_fcst,v_fcst,psfc_fcst]) is False):
         print('some data is not avaliable')
         return
 
@@ -132,19 +124,19 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
     gh_ana=utl.cut_xrdata(map_extent,gh_ana)
     u_ana=utl.cut_xrdata(map_extent,u_ana)
     v_ana=utl.cut_xrdata(map_extent,v_ana)
-    mslp_ana=utl.cut_xrdata(map_extent,mslp_ana)
+    psfc_ana=utl.cut_xrdata(map_extent,psfc_ana)
 
     gh_fcst=utl.cut_xrdata(map_extent,gh_fcst)
     u_fcst=utl.cut_xrdata(map_extent,u_fcst)
     v_fcst=utl.cut_xrdata(map_extent,v_fcst)
-    mslp_fcst=utl.cut_xrdata(map_extent,mslp_fcst)
+    psfc_fcst=utl.cut_xrdata(map_extent,psfc_fcst)
 
-    u_ana=utl.mask_terrian(uv_lev,mslp_ana,u_ana)
-    v_ana=utl.mask_terrian(uv_lev,mslp_ana,v_ana)
-    gh_ana=utl.mask_terrian(gh_lev,mslp_ana,gh_ana)
-    u_fcst=utl.mask_terrian(uv_lev,mslp_fcst,u_fcst)
-    v_fcst=utl.mask_terrian(uv_lev,mslp_fcst,v_fcst)
-    gh_fcst=utl.mask_terrian(gh_lev,mslp_fcst,gh_fcst)
+    u_ana=utl.mask_terrian(uv_lev,psfc_ana,u_ana)
+    v_ana=utl.mask_terrian(uv_lev,psfc_ana,v_ana)
+    gh_ana=utl.mask_terrian(gh_lev,psfc_ana,gh_ana)
+    u_fcst=utl.mask_terrian(uv_lev,psfc_fcst,u_fcst)
+    v_fcst=utl.mask_terrian(uv_lev,psfc_fcst,v_fcst)
+    gh_fcst=utl.mask_terrian(gh_lev,psfc_fcst,gh_fcst)
 
     uv_ana=xr.merge([u_ana.rename({'data': 'u'}),v_ana.rename({'data': 'v'})])
     uv_fcst=xr.merge([u_fcst.rename({'data': 'u'}),v_fcst.rename({'data': 'v'})])

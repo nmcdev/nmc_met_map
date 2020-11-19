@@ -17,7 +17,7 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     gh_lev=500,uv_lev=850,th_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
 # prepare data
     if(data_source =='MICAPS'):    
@@ -25,7 +25,8 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=gh_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=uv_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=uv_lev),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='THETAE',lvl=th_lev)]
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='THETAE',lvl=th_lev),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
         except KeyError:
             raise ValueError('Can not find all directories needed')
 
@@ -50,7 +51,8 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
         thetae = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
         if thetae is None:
             return   
-
+        psfc = MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
+        
     if(data_source =='CIMISS'): 
         # get filename
         if(initTime != None):
@@ -58,7 +60,7 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
@@ -87,6 +89,12 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
                         fcst_level=th_lev, fcst_ele="PPT", units='K')
             if thetae is None:
                 return                
+
+            psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
+
         except KeyError:
             raise ValueError('Can not find all data needed')                
 # set map extent
@@ -105,18 +113,18 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     delt_x=(map_extent[1]-map_extent[0])*0.2
     delt_y=(map_extent[3]-map_extent[2])*0.1
 
-# to solve the problem of labels on all the contours
-    mask1 = (gh['lon'] > map_extent[0]-delt_x) & (gh['lon'] < map_extent[1]+delt_x) & (gh['lat'] > map_extent[2]-delt_y) & (gh['lat'] < map_extent[3]+delt_y)
-    mask2 = (u['lon'] > map_extent[0]-delt_x) & (u['lon'] < map_extent[1]+delt_x) & (u['lat'] > map_extent[2]-delt_y) & (u['lat'] < map_extent[3]+delt_y)
-    mask3 = (thetae['lon'] > map_extent[0]-delt_x) & (thetae['lon'] < map_extent[1]+delt_x) & (thetae['lat'] > map_extent[2]-delt_y) & (thetae['lat'] < map_extent[3]+delt_y)
+    gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
+    u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)
+    v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
+    thetae=utl.cut_xrdata(map_extent, thetae, delt_x=delt_x, delt_y=delt_y)
 
-    gh=gh.where(mask1,drop=True)
+    gh=utl.mask_terrian(gh_lev,psfc,gh)
+    u=utl.mask_terrian(uv_lev,psfc,u)
+    v=utl.mask_terrian(uv_lev,psfc,v)
+    thetae=utl.mask_terrian(th_lev,psfc,thetae)
+
     gh.attrs['model']=model
-
-    u=u.where(mask2,drop=True)
-    v=v.where(mask2,drop=True)
     uv=xr.merge([u.rename({'data': 'u'}),v.rename({'data': 'v'})])
-    thetae=thetae.where(mask3,drop=True)
 
 # draw
     thermal_graphics.draw_gh_uv_thetae(
@@ -129,7 +137,7 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,tmp_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
 #prepare data
     if(data_source =='MICAPS'):   
@@ -137,7 +145,8 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=gh_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=uv_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=uv_lev),
-                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=tmp_lev)]
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=tmp_lev),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
         except KeyError:
             raise ValueError('Can not find all directories needed')
 
@@ -162,7 +171,8 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
         tmp = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
         if tmp is None:
             return   
-    
+        psfc = MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
+        
     if(data_source=='CIMISS'):
         # get filename
         if(initTime != None):
@@ -170,7 +180,7 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
@@ -200,6 +210,12 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
             if tmp is None:
                 return   
             tmp['data'].values=tmp['data'].values-273.15
+
+            psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
+
         except KeyError:
             raise ValueError('Can not find all data needed')                
 # set map extent
@@ -218,18 +234,17 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
     delt_x=(map_extent[1]-map_extent[0])*0.2
     delt_y=(map_extent[3]-map_extent[2])*0.1
 
-#to solve the problem of labels on all the contours
-    mask1 = (gh['lon'] > map_extent[0]-delt_x) & (gh['lon'] < map_extent[1]+delt_x) & (gh['lat'] > map_extent[2]-delt_y) & (gh['lat'] < map_extent[3]+delt_y)
-    mask2 = (u['lon'] > map_extent[0]-delt_x) & (u['lon'] < map_extent[1]+delt_x) & (u['lat'] > map_extent[2]-delt_y) & (u['lat'] < map_extent[3]+delt_y)
-    mask3 = (tmp['lon'] > map_extent[0]-delt_x) & (tmp['lon'] < map_extent[1]+delt_x) & (tmp['lat'] > map_extent[2]-delt_y) & (tmp['lat'] < map_extent[3]+delt_y)
+    gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
+    u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)
+    v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
+    tmp=utl.cut_xrdata(map_extent, tmp, delt_x=delt_x, delt_y=delt_y)
 
-    gh=gh.where(mask1,drop=True)
+    gh=utl.mask_terrian(gh_lev,psfc,gh)
+    u=utl.mask_terrian(uv_lev,psfc,u)
+    tmp=utl.mask_terrian(tmp_lev,psfc,tmp)
+
     gh.attrs['model']=model
-
-    u=u.where(mask2,drop=True)
-    v=v.where(mask2,drop=True)
     uv=xr.merge([u.rename({'data': 'u'}),v.rename({'data': 'v'})])
-    tmp=tmp.where(mask3,drop=True)
 
 #draw
     thermal_graphics.draw_gh_uv_tmp(
@@ -243,7 +258,7 @@ def TMP850_anomaly_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     uv_lev=850,tmp_lev=850,
     map_ratio=13/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
 #prepare data
     if(data_source =='MICAPS'):   
@@ -346,7 +361,7 @@ def TMP850_extreme_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     uv_lev=850,tmp_lev=850,
     map_ratio=13/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
 #prepare data
     if(data_source =='MICAPS'):   

@@ -96,7 +96,7 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    #utl.add_cartopy_background(ax,name='RD')
+    utl.add_cartopy_background(ax,name='RD')
 
     l, b, w, h = ax.get_position().bounds
 
@@ -144,6 +144,7 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
         plt.savefig(output_dir+'位势高度场_风场_相当位温_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                
@@ -275,6 +276,7 @@ def draw_gh_uv_tmp(gh=None, uv=None, tmp=None,
         plt.savefig(output_dir+'温度异常_风场_温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()                        

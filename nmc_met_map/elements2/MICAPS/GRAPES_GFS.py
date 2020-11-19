@@ -12,7 +12,7 @@ import pkg_resources
 def dT2m_mx24(initTime=None, fhour=48, day_back=0,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = None,city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='GRAPES_GFS',var_name='Tmx3_2m')]
     fhours1 = np.arange(fhour-21, fhour+1, 3)
@@ -80,7 +80,7 @@ def dT2m_mx24(initTime=None, fhour=48, day_back=0,
 def dT2m_mn24(initTime=None, fhour=48, day_back=0,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area =None,city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='GRAPES_GFS',var_name='Tmn3_2m')]
     fhours1 = np.arange(fhour-21, fhour+1, 3)
@@ -148,7 +148,7 @@ def dT2m_mn24(initTime=None, fhour=48, day_back=0,
 def dT2m_mean24(initTime=None, fhour=48, day_back=0,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = None,city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='GRAPES_GFS',var_name='T2m')]
     fhours1 = np.arange(fhour-21, fhour+1, 3)

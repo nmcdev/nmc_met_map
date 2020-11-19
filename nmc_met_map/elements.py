@@ -17,7 +17,7 @@ import nmc_met_map.product.diagnostic.elements.horizontal.SCMOC as draw_SCMOC
 def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
 # prepare data
     if(data_source =='MICAPS'):    
@@ -42,7 +42,7 @@ def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象�
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             T_2m=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='TEF2'),
                         fcst_level=0, fcst_ele='TEF2', units='K')
@@ -118,7 +118,7 @@ def T2m_mx24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
         if(initTime is None):
             initTime=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)[0:8]
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             T_2m=CMISS_IO.cimiss_model_by_times('20'+initTime,valid_times=fhours,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='MX2T6'),
                         fcst_level=0, fcst_ele='MX2T6', units='K',allExists=False)
@@ -170,7 +170,7 @@ def T2m_mx24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
 def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area =None,city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
 # prepare data
     if(data_source =='MICAPS'):    
@@ -204,7 +204,7 @@ def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
         if(initTime is None):
             initTime=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)[0:8]
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             T_2m=CMISS_IO.cimiss_model_by_times('20'+initTime,valid_times=fhours,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='MN2T6'),
                         fcst_level=0, fcst_ele='MN2T6', units='K',allExists=False)
@@ -252,7 +252,7 @@ def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
 def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = None,city=False,output_dir=None,return_data=False,
-    Global=False):
+    Global=False,**kwargs):
 
 # prepare data
     if(data_source =='MICAPS'):    
@@ -315,7 +315,7 @@ def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短�
 def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
 # prepare data
     if(data_source =='MICAPS'):
@@ -346,7 +346,7 @@ def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             t2m=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='TEF2'),
                         fcst_level=0, fcst_ele="TEF2", units='K')
@@ -413,7 +413,7 @@ def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
 def mslp_gust10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
     # micaps data directory
     if(data_source =='MICAPS'):   
@@ -498,7 +498,7 @@ def mslp_gust10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
 def mslp_gust10m_uv10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area = '全国',city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
     # micaps data directory
     if(data_source =='MICAPS'):   
@@ -589,7 +589,7 @@ def mslp_gust10m_uv10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
 def low_level_wind(initTime=None, fhour=6, day_back=0,model='ECMWF',wind_level='100m',data_source='MICAPS',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
     # micaps data directory
     if(data_source =='MICAPS'):
@@ -629,7 +629,7 @@ def low_level_wind(initTime=None, fhour=6, day_back=0,model='ECMWF',wind_level='
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             u10m=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'+wind_level[0:-1]),
                         fcst_level=0, fcst_ele="WIU"+wind_level[0:-1], units='m*s-1')

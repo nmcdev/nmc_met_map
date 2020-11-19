@@ -24,7 +24,7 @@ import cartopy.crs as ccrs
 def cumulative_precip_and_rain_days(endtime=None, cu_ndays=5, rn_ndays=7,
     map_ratio=19/11,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = None,city=False,output_dir=None,
-    Global=False):
+    Global=False,**kwargs):
 
 # prepare data
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='CLDAS',var_name='RAIN24') ]

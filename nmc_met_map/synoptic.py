@@ -15,11 +15,12 @@ import math as mth
 import xarray as xr
 import pkg_resources
 import pandas as pd
+from datetime import datetime, timedelta
 def gh500_anomaly_uv(initTime=None, fhour=240, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=500,
     map_ratio=13/9,zoom_ratio=20,cntr_pnt=[102,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
     if(area != '全国'):
         south_China_sea=False
@@ -63,7 +64,7 @@ def gh500_anomaly_uv(initTime=None, fhour=240, day_back=0,model='ECMWF',
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
@@ -126,7 +127,7 @@ def gh_uv_mslp(initTime=None, fhour=0, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
     if(area != '全国'):
         south_China_sea=False
@@ -137,7 +138,8 @@ def gh_uv_mslp(initTime=None, fhour=0, day_back=0,model='ECMWF',
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=gh_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=uv_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=uv_lev),
-                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PRMSL')]
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PRMSL'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
         except KeyError:
             raise ValueError('Can not find all directories needed')
 
@@ -153,64 +155,52 @@ def gh_uv_mslp(initTime=None, fhour=0, day_back=0,model='ECMWF',
 
         # retrieve data from micaps server
         gh = MICAPS_IO.get_model_grid(data_dir[0], filename=filename)
-        if gh is None:
-            return
-        
         u = MICAPS_IO.get_model_grid(data_dir[1], filename=filename)
-        if u is None:
-            return
-            
         v = MICAPS_IO.get_model_grid(data_dir[2], filename=filename)
-        if v is None:
-            return
         mslp = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
-        if mslp is None:
-            return
+        psfc = MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
 
     if(data_source =='CIMISS'):
 
         # get filename
         if(initTime != None):
-            filename = utl.model_filename(initTime, fhour,UTC=True)
+            iniTime = utl.model_filename(iniTime, fhour,UTC=True)[0:8]
         else:
-            filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
+            iniTime=utl.filename_day_back_model(fhour=fhour,UTC=True)[0:8]
         try:
-            # retrieve data from CMISS server        
-            gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+            # retrieve data from CIMISS server        
+            gh=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
-            if gh is None:
-                return
             gh['data'].values=gh['data'].values/10.
 
-            u=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+            u=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
-            if u is None:
-                return
                 
-            v=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+            v=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
-            if v is None:
-                return
 
             if(model == 'ECMWF'):
-                mslp=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                mslp=CMISS_IO.cimiss_model_by_time('20'+iniTime, valid_time=fhour,
                             data_code=utl.CMISS_data_code(data_source=model,var_name='GSSP'),
                             levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
                             fcst_level=0, fcst_ele="GSSP", units='Pa')
             else:
-                mslp=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                mslp=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
                             data_code=utl.CMISS_data_code(data_source=model,var_name='SSP'),
                             levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
                             fcst_level=0, fcst_ele="SSP", units='Pa')
-            if mslp is None:
-                return
             mslp['data']=mslp['data']/100.
+
+            psfc=CMISS_IO.cimiss_model_by_time('20'+iniTime, valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
         except KeyError:
             raise ValueError('Can not find all data needed')                
     # prepare data
@@ -227,19 +217,17 @@ def gh_uv_mslp(initTime=None, fhour=0, day_back=0,model='ECMWF',
     delt_x=(map_extent[1]-map_extent[0])*0.2
     delt_y=(map_extent[3]-map_extent[2])*0.1
 
-#+ to solve the problem of labels on all the contours
-    mask1 = (gh['lon'] > map_extent[0]-delt_x) & (gh['lon'] < map_extent[1]+delt_x) & (gh['lat'] > map_extent[2]-delt_y) & (gh['lat'] < map_extent[3]+delt_y)
+    gh=utl.cut_xrdata(map_extent,gh,delt_x=delt_x,delt_y=delt_y)
+    u=utl.cut_xrdata(map_extent,u,delt_x=delt_x,delt_y=delt_y)
+    v=utl.cut_xrdata(map_extent,v,delt_x=delt_x,delt_y=delt_y)
+    mslp=utl.cut_xrdata(map_extent,mslp,delt_x=delt_x,delt_y=delt_y)
+    psfc=utl.cut_xrdata(map_extent,psfc,delt_x=delt_x,delt_y=delt_y)
 
-    mask2 = (u['lon'] > map_extent[0]-delt_x) & (u['lon'] < map_extent[1]+delt_x) & (u['lat'] > map_extent[2]-delt_y) & (u['lat'] < map_extent[3]+delt_y)
+    u=utl.mask_terrian(uv_lev,psfc,u)
+    v=utl.mask_terrian(uv_lev,psfc,v)
+    gh=utl.mask_terrian(gh_lev,psfc,gh)
 
-    mask3 = (mslp['lon'] > map_extent[0]-delt_x) & (mslp['lon'] < map_extent[1]+delt_x) & (mslp['lat'] > map_extent[2]-delt_y) & (mslp['lat'] < map_extent[3]+delt_y)
-#- to solve the problem of labels on all the contours
-    gh=gh.where(mask1,drop=True)
     gh.attrs['model']=model
-
-    u=u.where(mask2,drop=True)
-    v=v.where(mask2,drop=True)
-    mslp=mslp.where(mask3,drop=True)
 
     uv=xr.merge([u.rename({'data': 'u'}),v.rename({'data': 'v'})])
 
@@ -253,7 +241,7 @@ def gh_uv_wsp(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
     if(area != '全国'):
         south_China_sea=False
@@ -269,6 +257,7 @@ def gh_uv_wsp(initTime=None, fhour=6, day_back=0,model='ECMWF',
             raise ValueError('Can not find all directories needed')
 
         # get filename
+        print(initTime)
         if(initTime != None):
             filename = utl.model_filename(initTime, fhour)
         else:
@@ -297,7 +286,7 @@ def gh_uv_wsp(initTime=None, fhour=6, day_back=0,model='ECMWF',
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
@@ -356,7 +345,7 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
-    Global=False):
+    Global=False,**kwargs):
 
     if(area != '全国'):
         south_China_sea=False
@@ -367,7 +356,8 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
             data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=gh_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=uv_lev),
                         utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=uv_lev),
-                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN06')]
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='RAIN06'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
         except KeyError:
             raise ValueError('Can not find all directories needed')
 
@@ -392,7 +382,8 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
         r6 = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
         if r6 is None:
             return
-
+        psfc = MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
+        
     if(data_source =='CIMISS'):
 
         # get filename
@@ -401,7 +392,7 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
@@ -436,7 +427,13 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
                         levattrs={'long_name':'Height above Ground', 'units':'m', '_CoordinateAxisType':'-'},
                         fcst_level=0, fcst_ele="TPE", units='kg*m^-2')
             if TPE2 is None:
-                return                
+                return        
+
+            psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
+
         except KeyError:
             raise ValueError('Can not find all data needed')      
 
@@ -457,23 +454,17 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
     delt_x=(map_extent[1]-map_extent[0])*0.2
     delt_y=(map_extent[3]-map_extent[2])*0.1
 
-#+ to solve the problem of labels on all the contours
+    gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
+    u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)
+    v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
+    r6=utl.cut_xrdata(map_extent, r6, delt_x=delt_x, delt_y=delt_y)
 
-    mask1 = (gh['lon'] > map_extent[0]-delt_x) & (gh['lon'] < map_extent[1]+delt_x) & (gh['lat'] > map_extent[2]-delt_y) & (gh['lat'] < map_extent[3]+delt_y)
+    gh=utl.mask_terrian(gh_lev,psfc,gh)
+    u=utl.mask_terrian(uv_lev,psfc,u)
+    v=utl.mask_terrian(uv_lev,psfc,v)
 
-    mask2 = (u['lon'] > map_extent[0]-delt_x) & (u['lon'] < map_extent[1]+delt_x) & (u['lat'] > map_extent[2]-delt_y) & (u['lat'] < map_extent[3]+delt_y)
-
-    mask3 = (r6['lon'] > map_extent[0]-delt_x) & (r6['lon'] < map_extent[1]+delt_x) & (r6['lat'] > map_extent[2]-delt_y) & (r6['lat'] < map_extent[3]+delt_y)
-
-#- to solve the problem of labels on all the contours
-    gh=gh.where(mask1,drop=True)
     gh.attrs['model']=model
-
-    u=u.where(mask2,drop=True)
-    v=v.where(mask2,drop=True)
     uv=xr.merge([u.rename({'data': 'u'}),v.rename({'data': 'v'})])
-
-    r6=r6.where(mask3,drop=True)
 
     synoptic_graphics.draw_gh_uv_r6(
         r6=r6, gh=gh, uv=uv,
@@ -487,7 +478,7 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,100],lvl_ana=250,
     Global=False,
     south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS'
-     ):
+     ,**kwargs):
 
     # micaps data directory
     if(area != '全国'):
@@ -534,7 +525,7 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             rh=CMISS_IO.cimiss_model_3D_grid(
                         data_code=utl.CMISS_data_code(data_source=model,var_name='RHU'),
                         init_time_str='20'+filename[0:8],valid_time=fhour,

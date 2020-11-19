@@ -28,7 +28,7 @@ def point_fcst_uv_tmp_according_to_3D_field_vs_sounding(
             'point_name':' ',
             'drw_thr':True,
             'levels_for_interp':[1000, 950, 925, 900, 850, 800, 700, 600, 500,400,300,250,200,150]}
-            ):
+            ,**kwargs):
             
     model='NCEP_GFS'
     try:

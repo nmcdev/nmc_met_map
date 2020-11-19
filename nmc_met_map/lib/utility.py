@@ -36,7 +36,66 @@ from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import Point as ShapelyPoint
 from scipy.ndimage.filters import minimum_filter, maximum_filter
 import xarray as xr
+from concurrent import futures
+import shutil
+import imageio
 
+def save_animation(pic_all=None,temp_path=None, output_dir=None, gif_name=None):
+    '''
+    保存成gif
+    '''
+    if len(pic_all) == 0:
+        return None
+    gif_path = None
+    if output_dir:
+        gif_path = os.path.join(output_dir, gif_name)
+        with imageio.get_writer(gif_path, mode='I', fps=1, loop=0) as writer:
+            for ipic in pic_all:
+                imgbuf=plt.imread(temp_path+ipic)
+                writer.append_data(imgbuf)
+    shutil.rmtree(temp_path)
+    return 
+
+def save_tab(temp_path=None,pic_all=None,tab_size=None,output_dir=None,png_name=None):
+    '''
+    保存成tab，多图叠加
+    '''
+    fig = plt.figure(figsize=tab_size)
+    nrows, ncols = get_labels_dist(len(pic_all))
+
+    for i, ipic in enumerate(pic_all):
+        ax = fig.add_subplot(nrows, ncols, i + 1)
+        ax.axis('off')
+        imgbuf = plt.imread(temp_path+ipic)
+        ax.imshow(imgbuf)
+    plt.tight_layout()  # 调整整体空白
+    plt.subplots_adjust(wspace=-0.3, hspace=0)  # 调整子图间距
+
+    png_path=output_dir+png_name
+    plt.savefig(png_path, idpi=200, bbox_inches='tight')
+    shutil.rmtree(temp_path)
+
+    return
+
+def get_labels_dist(num):
+    '''
+    [获取label类型图的分布]
+    '''
+    if num == 1:
+        return (1, 1)
+    if num == 2:
+        return (1, 2)
+
+    if num > 2 and num <= 4:
+        return (2, 2)
+
+    if num > 4 and num <= 9:
+        return (3, 3)
+
+    if num > 9 and num <= 16:
+        return (4, 4)
+    if num > 16 and num <= 25:
+        return (5, 5)
 
 def obs_radar_filename(time='none', product_name='CREF'):
     """
@@ -644,6 +703,32 @@ def filename_day_back_model(day_back=0,fhour=0,UTC=False):
     initTime_dayback=datetime.strptime(initTime,'%Y%m%d%H')-timedelta(hours=day_back*24)
     filename=initTime_dayback.strftime('%Y%m%d%H')[2:10]+'.%03d'%fhour
     return filename    
+def get_latest_init_time_model(day_back=0,fhour=0,UTC=False):
+    """
+    get different initial time from models or observation time according the systime and day_back
+    day_back: in, days to go back, days
+    fhour: forecast hour for models, for observation, fhour = 0
+    return: str, YYMMDDHH.HHH
+    """
+    hour=int(datetime.now().strftime('%H'))
+
+    if(UTC is False):
+        if(hour >= 14):
+            initTime = (datetime.now()).strftime('%Y%m%d')+'08'
+        elif(hour >= 2):    
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'20'
+        else:
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'08'
+    if(UTC is True):
+        if(hour >= 14 or hour < 2):
+            initTime = (datetime.now()).strftime('%Y%m%d')+'00'
+        elif(hour >= 2):    
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'12'
+        else:
+            initTime = (datetime.now()-timedelta(hours=24)).strftime('%Y%m%d')+'00'
+    #process day back
+    latest_init_time=datetime.strptime(initTime,'%Y%m%d%H')-timedelta(hours=day_back*24)
+    return latest_init_time  
 
 def wind2UV(Winddir=None,Windsp=None):
     """

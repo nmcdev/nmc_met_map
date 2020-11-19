@@ -92,6 +92,7 @@ def box_line_temp(TMP=None,
         plt.savefig(output_dir2+TMP.attrs['model']+'_'+extra_info['point_name']+'_'+extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'_温度_箱线图'+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -174,6 +175,7 @@ def box_line_rn(rn=None,
         plt.savefig(output_dir2+rn.attrs['model']+'_'+extra_info['point_name']+'_'+extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'_降水_箱线图'+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()
 
@@ -259,5 +261,6 @@ def box_line_wsp(wsp=None,
         plt.savefig(output_dir2+wsp.attrs['model']+'_'+extra_info['point_name']+'_'+extra_info['output_head_name']+
         initTime.strftime("%Y%m%d%H")+
         '00'+extra_info['output_tail_name']+'_风速_箱线图'+'.jpg', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()

@@ -46,7 +46,7 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
     plt.title('['+gh.attrs['model']+'] '+
     str(int(gh['level'].values[0]))+'hPa 位势高度场, '+
     str(int(uv['level'].values[0]))+'hPa 风场, 海平面气压场', 
-        loc='left', fontsize=30)
+        loc='left', fontsize=25)
         
     datacrs = ccrs.PlateCarree()
 
@@ -199,13 +199,14 @@ def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
         plt.savefig(output_dir+'最高温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()
 
 def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
                     map_extent=(50, 150, 0, 65),
-                    regrid_shape=20,
+                    regrid_shape=25,
                     add_china=True,city=True,south_China_sea=True,
                     output_dir=None,Global=False):
 
@@ -337,6 +338,7 @@ def draw_gh_uv_wsp(gh=None, uv=None, wsp=None,
         plt.savefig(output_dir+'高度场_风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()
@@ -468,6 +470,7 @@ def draw_gh_anomaly_uv(gh=None, uv=None, gh_anm=None,
         plt.savefig(output_dir+'高度场_风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()
@@ -600,6 +603,7 @@ def draw_gh_uv_r6(gh=None, uv=None, r6=None,
         plt.savefig(output_dir+'高度场_风场_降水_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()      
@@ -738,6 +742,7 @@ def draw_PV_Div_uv(pv=None, uv=None, div=None,
         plt.savefig(output_dir+'位涡_风场_散度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(pv.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()              

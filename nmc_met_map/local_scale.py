@@ -25,7 +25,7 @@ def wind_rh_according_to_4D_data(initTime=None, fhour=6, day_back=0,
     map_ratio=14/9,zoom_ratio=1,
     south_China_sea=False,area = '全国',city=False,output_dir=None,
     bkgd_type='satellite',
-    data_source='MICAPS'):
+    data_source='MICAPS',**kwargs):
 
     # micaps data directory
     if(area != '全国'):
@@ -132,7 +132,7 @@ def wind_rh_according_to_4D_data(initTime=None, fhour=6, day_back=0,
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
 
             gh=CIMISS_IO.cimiss_model_3D_grid(
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
@@ -373,7 +373,7 @@ def wind_temp_rn_according_to_4D_data(initTime=None, fhour=6, day_back=0,
     map_ratio=19/9,zoom_ratio=1,
     south_China_sea=False,area = '全国',city=False,output_dir=None,
     bkgd_type='satellite',
-    data_source='MICAPS'):
+    data_source='MICAPS',**kwargs):
 
     # micaps data directory
     if(area != '全国'):

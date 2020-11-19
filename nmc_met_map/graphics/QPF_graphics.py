@@ -69,9 +69,9 @@ def draw_gh_rain(gh=None, rain=None,
         plt.clabel(plots['gh'], inline=2, fontsize=20, fmt='%.0f',colors='black')
 #additional information
     plt.title('['+gh.attrs['model']+'] '+
-    str(int(gh['level'].values[0]))+'hPa 位势高度场, '+
-    str(int(rain.attrs['atime']))+'小时降水', 
-        loc='left', fontsize=30)
+                str(int(gh['level'].values[0]))+'hPa 位势高度场, '+
+                str(int(rain.attrs['atime']))+'小时降水', 
+                loc='left', fontsize=30)
         
     ax.add_feature(cfeature.OCEAN)
     utl.add_china_map_2cartopy_public(
@@ -111,7 +111,7 @@ def draw_gh_rain(gh=None, rain=None,
         locale.setlocale(locale.LC_CTYPE, 'chinese')
     plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=15)
     plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=15)
-    plt.text(2.5, 2.5,'预报时效: '+str(int(gh.coords['forecast_period'].values[0]))+'小时'+'(降水'+str(int(gh.coords['forecast_period'].values[0]+12))+'小时)',size=15)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(gh.coords['forecast_period'].values[0]))+'小时',size=15)
     plt.text(2.5, 0.5,'www.nmc.cn',size=15)
 
     # add color bar
@@ -137,7 +137,8 @@ def draw_gh_rain(gh=None, rain=None,
     if(output_dir != None):
         plt.savefig(output_dir+'高度场_降水_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(int(gh.coords['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
+        '预报时效_'+str(int(gh.coords['forecast_period'].values[0]))+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()
@@ -290,6 +291,7 @@ def draw_mslp_rain_snow(
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(mslp.coords['forecast_period'].values[0]))+'小时'+'.png',
          dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()
@@ -406,7 +408,8 @@ def draw_Rain_evo(
     if(output_dir != None):
         plt.savefig(output_dir+'海平面气压_降水_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
-        '预报时效_'+str(int(rain.coords['forecast_period'].values[0]))+'小时'+'.png', dpi=200)
+        '预报时效_'+str(int(rain.coords['forecast_period'].values[0]))+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     
     if(output_dir == None):
         plt.show()        
@@ -444,7 +447,7 @@ def draw_cumulated_precip_evo(
         cmap,norm=dk_ctables.cm_qpf_nws(atime=24)
         cmap.set_under(color=[0,0,0,0],alpha=0.0)
         plots['rain'] = ax.pcolormesh(
-            x,y,znan, norm=norm,
+            x,y,z, norm=norm,
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
 #additional information
     plt.title('['+rain.attrs['model']+'] '+
@@ -658,5 +661,6 @@ def draw_cumulated_precip(
         plt.savefig(output_dir+
             '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
             '预报时效_'+str(int(rain.coords['forecast_period'].values[-1]))+'小时_'+rain.attrs['model']+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
     else:
         plt.show()

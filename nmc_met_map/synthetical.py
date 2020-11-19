@@ -32,7 +32,7 @@ from nmc_met_map.graphics import synthetical_graphics
 def Miller_Composite_Chart(initTime=None, fhour=24, day_back=0,model='GRAPES_GFS',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     Global=False,
-    south_China_sea=True,area = '全国',city=False,output_dir=None
+    south_China_sea=True,area = '全国',city=False,output_dir=None,**kwargs
      ):
 
     # micaps data directory
@@ -129,7 +129,7 @@ def Miller_Composite_Chart(initTime=None, fhour=24, day_back=0,model='GRAPES_GFS
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
             filename2=utl.filename_day_back_model(day_back=day_back,fhour=fhour-12,UTC=True)
         try:
-            # retrieve data from CMISS server        
+            # retrieve data from CIMISS server        
             rh_700=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='RHU'),
                         fcst_level=700, fcst_ele="RHU", units='%')
