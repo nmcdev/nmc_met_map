@@ -211,12 +211,19 @@ def draw_gh_uv_rh(gh=None, uv=None, rh=None,
     if rh is not None:
         x, y = np.meshgrid(rh['lon'], rh['lat'])
         z=np.squeeze(rh['data'])
-        cmap,norm=dk_ctables.cm_relative_humidity_nws()
-        cmap.set_under(color=[0,0,0,0],alpha=0.0)
+        # cmap,norm=dk_ctables.cm_relative_humidity_nws()
+        # cmap.set_under(color=[0,0,0,0],alpha=0.0)
+
+        # example 2: use the "fromList() method
+        import matplotlib.colors as col
+        startcolor = '#1E90FF'   #蓝色
+        midcolor = '#F1F1F1'     #白色
+        endcolor = '#696969'     #灰色
+        cmap = col.LinearSegmentedColormap.from_list('own2',[startcolor,midcolor,endcolor])
 
         plots['rh'] = ax.pcolormesh(
-            x, y, z, norm=norm,
-            cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
+            x, y, z, vmin=0,vmax=100,
+            cmap=cmap, zorder=1,transform=datacrs,alpha=0.8)
 
     # draw -hPa wind bards
     if uv is not None:
@@ -482,13 +489,17 @@ def draw_gh_uv_wvfl(gh=None, uv=None, wvfl=None,
         z=np.squeeze(wvfl['data'])
         #pos=[0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 22]
         z=z.where(z > 5)
-        cmap, norm=gy_ctables.wvfl_ctable()
+        # cmap, norm=gy_ctables.wvfl_ctable()
+        # cmap.set_under(color=[0,0,0,0],alpha=0.0)
 
-        cmap.set_under(color=[0,0,0,0],alpha=0.0)
+        # plots['wvfl'] = ax.pcolormesh(
+        #     x, y, z, 
+        #     cmap=cmap,norm=norm,zorder=1,transform=datacrs,alpha=0.5)
 
         plots['wvfl'] = ax.pcolormesh(
-            x, y, z, 
-            cmap=cmap,norm=norm,zorder=1,transform=datacrs,alpha=0.5)
+            x, y, z/10., 
+            vmin=5,vmax=35,cmap=dk_ctables2.ncl_cmaps('GMT_drywet'),
+            zorder=1,transform=datacrs,alpha=0.5)
 
     # draw -hPa wind bards
     if uv is not None:
@@ -542,7 +553,7 @@ def draw_gh_uv_wvfl(gh=None, uv=None, wvfl=None,
         cax=plt.axes([l,b-0.04,w,.02])
         cb = plt.colorbar(plots['wvfl'], cax=cax, orientation='horizontal')
         cb.ax.tick_params(labelsize='x-large')                      
-        cb.set_label('Water Vapor Flux (0.1g/(cm*hPa*s)',size=20)
+        cb.set_label('Water Vapor Flux (g/(cm*hPa*s)',size=20)
 
     # add south China sea
     if south_China_sea:

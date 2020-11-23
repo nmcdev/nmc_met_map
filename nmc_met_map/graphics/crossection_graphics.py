@@ -134,7 +134,7 @@ def draw_Crosssection_Wind_Theta_e_absv(
     fig = plt.figure(1, figsize=(lw_ratio[0], lw_ratio[1]))
     ax = plt.axes()
     absv_contour = ax.contourf(cross_absv3d['lon'], cross_absv3d['level'], cross_absv3d['data']*100000,
-                            levels=range(-60, 60, 1), cmap=dk_ctables2.ncl_cmaps('hotcold_18lev'))
+                            levels=range(-60, 60, 1), cmap=dk_ctables2.ncl_cmaps('hotcold_18lev'),extend='both')
     absv_colorbar = fig.colorbar(absv_contour)
 
     # Plot potential temperature using contour, with some custom labeling

@@ -19,7 +19,7 @@ import copy
 def gh_rain(initTime=None, fhour=24, day_back=0,model='ECMWF',
     gh_lev=500,atime=6,data_source='MICAPS',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
 # prepare data
@@ -58,7 +58,7 @@ def gh_rain(initTime=None, fhour=24, day_back=0,model='ECMWF',
         if(initTime != None):
             filename = utl.model_filename(initTime, fhour,UTC=True)
             if(atime > 3):
-                filename_gh=utl.filename_day_back_model(initTime,fhour=int(fhour-atime/2),UTC=True)
+                filename_gh=utl.model_filename(initTime,fhour=int(fhour-atime/2),UTC=True)
         else:
             filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
             if(atime > 3):
@@ -97,7 +97,7 @@ def gh_rain(initTime=None, fhour=24, day_back=0,model='ECMWF',
         rain['data'].values=TPE1['data'].values-TPE2['data'].values
 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -230,7 +230,7 @@ def mslp_rain_snow(initTime=None, fhour=24, day_back=0,model='ECMWF',
         snow['data'].values=(TTSP1['data'].values-TTSP2['data'].values)*1000
 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -276,7 +276,7 @@ def mslp_rain_snow(initTime=None, fhour=24, day_back=0,model='ECMWF',
 def Rain_evo(initTime=None, t_gap=6,t_range=[6,36], fcs_lvl=4,day_back=0,model='ECMWF',
     data_source='MICAPS',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
     fhours = np.arange(t_range[0], t_range[1]+1, t_gap)
@@ -314,7 +314,7 @@ def Rain_evo(initTime=None, t_gap=6,t_range=[6,36], fcs_lvl=4,day_back=0,model='
 
 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -373,11 +373,11 @@ def cumulated_precip_evo(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model=
         except KeyError:
             raise ValueError('Can not find all data needed')
         rain=TPE1.copy(deep=True)
-        rain['data'].values=(TPE1['data'].values)*1000
+        rain['data'].values=(TPE1['data'].values)
 
 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -419,10 +419,7 @@ def cumulated_precip(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model='ECM
         filenames = [initTime+'.'+str(fhour).zfill(3) for fhour in fhours]
         # retrieve data from micaps server
         rain = MICAPS_IO.get_model_grids(data_dir[0], filenames=filenames)
-        rain2=rain.copy(deep=True)
-        for itime in range(1,len(rain['forecast_period'].values)):
-            rain2['data'].values[itime,:,:]=np.sum(rain['data'].values[0:itime+1,:,:],axis=0)
-
+        rain2=rain.sum('time')
 
     if(data_source =='CIMISS'):
         if(initTime != None):
@@ -430,18 +427,25 @@ def cumulated_precip(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model='ECM
         else:
             filename=utl.filename_day_back_model(day_back=0,fhour=0,UTC=True)
         try:
-            TPE1=CMISS_IO.cimiss_model_by_times('20'+filename[0:8],valid_times=fhours,
+            TPE1=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhours[0],
                         data_code=utl.CMISS_data_code(data_source=model,var_name='TPE'),
-                        levattrs={'long_name':'Height above Ground', 'units':'m', '_CoordinateAxisType':'-'},
                         fcst_level=0, fcst_ele="TPE", units='kg*m^-2')
+            if TPE1 is None:
+                return    
+
+            TPE2=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhours[-1],
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='TPE'),
+                        fcst_level=0, fcst_ele="TPE", units='kg*m^-2')
+            if TPE2 is None:
+                return    
+
         except KeyError:
             raise ValueError('Can not find all data needed')
         rain=TPE1.copy(deep=True)
-        rain['data'].values=(TPE1['data'].values)*1000
-
-
+        rain['data'].values=(TPE2['data'].values-TPE1['data'].values)
+        rain2=rain.sum('time')
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -454,13 +458,15 @@ def cumulated_precip(initTime=None, t_gap=6,t_range=[6,36],day_back=0,model='ECM
         map_extent[3]=cntr_pnt[1]+zoom_ratio*1
     delt_x=(map_extent[1]-map_extent[0])*0.2
     delt_y=(map_extent[3]-map_extent[2])*0.1
-    mask1 = (rain['lon'] > map_extent[0]-delt_x) & (rain['lon'] < map_extent[1]+delt_x) & (rain['lat'] > map_extent[2]-delt_y) & (rain['lat'] < map_extent[3]+delt_y)
-    rain2=rain2.where(mask1,drop=True)
+    rain=utl.cut_xrdata(map_extent=map_extent,xr_input=rain,delt_y=delt_y,delt_x=delt_x)
     rain2.attrs['model']=model
     rain2.attrs['t_gap']=t_gap
+    rain2.attrs['initTime']=datetime.strptime(initTime,'%y%m%d%H')
+    rain2.attrs['fhour1']=fhours[0]
+    rain2.attrs['fhour2']=fhours[-1]
 # draw
     QPF_graphics.draw_cumulated_precip(
         rain=rain2,
-        map_extent=map_extent, regrid_shape=20,
+        map_extent=map_extent,
         city=city,south_China_sea=south_China_sea,
         output_dir=output_dir,Global=Global)                

@@ -84,7 +84,7 @@ def get_labels_dist(num):
     if num == 1:
         return (1, 1)
     if num == 2:
-        return (1, 2)
+        return (2, 2)
 
     if num > 2 and num <= 4:
         return (2, 2)
@@ -574,7 +574,7 @@ def get_map_area(area_name):
         '江南':[112,27.6],
         '江淮':[115,31],
         '华中':[112,30],
-        '西南':[103,26.5],
+        '西南':[105,26.5],
         '西欧':[5,45],
         '欧洲':[14,48],
         '北美':[263,45],
@@ -977,7 +977,9 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     },
             'CLDAS':{
                     'Tmx_2m':"CLDAS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/",
-                    'RAIN24':'CLDAS/RAIN24_TRI_DATA_SOURCE/'
+                    'Tmn_2m':"CLDAS/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/",
+                    'RAIN24':'CLDAS/RAIN24_TRI_DATA_SOURCE/',
+                    'RAIN01':'CLDAS/RAIN01_TRI_DATA_SOURCE/'
                     } 
             }
     if(data_type== 'high'):
@@ -1264,8 +1266,12 @@ def CMISS_data_code(
                     'RHF2':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
                     'PLI':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
                     'DPT':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
-                    'PRS':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE'
+                    'PRS':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE',
+                    'VVM':'NAFP_FOR_FTM_GRAPES_CFSV2_NEHE'
                     },
+            'CLDAS':{
+                    'TEM':'NAFP_CLDAS2.0_RT_NC',
+                    'PRE':'NAFP_CLDAS2.0_RT_NC'},
             'OBS':{            
                     'PLOT_sfc':'SURF_CHN_MUL_HOR'
                     }
@@ -1510,7 +1516,9 @@ def get_map_extent(cntr_pnt,zoom_ratio,map_ratio):
     map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
     map_extent[2]=cntr_pnt[1]-zoom_ratio*1
     map_extent[3]=cntr_pnt[1]+zoom_ratio*1
-    return map_extent
+    delt_x=(map_extent[1]-map_extent[0])*0.2
+    delt_y=(map_extent[3]-map_extent[2])*0.1
+    return map_extent,delt_x,delt_y
 
 def get_var_anm(input_var=None,Var_name='gh500'):
     clm_file_name={'gh500':'mean_hourly_from_1979_to_2020_gh500.nc',
@@ -1531,6 +1539,7 @@ def get_var_anm(input_var=None,Var_name='gh500'):
     clm_data.close()
     var_anm=input_var.copy()
     var_anm['data'].values=var_anm['data'].values-clm_data_slt_regrided[Var_name_ERA[Var_name]].values[:,np.newaxis,:,:]/clm_unit_change_ratio[Var_name]
+    clm_data_slt_regrided.close()
     return var_anm
 
 def get_var_extr(input_var=None,Var_name='gh500'):

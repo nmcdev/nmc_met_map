@@ -32,7 +32,7 @@ from nmc_met_map.graphics import synthetical_graphics
 def Miller_Composite_Chart(initTime=None, fhour=24, day_back=0,model='GRAPES_GFS',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     Global=False,
-    south_China_sea=True,area = '全国',city=False,output_dir=None,**kwargs
+    south_China_sea=True,area =None,city=False,output_dir=None,**kwargs
      ):
 
     # micaps data directory
@@ -309,5 +309,5 @@ def Miller_Composite_Chart(initTime=None, fhour=24, day_back=0,model='GRAPES_GFS
                     pmsl_change=pmsl_change,hgt_500_change=hgt_500_change,Td_dep_700=Td_dep_700,
                     Td_sfc=Td_sfc,pmsl=pmsl,lifted_index=lifted_index,vort_adv_500_smooth=vort_adv_500_smooth,
                     map_extent=map_extent,
-                    add_china=True,city=False,south_China_sea=True,
-                    output_dir=None,Global=False)           
+                    add_china=True,city=city,south_China_sea=south_China_sea,
+                    output_dir=output_dir,Global=False)           

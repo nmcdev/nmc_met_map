@@ -46,7 +46,7 @@ def draw_TMP2(TMP2,map_extent=(60, 150, 0, 65),
     initTime = pd.to_datetime(TMP2.coords['time'].values[0]).replace(tzinfo=None).to_pydatetime()
     fhour = str(TMP2.attrs['vhours'])
 
-    title = '[{}] 过去{}小时最高温度'.format(TMP2.attrs['model_name'],str(np.abs(TMP2.attrs['vhours'])))
+    title = '[{}] 过去{}小时{}'.format(TMP2.attrs['model_name'],str(np.abs(TMP2.attrs['vhours'])),TMP2.attrs['var_name'])
 
     forcast_info = '观测|分析时间: {0:%Y}年{0:%m}月{0:%d}日{0:%H}时\nwww.nmc.cn'.format(initTime)
 
@@ -72,6 +72,6 @@ def draw_TMP2(TMP2,map_extent=(60, 150, 0, 65),
 
     if output_dir:
         png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测|分析'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(TMP2['data'].attrs['vhours'])))
-        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+        plt.savefig(output_dir+png_name, idpi=300, bbox_inches='tight')
     else:
         plt.show()

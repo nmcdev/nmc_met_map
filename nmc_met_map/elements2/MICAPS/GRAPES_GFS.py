@@ -47,7 +47,7 @@ def dT2m_mx24(initTime=None, fhour=48, day_back=0,
     dTmx_2m=Tmx_2m1.copy()
     dTmx_2m['data'].values=Tmx_2m1['data'].values-Tmx_2m2['data'].values
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -115,7 +115,7 @@ def dT2m_mn24(initTime=None, fhour=48, day_back=0,
     dTmn_2m=Tmn_2m1.copy()
     dTmn_2m['data'].values=Tmn_2m1['data'].values-Tmn_2m2['data'].values
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -183,7 +183,7 @@ def dT2m_mean24(initTime=None, fhour=48, day_back=0,
     dTmn_2m=Tmn_2m1.copy()
     dTmn_2m['data'].values=Tmn_2m1['data'].values-Tmn_2m2['data'].values
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):

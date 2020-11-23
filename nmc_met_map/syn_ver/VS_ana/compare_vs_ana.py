@@ -23,7 +23,7 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     **products_kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -40,11 +40,12 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
 
         if(anaTime == None):
             anaTime = MICAPS_IO.get_latest_initTime(data_dir[-1])
-            iniTime= (datetime.strptime('20'+anaTime, '%Y%m%d%H')-timedelta(hours=fhour)).strftime("%Y%m%d%H")[2:10]
+            initTime= (datetime.strptime('20'+anaTime, '%Y%m%d%H')-timedelta(hours=fhour)).strftime("%Y%m%d%H")[2:10]
 
         if(anaTime != None):
             filename_ana = utl.model_filename(anaTime, 0)
-            filename_fcst = utl.model_filename(iniTime, fhour)
+            initTime=(datetime.strptime('20'+anaTime, '%Y%m%d%H')-timedelta(hours=fhour)).strftime("%Y%m%d%H")[2:10]
+            filename_fcst = utl.model_filename(initTime, fhour)
 
         # retrieve data from micaps server
         gh_ana = MICAPS_IO.get_model_grid(data_dir[0], filename=filename_ana)
@@ -63,7 +64,7 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
             anaTime = utl.model_filename(anaTime, fhour,UTC=True)[0:8]
         else:
             anaTime=utl.filename_day_back_model(fhour=fhour,UTC=True)[0:8]
-        iniTime= (datetime.strptime('20'+anaTime, '%Y%m%d%H')-timedelta(hours=fhour)).strftime("%Y%m%d%H")[2:10]
+        initTime= (datetime.strptime('20'+anaTime, '%Y%m%d%H')-timedelta(hours=fhour)).strftime("%Y%m%d%H")[2:10]
         try:
             # retrieve data from CIMISS server        
             gh_ana=CMISS_IO.cimiss_model_by_time('20'+anaTime,valid_time=0,
@@ -71,7 +72,7 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
             gh_ana['data'].values=gh_ana['data'].values/10.
-            gh_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+            gh_fcst=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
@@ -81,7 +82,7 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
-            u_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+            u_fcst=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
@@ -90,7 +91,7 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
-            v_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+            v_fcst=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
@@ -99,7 +100,7 @@ def compare_gh_uv(anaTime=None, anamodel='GRAPES_GFS',
                         data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
                         levattrs={'long_name':'sea_surface_pressure', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=0, fcst_ele="PRS", units='Pa')
-            psfc_fcst=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+            psfc_fcst=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
                         levattrs={'long_name':'sea_surface_pressure', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=0, fcst_ele="PRS", units='Pa')

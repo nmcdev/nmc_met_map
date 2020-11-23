@@ -11,7 +11,7 @@ import pkg_resources
 
 def dT2m_mx24(initTime=None, fhour=48, day_back=0,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='ECMWF',var_name='Tmx3_2m')]
@@ -47,7 +47,7 @@ def dT2m_mx24(initTime=None, fhour=48, day_back=0,
     dTmx_2m=Tmx_2m1.copy()
     dTmx_2m['data'].values=Tmx_2m1['data'].values-Tmx_2m2['data'].values
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -79,7 +79,7 @@ def dT2m_mx24(initTime=None, fhour=48, day_back=0,
 
 def dT2m_mn24(initTime=None, fhour=48, day_back=0,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='ECMWF',var_name='Tmn3_2m')]
@@ -115,7 +115,7 @@ def dT2m_mn24(initTime=None, fhour=48, day_back=0,
     dTmn_2m=Tmn_2m1.copy()
     dTmn_2m['data'].values=Tmn_2m1['data'].values-Tmn_2m2['data'].values
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -147,7 +147,7 @@ def dT2m_mn24(initTime=None, fhour=48, day_back=0,
 
 def dT2m_mean24(initTime=None, fhour=48, day_back=0,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
     data_dir = [utl.Cassandra_dir(data_type='surface',data_source='ECMWF',var_name='T2m')]
@@ -183,7 +183,7 @@ def dT2m_mean24(initTime=None, fhour=48, day_back=0,
     dTmn_2m=Tmn_2m1.copy()
     dTmn_2m['data'].values=Tmn_2m1['data'].values-Tmn_2m2['data'].values
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):

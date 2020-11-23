@@ -898,7 +898,7 @@ def draw_point_uv_tmp_rh_rn_fcst(
     ax_t2m.set_xlim(t2m_t[0]-timedelta(hours=1),t2m_t[-1]+timedelta(hours=1))
     ax_t2m.set_ylim(
         np.min([math.floor(t2m['data'].values.min()/5)*5-2,0]),
-        np.max([math.ceil(t2m['data'].values.max()/5)*5,40]))
+        np.max([math.ceil(rn['data'].values.max()/5)*5,40]))
     #相对湿度
     for ifhour in t2m['forecast_period'].values:
         if (ifhour == t2m['forecast_period'].values[0] ):

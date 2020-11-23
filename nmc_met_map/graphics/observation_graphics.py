@@ -90,7 +90,7 @@ def OBS_Sounding_GeopotentialHeight(IR=None,Sounding=None,HGT=None,
             cmap=dk_ctables.cm_ir_enhancement1()
             title_name='红外(10.8微米)'
             plots['IR'] = ax.pcolormesh(
-                x, y, z, vmin=105., vmax=335.0,
+                x-10., y, z, vmin=105., vmax=335.0,
                 cmap=cmap, zorder=1,transform=datacrs)
 
         plt.title('FY4A'+title_name+

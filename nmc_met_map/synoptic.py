@@ -19,10 +19,10 @@ from datetime import datetime, timedelta
 def gh500_anomaly_uv(initTime=None, fhour=240, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=500,
     map_ratio=13/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -100,15 +100,13 @@ def gh500_anomaly_uv(initTime=None, fhour=240, day_back=0,model='ECMWF',
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
-    map_extent=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
     
     gh=utl.mask_terrian(gh_lev,psfc,gh)
     u=utl.mask_terrian(uv_lev,psfc,u)
     v=utl.mask_terrian(uv_lev,psfc,v)
     gh_anm=utl.mask_terrian(gh_lev,psfc,gh_anm)
     #+ to solve the problem of labels on all the contours
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
     gh=utl.cut_xrdata(map_extent,gh,delt_x=delt_x,delt_y=delt_y)
     u=utl.cut_xrdata(map_extent,u,delt_x=delt_x,delt_y=delt_y)
     v=utl.cut_xrdata(map_extent,v,delt_x=delt_x,delt_y=delt_y)
@@ -126,10 +124,10 @@ def gh500_anomaly_uv(initTime=None, fhour=240, day_back=0,model='ECMWF',
 def gh_uv_mslp(initTime=None, fhour=0, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -164,40 +162,40 @@ def gh_uv_mslp(initTime=None, fhour=0, day_back=0,model='ECMWF',
 
         # get filename
         if(initTime != None):
-            iniTime = utl.model_filename(iniTime, fhour,UTC=True)[0:8]
+            initTime = utl.model_filename(initTime, fhour,UTC=True)[0:8]
         else:
-            iniTime=utl.filename_day_back_model(fhour=fhour,UTC=True)[0:8]
+            initTime=utl.filename_day_back_model(fhour=fhour,UTC=True)[0:8]
         try:
             # retrieve data from CIMISS server        
-            gh=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+            gh=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
             gh['data'].values=gh['data'].values/10.
 
-            u=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+            u=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
                 
-            v=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+            v=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
 
             if(model == 'ECMWF'):
-                mslp=CMISS_IO.cimiss_model_by_time('20'+iniTime, valid_time=fhour,
+                mslp=CMISS_IO.cimiss_model_by_time('20'+initTime, valid_time=fhour,
                             data_code=utl.CMISS_data_code(data_source=model,var_name='GSSP'),
                             levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
                             fcst_level=0, fcst_ele="GSSP", units='Pa')
             else:
-                mslp=CMISS_IO.cimiss_model_by_time('20'+iniTime,valid_time=fhour,
+                mslp=CMISS_IO.cimiss_model_by_time('20'+initTime,valid_time=fhour,
                             data_code=utl.CMISS_data_code(data_source=model,var_name='SSP'),
                             levattrs={'long_name':'Mean_sea_level', 'units':'m', '_CoordinateAxisType':'-'},
                             fcst_level=0, fcst_ele="SSP", units='Pa')
             mslp['data']=mslp['data']/100.
 
-            psfc=CMISS_IO.cimiss_model_by_time('20'+iniTime, valid_time=fhour,
+            psfc=CMISS_IO.cimiss_model_by_time('20'+initTime, valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
                         fcst_level=0, fcst_ele="PRS", units='Pa')
             psfc['data']=psfc['data']/100.
@@ -240,10 +238,10 @@ def gh_uv_mslp(initTime=None, fhour=0, day_back=0,model='ECMWF',
 def gh_uv_wsp(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -319,14 +317,12 @@ def gh_uv_wsp(initTime=None, fhour=6, day_back=0,model='ECMWF',
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
-    map_extent=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
     
     gh=utl.mask_terrian(gh_lev,psfc,gh)
     u=utl.mask_terrian(uv_lev,psfc,u)
     v=utl.mask_terrian(uv_lev,psfc,v)
     #+ to solve the problem of labels on all the contours
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
     gh=utl.cut_xrdata(map_extent,gh,delt_x=delt_x,delt_y=delt_y)
     u=utl.cut_xrdata(map_extent,u,delt_x=delt_x,delt_y=delt_y)
     v=utl.cut_xrdata(map_extent,v,delt_x=delt_x,delt_y=delt_y)
@@ -344,10 +340,10 @@ def gh_uv_wsp(initTime=None, fhour=6, day_back=0,model='ECMWF',
 def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -417,14 +413,12 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
             TPE1=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='TPE'),
-                        levattrs={'long_name':'Height above Ground', 'units':'m', '_CoordinateAxisType':'-'},
                         fcst_level=0, fcst_ele="TPE", units='kg*m^-2')
             if TPE1 is None:
                 return    
 
             TPE2=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour-6,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='TPE'),
-                        levattrs={'long_name':'Height above Ground', 'units':'m', '_CoordinateAxisType':'-'},
                         fcst_level=0, fcst_ele="TPE", units='kg*m^-2')
             if TPE2 is None:
                 return        
@@ -438,7 +432,7 @@ def gh_uv_r6(initTime=None, fhour=6, day_back=0,model='ECMWF',
             raise ValueError('Can not find all data needed')      
 
         r6=TPE1.copy(deep=True)
-        r6['data'].values=TPE1['data'].values*1000-TPE2['data'].values*1000
+        r6['data'].values=TPE1['data'].values-TPE2['data'].values
 
     # prepare data
 
@@ -481,7 +475,7 @@ def PV_Div_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
      ,**kwargs):
 
     # micaps data directory
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory

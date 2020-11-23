@@ -22,7 +22,7 @@ from nmc_met_map.graphics import observation_graphics
 def IR_Sounding_GeopotentialHeight(Plot_IR=True,Plot_Sounding=True, Plot_HGT=True,
     IR_time=None,Sounding_time=None, HGT_initTime=None,fhour=24, model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],city=False,Channel='C009',
-    south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS',**kwargs):
+    south_China_sea=True,area =None,output_dir=None,data_source='MICAPS',**kwargs):
 
     Sounding=None
     HGT=None
@@ -57,7 +57,7 @@ def IR_Sounding_GeopotentialHeight(Plot_IR=True,Plot_Sounding=True, Plot_HGT=Tru
             else:
                 HGT = get_model_grid(data_dir[2])
 
-    if(area != '全国'):
+    if(area != None):
         cntr_pnt,zoom_ratio=get_map_area(area_name=area)
         south_China_sea=False
 
@@ -81,7 +81,7 @@ def IR_Sounding_GeopotentialHeight(Plot_IR=True,Plot_Sounding=True, Plot_HGT=Tru
 def CREF_Sounding_GeopotentialHeight(Plot_CREF=True,Plot_Sounding=True, Plot_HGT=True,
     CREF_time=None,Sounding_time=None, HGT_initTime=None,fhour=24, model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],city=False,Channel='C009',
-    south_China_sea=True,area = '全国',output_dir=None,data_source='MICAPS',**kwargs):
+    south_China_sea=True,area =None,output_dir=None,data_source='MICAPS',**kwargs):
 
     Sounding=None
     HGT=None
@@ -116,10 +116,10 @@ def CREF_Sounding_GeopotentialHeight(Plot_CREF=True,Plot_Sounding=True, Plot_HGT
             else:
                 HGT = get_model_grid(data_dir[2])
 
-    if(area != '全国'):
+    if(area != None):
         cntr_pnt,zoom_ratio=get_map_area(area_name=area)
         south_China_sea=False
-
+    CREF.coords['time'].values[0]=datetime.strptime(CREF_time,'%y%m%d%H')
     map_extent=[0,0,0,0]
     map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
     map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio

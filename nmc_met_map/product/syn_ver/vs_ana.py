@@ -57,6 +57,6 @@ def draw_compare_gh_uv(gh_ana=None, uv_ana=None,
     if output_dir:
         png_name = '{0:}位势高度_{1:}风场_检验_{2:%Y}年{2:%m}月{2:%d}日{2:%H}时分析'.format(str(int(gh_ana['levels'].values[0])),
             initTime)+'{}小时时效最高温度'.format(str(gh_fcst['data'].attrs['']))
-        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+        plt.savefig(output_dir+png_name, idpi=300, bbox_inches='tight')
     else:
         plt.show()

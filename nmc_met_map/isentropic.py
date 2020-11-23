@@ -18,7 +18,7 @@ def isentropic_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',data_source='
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,250,200,100],
     Global=False,
-    south_China_sea=True,area = '全国',city=False,output_dir=None,**kwargs
+    south_China_sea=True,area =None,city=False,output_dir=None,**kwargs
      ):
     # micaps data directory
     if(data_source =='MICAPS'):    

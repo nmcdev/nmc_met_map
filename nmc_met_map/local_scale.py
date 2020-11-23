@@ -23,16 +23,16 @@ def wind_rh_according_to_4D_data(initTime=None, fhour=6, day_back=0,
     draw_zd=True,
     levels=[1000, 950, 925, 900,850, 800, 700, 600, 500,400,300,250,200,150],
     map_ratio=14/9,zoom_ratio=1,
-    south_China_sea=False,area = '全国',city=False,output_dir=None,
+    south_China_sea=False,area =None,city=False,output_dir=None,
     bkgd_type='satellite',
     data_source='MICAPS',**kwargs):
 
     # micaps data directory
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # prepare data
-    if(area != '全国'):
+    if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
     cntr_pnt=np.append(np.mean(sta_fcs['lon']),np.mean(sta_fcs['lat']))
@@ -371,16 +371,16 @@ def wind_temp_rn_according_to_4D_data(initTime=None, fhour=6, day_back=0,
     draw_zd=True,
     levels=[1000, 950, 925, 900,850, 800, 700, 600, 500,400,300,250,200,150],
     map_ratio=19/9,zoom_ratio=1,
-    south_China_sea=False,area = '全国',city=False,output_dir=None,
+    south_China_sea=False,area =None,city=False,output_dir=None,
     bkgd_type='satellite',
     data_source='MICAPS',**kwargs):
 
     # micaps data directory
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # prepare data
-    if(area != '全国'):
+    if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
     cntr_pnt=np.append(np.mean(sta_fcs['lon']),np.mean(sta_fcs['lat']))

@@ -17,7 +17,7 @@ import sys
 def Crosssection_Wind_Theta_e_div(
     initTime=None, fhour=24,lw_ratio=[16,9],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
-    day_back=0,model='ECMWF',data_source='MICAPS',
+    day_back=0,model='GRAPES_GFS',data_source='MICAPS',
     output_dir=None,
     st_point = [20, 120.0],
     ed_point = [50, 130.0],
@@ -191,7 +191,7 @@ def Crosssection_Wind_Theta_e_div(
 def Crosssection_Wind_Theta_e_absv(
     initTime=None, fhour=24,lw_ratio=[16,9],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
-    day_back=0,model='ECMWF',data_source='MICAPS',
+    day_back=0,model='GRAPES_GFS',data_source='MICAPS',
     output_dir=None,
     st_point = [20, 120.0],
     ed_point = [50, 130.0],
@@ -362,7 +362,7 @@ def Crosssection_Wind_Theta_e_absv(
 def Crosssection_Wind_Theta_e_RH(
     initTime=None, fhour=24,
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
-    day_back=0,model='ECMWF',data_source='MICAPS',
+    day_back=0,model='GRAPES_GFS',data_source='MICAPS',
     output_dir=None,
     st_point = [20, 120.0],
     ed_point = [50, 130.0],
@@ -517,7 +517,7 @@ def Crosssection_Wind_Theta_e_RH(
 def Crosssection_Wind_Theta_e_Qv(
     initTime=None, fhour=24,
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
-    day_back=0,model='ECMWF',data_source='MICAPS',
+    day_back=0,model='GRAPES_GFS',data_source='MICAPS',
     lw_ratio=[16,9],
     output_dir=None,
     st_point = [20, 120.0],
@@ -883,7 +883,7 @@ def Crosssection_Wind_Temp_RH(
 
 def Time_Crossection_rh_uv_Temp(initTime=None,model='ECMWF',points={'lon':[116.3833], 'lat':[39.9]},
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],data_source='MICAPS',
-    t_gap=3,t_range=[0,48],lw_ratio=[25,9],output_dir=None,**kwargs):
+    t_gap=3,t_range=[0,48],lw_ratio=[16,9],output_dir=None,**kwargs):
   
     fhours = np.arange(t_range[0], t_range[1], t_gap)
 

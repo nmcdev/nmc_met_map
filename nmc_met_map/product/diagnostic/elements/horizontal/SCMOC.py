@@ -71,8 +71,8 @@ def draw_TMP2(TMP2,map_extent=(60, 150, 0, 65),
     cb.set_label('($^\circ$C)',size=20)
 
     if output_dir:
-        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测|分析'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(TMP2['data'].attrs['vhours'])))
-        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(TMP2['data'].attrs['vhours'])))
+        plt.savefig(output_dir+png_name, idpi=300, bbox_inches='tight')
     else:
         plt.show()
 
@@ -105,7 +105,7 @@ def draw_dT2m(dT2m,map_extent=(60, 150, 0, 65),
     cb.set_label('($^\circ$C)',size=20)
 
     if output_dir:
-        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测|分析'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(TMP2['data'].attrs['vhours'])))
-        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测'.format(initTime)+'的过去{}小时最高温度.png'.format(str(np.abs(dT2m.attrs['vhours'])))
+        plt.savefig(output_dir+png_name, idpi=200, bbox_inches='tight')
     else:
         plt.show()

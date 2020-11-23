@@ -17,6 +17,7 @@ import nmc_met_graphics.cmap.ctables as dk_ctables
 import nmc_met_graphics.cmap.cm as dk_ctables2
 import nmc_met_map.lib.gy_ctables as gy_ctables
 import nmc_met_map.graphics2 as GF
+import os
 
 def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
                     map_extent=(50, 150, 0, 65),
@@ -53,7 +54,7 @@ def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
         plots['thetae'] = ax.pcolormesh(
             x, y, z, 
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5,
-            vmin=300,vmax=370)
+            vmin=260,vmax=360)
 
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
@@ -185,6 +186,9 @@ def draw_gh_uv_tmp(gh=None, uv=None, tmp=None,
             x, y, z, 
             cmap=cmap, zorder=1,transform=datacrs,alpha=0.5)
 
+        plots['tmp_contour'] = ax.contour(x, y, z, 
+            levels=[-4],colors='red',linewidth=8,zorder=4,transform=datacrs,alpha=1,linestyles='solid')
+        plt.clabel(plots['tmp_contour'], inline=1, fontsize=25, fmt='%.0f',colors='red')
     # draw -hPa wind bards
     if uv is not None:
         x, y = np.meshgrid(uv['lon'], uv['lat'])
@@ -273,7 +277,7 @@ def draw_gh_uv_tmp(gh=None, uv=None, tmp=None,
 
 # show figure
     if(output_dir != None):
-        plt.savefig(output_dir+'温度异常_风场_温度_预报_'+
+        plt.savefig(output_dir+'高度场_风场_温度_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
         plt.close()
@@ -310,8 +314,8 @@ def draw_gh_uv_tmp_anm(tmp_anm=None, uv=None, tmp=None,
     cb.set_label('Temperature Anomaly ('+u'°C'+')',size=20)
 
     if output_dir:
-        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测|分析'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(tmp['data'].attrs['vhours'])))
-        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}起报温度异常_高度场_风场.png'.format(initTime)
+        plt.savefig(output_dir+png_name, idpi=300, bbox_inches='tight')
     else:
         plt.show()
 
@@ -344,7 +348,7 @@ def draw_gh_uv_tmp_extr(tmp_extr=None, uv=None, tmp=None,
     cb.set_label('Sigma',size=20)
 
     if output_dir:
-        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}时观测|分析'.format(initTime)+'的过去{}小时最高温度'.format(str(np.abs(tmp['data'].attrs['vhours'])))
-        plt.savefig(os.path.join(output_dir, png_name), idpi=300, bbox_inches='tight')
+        png_name = '{0:%Y}年{0:%m}月{0:%d}日{0:%H}高度场_风场_温度极端性.png'.format(initTime)
+        plt.savefig(output_dir+png_name, idpi=300, bbox_inches='tight')
     else:
         plt.show()

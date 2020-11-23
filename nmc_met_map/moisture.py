@@ -16,10 +16,10 @@ import xarray as xr
 def gh_uv_pwat(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -140,13 +140,13 @@ def gh_uv_pwat(initTime=None, fhour=6, day_back=0,model='ECMWF',
         output_dir=output_dir,Global=Global)
 
 
-def gh_uv_rh(initTime=None, fhour=6, day_back=0,model='ECMWF',
+def gh_uv_rh(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     gh_lev=500,uv_lev=850,rh_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
     if(data_source =='MICAPS'):
         # micaps data directory
@@ -265,10 +265,10 @@ def gh_uv_rh(initTime=None, fhour=6, day_back=0,model='ECMWF',
 def gh_uv_spfh(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,spfh_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(data_source=='MICAPS'):
@@ -396,10 +396,10 @@ def gh_uv_spfh(initTime=None, fhour=6, day_back=0,model='ECMWF',
 def gh_uv_wvfl(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     gh_lev=500,uv_lev=850,wvfl_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area = None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -472,6 +472,7 @@ def gh_uv_wvfl(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
                         data_code=utl.CMISS_data_code(data_source=model,var_name='MOFU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
                         fcst_level=wvfl_lev, fcst_ele="MOFU", units='10^-1*g/cm*hPa*s')
+            wvfl['data'].values=wvfl['data'].values*10.
             if wvfl is None:
                 return                
 
@@ -486,14 +487,7 @@ def gh_uv_wvfl(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
-    map_extent=[0,0,0,0]
-    map_extent[0]=cntr_pnt[0]-zoom_ratio*1*map_ratio
-    map_extent[1]=cntr_pnt[0]+zoom_ratio*1*map_ratio
-    map_extent[2]=cntr_pnt[1]-zoom_ratio*1
-    map_extent[3]=cntr_pnt[1]+zoom_ratio*1
-
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt=cntr_pnt,zoom_ratio=zoom_ratio,map_ratio=map_ratio)
 
     gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
     u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)

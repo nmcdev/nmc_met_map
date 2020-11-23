@@ -16,7 +16,7 @@ import nmc_met_map.product.diagnostic.elements.horizontal.SCMOC as draw_SCMOC
 
 def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
 # prepare data
@@ -53,7 +53,7 @@ def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象�
         except KeyError:
             raise ValueError('Can not find all data needed') 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -133,7 +133,7 @@ def T2m_mx24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
         Tmx_2m['data'].values[0,:,:]=np.max(T_2m['data'].values,axis=0)
 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -219,7 +219,7 @@ def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
         Tmn_2m['data'].values[0,:,:]=np.min(T_2m['data'].values,axis=0)
 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -279,7 +279,7 @@ def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短�
         Tmean_2m['data'].values[0,:,:]=np.min(T_2m['data'].values,axis=0)
 
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -314,7 +314,7 @@ def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短�
 
 def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
 # prepare data
@@ -378,7 +378,7 @@ def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     map_extent=[0,0,0,0]
@@ -412,7 +412,7 @@ def T2m_mslp_uv10m(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
 def mslp_gust10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
     # micaps data directory
@@ -467,7 +467,7 @@ def mslp_gust10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
             raise ValueError('Can not find all data needed') 
     # prepare data
 
-    if(area != '全国'):
+    if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
         south_China_sea=False
 
@@ -497,7 +497,7 @@ def mslp_gust10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
 
 def mslp_gust10m_uv10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
     # micaps data directory
@@ -555,7 +555,7 @@ def mslp_gust10m_uv10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
             raise ValueError('Can not find all data needed') 
     # prepare data
 
-    if(area != '全国'):
+    if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
         south_China_sea=False
 
@@ -588,7 +588,7 @@ def mslp_gust10m_uv10m(initTime=None, fhour=6, day_back=0,t_gap=3,model='ECMWF',
 
 def low_level_wind(initTime=None, fhour=6, day_back=0,model='ECMWF',wind_level='100m',data_source='MICAPS',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,
+    south_China_sea=True,area =None,city=False,output_dir=None,
     Global=False,**kwargs):
 
     # micaps data directory
@@ -620,7 +620,7 @@ def low_level_wind(initTime=None, fhour=6, day_back=0,model='ECMWF',wind_level='
 
         if(area != None):
             cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
-        if(area != '全国'):
+        if(area != None):
             south_China_sea=False
     if(data_source =='CIMISS'):
         # get filename

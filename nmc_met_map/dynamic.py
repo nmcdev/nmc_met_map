@@ -14,12 +14,12 @@ import metpy.calc as mpcalc
 import xarray as xr
 from scipy.ndimage import gaussian_filter
 
-def gh_uv_div(initTime=None, fhour=6, day_back=0,model='ECMWF',
+def gh_uv_div(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     gh_lev=500,uv_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',**kwargs):
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -51,7 +51,7 @@ def gh_uv_div(initTime=None, fhour=6, day_back=0,model='ECMWF',
         if v is None:
             return
         
-        psfc = MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
+        psfc = MICAPS_IO.get_model_grid(data_dir[3], filename=filename)
         
         init_time = gh.coords['forecast_reference_time'].values
 
@@ -97,7 +97,7 @@ def gh_uv_div(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
-    map_extent=utl.get_map_extent(cntr_pnt, zoom_ratio, map_ratio)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt, zoom_ratio, map_ratio)
 
 #+ to solve the problem of labels on all the contours
     dx,dy=mpcalc.lat_lon_grid_deltas(u['lon'].values.squeeze(),u['lat'].values.squeeze())
@@ -106,15 +106,13 @@ def gh_uv_div(initTime=None, fhour=6, day_back=0,model='ECMWF',
                          dx, dy, dim_order='yx')
     div_xr=u.copy(deep=True)
     div_xr['data'].values=div.magnitude[np.newaxis,np.newaxis,:,:]
-    div_xr['data'].values=gaussian_filter(div_xr['data'].values,2)
+    div_xr['data'].values=gaussian_filter(div_xr['data'].values,1)
 
     gh=utl.mask_terrian(gh_lev,psfc,gh)
     u=utl.mask_terrian(uv_lev,psfc,u)
     v=utl.mask_terrian(uv_lev,psfc,v)
     div_xr=utl.mask_terrian(uv_lev,psfc,div_xr)
 
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
     gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
     u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)
     v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
@@ -133,9 +131,9 @@ def gh_uv_div(initTime=None, fhour=6, day_back=0,model='ECMWF',
 def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uvw_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',**kwargs):
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',**kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -214,13 +212,31 @@ def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
             if v is None:
                 return
 
-            w=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
-                        data_code=utl.CMISS_data_code(data_source=model,var_name='VVP'),
-                        levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
-                        fcst_level=uvw_lev, fcst_ele="VVP", units='Pa.s-1')
-            if w is None:
-                return
-            w['data'].values=w['data'].values*100
+            if(model != 'GRAPES_GFS'):
+                w=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='VVP'),
+                            levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},
+                            fcst_level=uvw_lev, fcst_ele="VVP", units='Pa.s-1')
+                if w is None:
+                    return
+                w['data'].values=w['data'].values*100
+
+            if(model == 'GRAPES_GFS'):
+                
+                w=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='VVM'),
+                            fcst_level=uvw_lev, fcst_ele="VVM", units='m.s-1')
+                SPFH=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='SHU'),
+                            fcst_level=uvw_lev, fcst_ele="SHU", units='kg/kg')
+
+                TMP=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='TEM'),
+                            fcst_level=uvw_lev, fcst_ele="TEM", units='K')
+                temp=mpcalc.vertical_velocity_pressure((w['data'].values)*units('m/s'),
+                            (np.zeros_like(w['data'].values)+uvw_lev)*units.hPa,
+                            TMP['data'].values*units['kelvin'], mixing=SPFH['data'].values*units['kg/kg']).magnitude*100.
+                w['data'].values=temp
 
             psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
@@ -232,7 +248,7 @@ def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
-    map_extent=utl.get_map_extent(cntr_pnt, zoom_ratio, map_ratio)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt, zoom_ratio, map_ratio)
 
     w['data'].values=gaussian_filter(w['data'].values,5)
 
@@ -244,8 +260,6 @@ def gh_uv_VVEL(initTime=None, fhour=6, day_back=0,model='ECMWF',
     v=utl.mask_terrian(uvw_lev,psfc,v)
     w=utl.mask_terrian(uvw_lev,psfc,w)
 
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
     gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
     u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)
     v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
@@ -268,7 +282,7 @@ def fg_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
     south_China_sea=True,area = None,city=False,output_dir=None,data_source='MICAPS',
     **kwargs):
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     # micaps data directory
@@ -359,12 +373,10 @@ def fg_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
-    map_extent=utl.get_map_extent(cntr_pnt, zoom_ratio, map_ratio)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt, zoom_ratio, map_ratio)
 
 #+ to solve the problem of labels on all the contours
 
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
     fg_xr=u.copy()
     fg_xr['data'].values=fg.magnitude[np.newaxis,np.newaxis,:,:]
     fg_xr=utl.cut_xrdata(map_extent, fg_xr, delt_x=delt_x, delt_y=delt_y)

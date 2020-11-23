@@ -84,3 +84,10 @@ def wind_barbs(ax,x,y,u,v,length=6, regrid_shape=20,
         color =color)
 
     return img
+
+def cu_rain_pcolormesh(ax,x,y,z,cmap=None,norm=None,atime=6,vmin=-50,vmax=50,alpha=0.8,transform=ccrs.PlateCarree(),**kwargs):
+    if(cmap == None or norm == None):
+        cmap,norm=dk_ctables.cm_precipitation_nws(atime=atime)
+    z[z<0.1]=np.nan
+    img = ax.pcolormesh(x,y,z,cmap=cmap, norm=norm,transform=transform,**kwargs)
+    return img

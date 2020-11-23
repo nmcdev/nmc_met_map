@@ -16,7 +16,7 @@ from scipy.ndimage import gaussian_filter
 def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     gh_lev=500,uv_lev=850,th_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
 # prepare data
@@ -98,7 +98,7 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
         except KeyError:
             raise ValueError('Can not find all data needed')                
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -136,7 +136,7 @@ def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
 def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=850,tmp_lev=850,
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
 #prepare data
@@ -219,7 +219,7 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
         except KeyError:
             raise ValueError('Can not find all data needed')                
 # set map extent
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
@@ -257,7 +257,7 @@ def gh_uv_tmp(initTime=None, fhour=6, day_back=0,model='ECMWF',
 def TMP850_anomaly_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     uv_lev=850,tmp_lev=850,
     map_ratio=13/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
 #prepare data
@@ -328,21 +328,19 @@ def TMP850_anomaly_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
 # set map extent
     tmp_anm=utl.get_var_anm(tmp+273.15,Var_name='t850')
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
-    map_extent=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
     tmp['data'].values=gaussian_filter(tmp['data'].values,5)
     u=utl.mask_terrian(uv_lev,psfc,u)
     v=utl.mask_terrian(uv_lev,psfc,v)
     tmp=utl.mask_terrian(tmp_lev,psfc,tmp)
     tmp_anm=utl.mask_terrian(tmp_lev,psfc,tmp_anm)
 #to solve the problem of labels on all the contours
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
     tmp=utl.cut_xrdata(map_extent,tmp,delt_x=delt_x,delt_y=delt_y)
     u=utl.cut_xrdata(map_extent,u,delt_x=delt_x,delt_y=delt_y)
     v=utl.cut_xrdata(map_extent,v,delt_x=delt_x,delt_y=delt_y)
@@ -360,7 +358,7 @@ def TMP850_anomaly_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
 def TMP850_extreme_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     uv_lev=850,tmp_lev=850,
     map_ratio=13/9,zoom_ratio=20,cntr_pnt=[102,34],
-    south_China_sea=True,area = '全国',city=False,output_dir=None,data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
     Global=False,**kwargs):
 
 #prepare data
@@ -431,21 +429,19 @@ def TMP850_extreme_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
 # set map extent
     tmp_extr=utl.get_var_extr(tmp+273.15,Var_name='t850')
 
-    if(area != '全国'):
+    if(area != None):
         south_China_sea=False
 
     if(area != None):
         cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
 
-    map_extent=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt,zoom_ratio,map_ratio)
     tmp['data'].values=gaussian_filter(tmp['data'].values,5)
     u=utl.mask_terrian(uv_lev,psfc,u)
     v=utl.mask_terrian(uv_lev,psfc,v)
     tmp=utl.mask_terrian(tmp_lev,psfc,tmp)
     tmp_extr=utl.mask_terrian(tmp_lev,psfc,tmp_extr)
 #to solve the problem of labels on all the contours
-    delt_x=(map_extent[1]-map_extent[0])*0.2
-    delt_y=(map_extent[3]-map_extent[2])*0.1
     tmp=utl.cut_xrdata(map_extent,tmp,delt_x=delt_x,delt_y=delt_y)
     u=utl.cut_xrdata(map_extent,u,delt_x=delt_x,delt_y=delt_y)
     v=utl.cut_xrdata(map_extent,v,delt_x=delt_x,delt_y=delt_y)
