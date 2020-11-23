@@ -40,9 +40,9 @@ def draw_obs_cu_rain(rain=None,map_extent=(50, 150, 0, 65),
 
     plots = {}
     # draw mean sea level pressure
-    plots['cu_rain']=GF.draw_method.cu_rain_pcolormesh(ax,rain['lon'].values,rain['lat'].values,rain['data'].values.squeeze(),zorder=1,alpha=0.8)
-    # plots['cu_rain']=GF.draw_method.cu_rain_countour(ax,rain['lon'].values,rain['lat'].values,rain['data'].values.squeeze(),zorder=1,alpha=0.8)
-    # clip_rain=utl.gy_China_maskout(plots['cu_rain'],ax)
+    # plots['cu_rain']=GF.draw_method.cu_rain_pcolormesh(ax,rain['lon'].values,rain['lat'].values,rain['data'].values.squeeze(),zorder=1,alpha=0.8)
+    plots['cu_rain']=GF.draw_method.cu_rain_contourf(ax,rain['lon'].values,rain['lat'].values,rain['data'].values.squeeze(),atime=int(rain.attrs['atime']),zorder=1,alpha=0.8)
+    clip_rain=utl.gy_China_maskout(plots['cu_rain'],ax)
     # add color bar
     l, b, w, h = ax.get_position().bounds
     cax=plt.axes([l,b-0.04,w,.02])

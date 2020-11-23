@@ -72,7 +72,7 @@ def gh500_anomaly_uv(initTime=None, fhour=240, day_back=0,model='ECMWF',
             if gh is None:
                 return
             gh['data'].values=gh['data'].values/10.
-
+            gh['time'].values[0]=datetime.strptime(initTime,'%y%m%d%H')+timedelta(hours=fhour)
             u=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         levattrs={'long_name':'pressure_level', 'units':'hPa', '_CoordinateAxisType':'-'},

@@ -12,6 +12,7 @@ from metpy.units import units
 import metpy.calc as mpcalc
 import xarray as xr
 from scipy.ndimage import gaussian_filter
+import datetime
 
 def gh_uv_thetae(initTime=None, fhour=6, day_back=0,model='GRAPES_GFS',
     gh_lev=500,uv_lev=850,th_lev=850,
@@ -318,7 +319,7 @@ def TMP850_anomaly_uv(initTime=None, fhour=6, day_back=0,model='ECMWF',
             if tmp is None:
                 return   
             tmp['data'].values=tmp['data'].values-273.15
-
+            tmp['time'].values[0]=datetime.datetime.strptime(initTime,'%y%m%d%H')+datetime.timedelta(hours=fhour)
             psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
                         fcst_level=0, fcst_ele="PRS", units='Pa')

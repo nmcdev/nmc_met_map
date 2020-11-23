@@ -9,6 +9,7 @@ from nmc_met_graphics.plot.china_map import add_china_map_2cartopy
 import nmc_met_graphics.cmap.cm as cm_collected
 from nmc_met_graphics.plot.util import add_model_title
 import nmc_met_map.lib.utility as utl
+import nmc_met_map.lib.gy_ctables as gy_ctables
 from datetime import datetime, timedelta
 import pandas as pd
 import locale
@@ -90,4 +91,11 @@ def cu_rain_pcolormesh(ax,x,y,z,cmap=None,norm=None,atime=6,vmin=-50,vmax=50,alp
         cmap,norm=dk_ctables.cm_precipitation_nws(atime=atime)
     z[z<0.1]=np.nan
     img = ax.pcolormesh(x,y,z,cmap=cmap, norm=norm,transform=transform,**kwargs)
+    return img
+
+def cu_rain_contourf(ax,x,y,z,cmap=None,levels=None,atime=6,vmin=-50,vmax=50,alpha=0.8,transform=ccrs.PlateCarree(),**kwargs):
+    if(cmap == None):
+        colors,levels=gy_ctables.cm_precipitation_nmc(atime=atime)
+    z[z<0.1]=np.nan
+    img = ax.contourf(x,y,z,colors=colors, levels=levels,transform=transform,extend='max',**kwargs)
     return img

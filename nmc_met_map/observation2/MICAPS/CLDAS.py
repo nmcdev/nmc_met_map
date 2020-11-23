@@ -21,6 +21,7 @@ import math
 from nmc_met_map.graphics import observation_graphics
 from nmc_met_map.product.observation.horizontal.CLDAS import draw_TMP2
 import cartopy.crs as ccrs
+import nmc_met_map.graphics.QPF_graphics as QPF_graphics
 
 def cumulative_precip_and_rain_days(endtime=None, cu_ndays=5, rn_ndays=7,
     map_ratio=19/11,zoom_ratio=20,cntr_pnt=[102,34],
@@ -254,13 +255,13 @@ def cu_rain(initTime=None, atime=6,data_source='MICAPS',
 
     map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt=cntr_pnt,zoom_ratio=zoom_ratio,map_ratio=map_ratio)
     rain=utl.cut_xrdata(map_extent, rain, delt_x=delt_x, delt_y=delt_y)
+    rain['data'].values[rain['data'].values==9999.]=np.nan
     cu_rain=rain.sum('time')
     cu_rain.attrs['obs_time']=datetime.strptime(initTime,'%y%m%d%H')
     cu_rain.attrs['model']='CLDAS'
     cu_rain.attrs['atime']=atime
     cu_rain.attrs['var_name']='累积降水'
 # draw
-    import nmc_met_map.graphics.QPF_graphics as QPF_graphics
     QPF_graphics.draw_obs_cu_rain(
         rain=cu_rain,map_extent=map_extent, regrid_shape=20,
         city=city,south_China_sea=south_China_sea,

@@ -33,3 +33,21 @@ def wvfl_ctable(pos=None):
     #return cmap, norm
     cmap, norm = mpl.colors.from_levels_and_colors(_pos, _colors, extend='max')
     return cmap, norm
+
+def cm_precipitation_nmc(atime=24):
+    """
+    http://jjhelmus.github.io/blog/2013/09/17/plotting-nsw-precipitation-data/
+    :param atime: accumulative time period.
+    :return: colormap function, normalization boundary.
+    """
+
+    if atime >= 24 :
+        clevs = [0.01, 10, 25, 50, 100, 250]
+    else:
+        clevs = [0.01, 2.5, 5, 10, 25, 50, 100,250]
+    
+    if atime >= 24 :
+        colors = ["#88F492", "#00A929", "#2AB8FF", "#1202FC", "#FF04F4", "#850C3E"]
+    else: 
+        colors = ["#88F492", "#6FD96D","#3AB941","#308932", "#2AB8FF", "#1202FC", "#FF04F4", "#850C3E"]
+    return colors, clevs
