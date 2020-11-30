@@ -41,7 +41,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
                 "ECMWF_HR/LCDC/",
                 "ECMWF_HR/UGRD_100M/",
                 "ECMWF_HR/VGRD_100M/",
-                "NWFD_SCMOC/VIS_SURFACE/",
+                "NWFD_SCMOC/VIS/",
 
                 utl.Cassandra_dir(
                     data_type='surface',data_source=model,var_name='RAIN03'),
@@ -162,7 +162,7 @@ def Station_Synthetical_Forecast_From_Cassandra(
     t2m_hourly=t2m.interp(time=time_new).rename({'data':'t2m'}).to_dataframe().drop(columns=['lon', 'lat','forecast_reference_time','forecast_period'])
     pd_output=VIS_hourly.merge(wsp10m_hourly,on='time').merge(r03_hourly,on='time').merge(t2m_hourly,on='time')
     if(output_dir is not None):
-        pd_output.to_csv(output_dir+pd.to_datetime(wsp10m['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime().strftime('%Y%m%d%H')+'_起报.csv')
+        pd_output.to_csv(output_dir+extra_info['point_name']+pd.to_datetime(wsp10m['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime().strftime('%Y%m%d%H')+'_起报.csv')
 
     sta_graphics.draw_Station_Synthetical_Forecast_From_Cassandra(
             t2m=t2m,Td2m=Td2m,AT=AT,u10m=u10m,v10m=v10m,u100m=u100m,v100m=v100m,

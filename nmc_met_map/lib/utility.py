@@ -40,7 +40,7 @@ from concurrent import futures
 import shutil
 import imageio
 
-def save_animation(pic_all=None,temp_path=None, output_dir=None, gif_name=None):
+def save_animation(pic_all=None,temp_path=None, output_dir=None, gif_name=None,keep_temp=False):
     '''
     保存成gif
     '''
@@ -53,10 +53,11 @@ def save_animation(pic_all=None,temp_path=None, output_dir=None, gif_name=None):
             for ipic in pic_all:
                 imgbuf=plt.imread(temp_path+ipic)
                 writer.append_data(imgbuf)
-    shutil.rmtree(temp_path)
+    if(keep_temp == False):
+        shutil.rmtree(temp_path)
     return 
 
-def save_tab(temp_path=None,pic_all=None,tab_size=None,output_dir=None,png_name=None):
+def save_tab(temp_path=None,pic_all=None,tab_size=None,output_dir=None,png_name=None,keep_temp=False):
     '''
     保存成tab，多图叠加
     '''
@@ -73,8 +74,8 @@ def save_tab(temp_path=None,pic_all=None,tab_size=None,output_dir=None,png_name=
 
     png_path=output_dir+png_name
     plt.savefig(png_path, idpi=200, bbox_inches='tight')
-    shutil.rmtree(temp_path)
-
+    if(keep_temp == False):
+        shutil.rmtree(temp_path)
     return
 
 def get_labels_dist(num):
@@ -961,7 +962,7 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'Tmx_2m':'NWFD_SCMOC/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'Tmn_2m':'NWFD_SCMOC/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
                     'T2m':'NWFD_SCMOC/TMP/2M_ABOVE_GROUND/',
-                    'VIS':'NWFD_SCMOC/VIS_SURFACE/',
+                    'VIS':'NWFD_SCMOC/VIS/',
                     'rh2m':'NWFD_SCMOC/RH/2M_ABOVE_GROUND/'
                     },
             '中央气象台智能网格':{

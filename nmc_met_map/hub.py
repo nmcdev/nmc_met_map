@@ -27,7 +27,7 @@ import numpy as np
 
 def compare(func=None,initTime=None,fhour=24,output_dir='./temp/',
             models=['ECMWF','GRAPES_GFS','NCEP_GFS','GRAPES_3KM'],tab_size=(30,18),show='tab',
-            func_other_args={},max_workers=6):
+            func_other_args={},max_workers=6,keep_temp=False):
 
     systime=datetime.datetime.now()
     temp_path='./temp/'+systime.strftime('%M%S%f')+'/'
@@ -58,15 +58,15 @@ def compare(func=None,initTime=None,fhour=24,output_dir='./temp/',
     pic_all=sorted(pic_all,key=lambda i:int(i.split('_')[0]))
     if(show == 'tab'):
         png_name = 'compare_{}.png'.format(func.__name__)
-        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name)
+        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name,keep_temp=keep_temp)
     if(show == 'animation'):
         gif_name = 'compare_{}.gif'.format(func.__name__)
-        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name)
+        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name,keep_temp=keep_temp)
 
 
 def stability(target_time=None, latest_init_time=None, ninit=4, init_interval=12, model='GRAPES_GFS',
                      func=None, func_other_args={}, max_workers=6,show='tab',
-                     output_dir='./temp/', tab_size=(30, 18)):
+                     output_dir='./temp/', tab_size=(30, 18),keep_temp=False):
     
     systime=datetime.datetime.now()
     temp_path='./temp/'+systime.strftime('%M%S%f')+'/'
@@ -122,15 +122,15 @@ def stability(target_time=None, latest_init_time=None, ninit=4, init_interval=12
     pic_all=sorted(pic_all,key=lambda i:int(i.split('_')[0]))
     if(show == 'tab'):
         png_name = 'stability_{}.png'.format(func.__name__)
-        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name)
+        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name,keep_temp=keep_temp)
     if(show == 'animation'):
         gif_name = 'stability_{}.gif'.format(func.__name__)
-        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name)
+        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name,keep_temp=keep_temp)
 
 
 def vercompare(anl_time=None, ninit=4, init_interval=12, model='GRAPES_GFS',
                      func=None, func_other_args={}, max_workers=6,show='tab',
-                     output_dir='./temp/', tab_size=(30, 18)
+                     output_dir='./temp/', tab_size=(30, 18),keep_temp=False
                      ):
     if(anl_time != None):
         anl_time=datetime.datetime.strptime(anl_time,'%y%m%d%H')
@@ -176,14 +176,14 @@ def vercompare(anl_time=None, ninit=4, init_interval=12, model='GRAPES_GFS',
     pic_all=sorted(pic_all,key=lambda i:int(i.split('_')[0]))
     if(show == 'tab'):
         png_name = 'vercompare_{}.png'.format(func.__name__)
-        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name)
+        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name,keep_temp=keep_temp)
     if(show == 'animation'):
         gif_name = 'vercompare_{}.gif'.format(func.__name__)
-        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name)
+        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name,keep_temp=keep_temp)
 
 def evolution(initTime=None, fhours=[12, 18, 24, 30, 36], model='GRAPES_GFS',
                    func=None, func_other_args={}, max_workers=6,show='tab',
-                   output_dir='./temp/', tab_size=(30, 18)): 
+                   output_dir='./temp/', tab_size=(30, 18),keep_temp=False): 
 
     systime=datetime.datetime.now()
     temp_path='./temp/'+systime.strftime('%M%S%f')+'/'
@@ -214,14 +214,14 @@ def evolution(initTime=None, fhours=[12, 18, 24, 30, 36], model='GRAPES_GFS',
     pic_all=sorted(pic_all,key=lambda i:int(i.split('_')[0]))
     if(show == 'tab'):
         png_name = 'evolution_{}.png'.format(func.__name__)
-        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name)
+        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name,keep_temp=keep_temp)
     if(show == 'animation'):
         gif_name = 'evolution_{}.gif'.format(func.__name__)
-        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name)
+        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name,keep_temp=keep_temp)
 
 def structure3D(func=None,levs=[{'uv_lev':925},{'uv_lev':850},{'uv_lev':700},{'uv_lev':500}],
                 initTime=None,fhour=24,model='GRAPES_GFS', func_other_args={}, max_workers=6,show='tab',
-                   output_dir='./temp/', tab_size=(30, 18)): 
+                   output_dir='./temp/', tab_size=(30, 18),keep_temp=False): 
 
     systime=datetime.datetime.now()
     temp_path='./temp/'+systime.strftime('%M%S%f')+'/'
@@ -253,14 +253,14 @@ def structure3D(func=None,levs=[{'uv_lev':925},{'uv_lev':850},{'uv_lev':700},{'u
     pic_all=sorted(pic_all,key=lambda i:int(i.split('_')[0]))
     if(show == 'tab'):
         png_name = 'structure3D_{}.png'.format(func.__name__)
-        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name)
+        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name,keep_temp=keep_temp)
     if(show == 'animation'):
         gif_name = 'structure3D_{}.gif'.format(func.__name__)
-        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name)
+        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name,keep_temp=keep_temp)
 
 def evolution_ana(initTime=[], fhour=0,atime=6, data_source='CIMISS', model='GRAPES_GFS',
                    func=None, func_other_args={}, max_workers=6,show='tab',
-                   output_dir='./temp/', tab_size=(30, 18)): 
+                   output_dir='./temp/', tab_size=(30, 18),keep_temp=False): 
 
     systime=datetime.datetime.now()
     temp_path='./temp/'+systime.strftime('%M%S%f')+'/'
@@ -293,10 +293,10 @@ def evolution_ana(initTime=[], fhour=0,atime=6, data_source='CIMISS', model='GRA
     pic_all=sorted(pic_all,key=lambda i:int(i.split('_')[0]))
     if(show == 'tab'):
         png_name = 'evolution_ana_{}.png'.format(func.__name__)
-        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name)
+        utl.save_tab(temp_path=temp_path,pic_all=pic_all,tab_size=tab_size,output_dir=output_dir,png_name=png_name,keep_temp=keep_temp)
     if(show == 'animation'):
         gif_name = 'evolution_ana_{}.gif'.format(func.__name__)
-        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name)
+        utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name,keep_temp=keep_temp)
 
 if __name__ == '__main__':
     func=draw_moisture.gh_uv_rh
