@@ -39,6 +39,7 @@ import xarray as xr
 from concurrent import futures
 import shutil
 import imageio
+from IPython.display import Image,display
 
 def save_animation(pic_all=None,temp_path=None, output_dir=None, gif_name=None,keep_temp=False):
     '''
@@ -53,6 +54,8 @@ def save_animation(pic_all=None,temp_path=None, output_dir=None, gif_name=None,k
             for ipic in pic_all:
                 imgbuf=plt.imread(temp_path+ipic)
                 writer.append_data(imgbuf)
+    img=Image(data=gif_path)
+    display(img)
     if(keep_temp == False):
         shutil.rmtree(temp_path)
     return 

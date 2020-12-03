@@ -430,7 +430,7 @@ def draw_Time_Crossection_rh_uv_t(
     startcolor = '#1E90FF'   #蓝色
     midcolor = '#F1F1F1'     #白色
     endcolor = '#696969'     #灰色
-    cmap2 = col.LinearSegmentedColormap.from_list('own2',[startcolor,midcolor,endcolor])
+    cmap2 = col.LinearSegmentedColormap.from_list('own2',['#1E90FF','#94D8F6','#F1F1F1','#BFBFBF','#696969'])
     
     rh_contour = ax.contourf(rh_2D['time'].values, rh_2D['level'].values, np.squeeze(rh_2D['data'].values.swapaxes(1,0)),                            
                             levels=np.arange(0, 101, 0.5), cmap=cmap2,extend='max')
@@ -512,7 +512,7 @@ def draw_Time_Crossection_rh_uv_theta_e(
     startcolor = '#1E90FF'   #蓝色
     midcolor = '#F1F1F1'     #白色
     endcolor = '#696969'     #灰色
-    cmap2 = col.LinearSegmentedColormap.from_list('own2',[startcolor,midcolor,endcolor])
+    cmap2 = col.LinearSegmentedColormap.from_list('own2',['#1E90FF','#94D8F6','#F1F1F1','#BFBFBF','#696969'])
     # extra arguments are N=256, gamma=1.0
     cm.register_cmap(cmap=cmap2)
 
@@ -608,7 +608,7 @@ def draw_Crosssection_Wind_Temp_RH(
     startcolor = '#1E90FF'   #蓝色
     midcolor = '#F1F1F1'     #白色
     endcolor = '#696969'     #灰色
-    cmap2 = col.LinearSegmentedColormap.from_list('own2',[startcolor,midcolor,endcolor])
+    cmap2 = col.LinearSegmentedColormap.from_list('own2',['#1E90FF','#94D8F6','#F1F1F1','#BFBFBF','#696969'])
     # extra arguments are N=256, gamma=1.0
     cm.register_cmap(cmap=cmap2)
     
@@ -723,7 +723,7 @@ def draw_Time_Crossection_rh_uv_Temp(
     startcolor = '#1E90FF'   #蓝色
     midcolor = '#F1F1F1'     #白色
     endcolor = '#696969'     #灰色
-    cmap2 = col.LinearSegmentedColormap.from_list('own2',[startcolor,midcolor,endcolor])
+    cmap2 = col.LinearSegmentedColormap.from_list('own2',['#1E90FF','#94D8F6','#F1F1F1','#BFBFBF','#696969'])
     # extra arguments are N=256, gamma=1.0
     cm.register_cmap(cmap=cmap2)
 

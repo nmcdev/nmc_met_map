@@ -22,7 +22,7 @@ def Crosssection_Wind_Theta_e_div(
     st_point = [20, 120.0],
     ed_point = [50, 130.0],
     map_extent=[70,140,15,55],
-    h_pos=[0.125, 0.665, 0.25, 0.2] ,**kwargs):
+    h_pos=[0.125, 0.665, 0.25, 0.2],**kwargs):
 
     # micaps data directory
     if(data_source == 'MICAPS'):
@@ -550,7 +550,7 @@ def Crosssection_Wind_Theta_e_Qv(
         t=get_model_3D_grid(directory=data_dir[3][0:-1],filename=filename,levels=levels, allExists=False)
         gh=get_model_grid(data_dir[4], filename=filename)
         psfc=get_model_grid(data_dir[5], filename=filename)
-    if(data_source is 'CIMISS'):
+    if(data_source == 'CIMISS'):
         # get filename
         if(initTime != None):
             filename = utl.model_filename(initTime, fhour,UTC=True)
@@ -560,39 +560,27 @@ def Crosssection_Wind_Theta_e_Qv(
             rh=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='RHU'),
                         fcst_levels=levels, fcst_ele="RHU", units='%')
-            if rh is None:
-                return
 
             u=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
                         fcst_levels=levels, fcst_ele="WIU", units='m/s')
-            if u is None:
-                return
                 
             v=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         fcst_levels=levels, fcst_ele="WIV", units='m/s')
-            if v is None:
-                return
 
             v2=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
                         fcst_levels=levels, fcst_ele="WIV", units='m/s')
-            if v2 is None:
-                return            
 
             t=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
                         data_code=utl.CMISS_data_code(data_source=model,var_name='TEM'),
                         fcst_levels=levels, fcst_ele="TEM", units='K')
-            if t is None:
-                return
             t['data'].values=t['data'].values-273.15
 
             gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
                             data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
                             fcst_level=500, fcst_ele="GPH", units='gpm')
-            if gh is None:
-                return
             gh['data'].values=gh['data'].values/10.
 
             psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
@@ -602,7 +590,6 @@ def Crosssection_Wind_Theta_e_Qv(
 
         except KeyError:
             raise ValueError('Can not find all data needed')   
-
     rh = rh.metpy.parse_cf().squeeze()
     u = u.metpy.parse_cf().squeeze()
     v = v.metpy.parse_cf().squeeze()

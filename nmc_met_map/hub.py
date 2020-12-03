@@ -269,7 +269,6 @@ def evolution_ana(initTime=[], fhour=0,atime=6, data_source='CIMISS', model='GRA
         os.makedirs(temp_path)
 
     pool = mp.Pool(processes=max_workers)
-
     for idx,iinit in enumerate(initTime):
         func_args = copy.deepcopy(func_other_args)
         func_args['initTime'] = iinit
@@ -280,7 +279,8 @@ def evolution_ana(initTime=[], fhour=0,atime=6, data_source='CIMISS', model='GRA
         func_args['map_ratio'] = 14/9
         func_args['lw_ratio'] = [14,9]
         func_args['output_dir']=temp_path+str(idx)+'_'+model
-        pool.apply_async(func,kwds=func_args)
+        x=pool.apply_async(func,kwds=func_args)
+        #x.get() # for debug
         timer.sleep(1)
     pool.close()
     pool.join()
@@ -299,6 +299,21 @@ def evolution_ana(initTime=[], fhour=0,atime=6, data_source='CIMISS', model='GRA
         utl.save_animation(temp_path=temp_path,pic_all=pic_all,output_dir=output_dir,gif_name=gif_name,keep_temp=keep_temp)
 
 if __name__ == '__main__':
+
+    #剖面时间
+    time_cross=['20111808','20111814','20111820','20111902','20111908','20111914','20111920']
+    #第一个剖面位置
+    ed_point1=[37.0,124.4]
+    st_point1=[44,122]
+    #第二个剖面位置
+    ed_point2=[47.1,134.3]
+    st_point2=[38,120.888]
+    model_name='GRAPES_GFS'
+    func_other_args1={'ed_point':ed_point1,'st_point':st_point1,'map_extent':[120,140,35,50],'levels':[1000,975,950, 925, 900, 850, 800, 750,700,600,500],'data_source':'CIMISS'}
+    func_other_args2={'ed_point':ed_point2,'st_point':st_point2,'map_extent':[120,140,35,50],'levels':[1000,975,950, 925, 900, 850, 800, 750,700,600,500],'data_source':'CIMISS'}
+    func=draw_crossection.Crosssection_Wind_Theta_e_Qv
+    evolution_ana(func=func,model=model_name,initTime=time_cross,fhour=0,keep_temp=True,max_workers=6,func_other_args=func_other_args2,show='animation')
+
     func=draw_moisture.gh_uv_rh
     evolution_ana(func=func,initTime=['20111808','20111814','20111820','20111902'],fhour=0)
 
