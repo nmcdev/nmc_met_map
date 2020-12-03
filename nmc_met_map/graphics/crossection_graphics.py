@@ -88,7 +88,7 @@ def draw_Crosssection_Wind_Theta_e_div(
     ax.set_title('相当位温, 水平散度, 沿剖面风', loc='right', fontsize=20)
     ax.set_ylabel('Pressure (hPa)')
     ax.set_xlabel('Longitude')
-    absv_colorbar.set_label('Absolute Vorticity (dimensionless)')
+    absv_colorbar.set_label('水平散度 (dimensionless)')
 
     if(sys.platform[0:3] == 'lin'):
         locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
@@ -108,7 +108,7 @@ def draw_Crosssection_Wind_Theta_e_div(
 
     # show figure
     if(output_dir != None):
-        plt.savefig(output_dir+'相当位温_绝对涡度_沿剖面风_预报_'+
+        plt.savefig(output_dir+'相当位温_水平散度_沿剖面风_预报_'+
         '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
         '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200,bbox_inches='tight')
         plt.close()
@@ -233,10 +233,10 @@ def draw_Crosssection_Wind_Theta_e_RH(
     ax = plt.axes()
 
     # example 2: use the "fromList() method
-    startcolor = '#1E90FF'   #蓝色
-    midcolor = '#F1F1F1'     #白色
-    endcolor = '#696969'     #灰色
-    cmap2 = col.LinearSegmentedColormap.from_list('own2',[startcolor,midcolor,endcolor])
+    # startcolor = '#1E90FF'   #蓝色
+    # midcolor = '#F1F1F1'     #白色
+    # endcolor = '#696969'     #灰色
+    cmap2 = col.LinearSegmentedColormap.from_list('own2',['#1E90FF','#94D8F6','#F1F1F1','#BFBFBF','#696969'])
     
     rh_contour = ax.contourf(cross_rh['lon'], cross_rh['level'], cross_rh['data'],
                             levels=np.arange(0, 101, 0.5), cmap=cmap2,extend='max')
