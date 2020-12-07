@@ -22,8 +22,11 @@ import matplotlib.patheffects as mpatheffects
 import nmc_met_graphics.cmap.cpt as cpt
 
 def gh_contour(ax,x,y,z,colors='black',
-    levels=np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 584, 8), np.arange(580, 604, 4))), np.arange(604, 2000, 8)),
-    alpha=0.5,linewidths=2,transform=ccrs.PlateCarree(),**kwargs):
+    levels=np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 580, 4), np.arange(580, 604, 4))), np.arange(604, 2000, 8)),
+    alpha=0.8,linewidths=None,transform=ccrs.PlateCarree(),**kwargs):
+    if(linewidths == None):
+        linewidths=np.zeros_like(levels)+2
+        linewidths[levels==588]=4
     img = ax.contour(x,y,z,levels=levels,linewidths=linewidths,
         colors=colors, transform=transform,alpha=alpha,**kwargs)
     plt.clabel(img, inline=1, fontsize=20, fmt='%i',colors=colors)
@@ -98,4 +101,19 @@ def cu_rain_contourf(ax,x,y,z,cmap=None,levels=None,atime=6,vmin=-50,vmax=50,alp
         colors,levels=gy_ctables.cm_precipitation_nmc(atime=atime)
     z[z<0.1]=np.nan
     img = ax.contourf(x,y,z,colors=colors, levels=levels,transform=transform,extend='max',**kwargs)
+    return img
+
+def ulj_contourf(ax,x,y,z,cmap=utl.linearized_ncl_cmap('MPL_Oranges'),levels=np.arange(30,80,2),alpha=0.8,transform=ccrs.PlateCarree(),**kwargs):
+    z[z<levels[0]]=np.nan
+    img = ax.contourf(x,y,z,cmap=cmap, levels=levels,transform=transform,extend='max',alpha=alpha,**kwargs)
+    return img
+
+def wet_area_contourf(ax,x,y,z,cmap=utl.linearized_ncl_cmap('MPL_Blues'),levels=np.arange(50,80,2),vmin=50,vmax=80,alpha=0.8,transform=ccrs.PlateCarree(),**kwargs):
+    z[z<levels[0]]=np.nan
+    img = ax.contourf(x,y,z,cmap=cmap, levels=levels,transform=transform,extend='max',alpha=alpha,**kwargs)
+    return img
+
+def tadv_pcolormesh(ax,x,y,z,cmap=dk_ctables2.ncl_cmaps('cmp_b2r'),vmin=-50,vmax=50,alpha=0.8,transform=ccrs.PlateCarree(),**kwargs):
+    img = ax.pcolormesh(x,y,z,
+        cmap=cmap,transform=transform, vmin=vmin, vmax=vmax,**kwargs)
     return img

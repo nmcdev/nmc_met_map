@@ -40,6 +40,35 @@ from concurrent import futures
 import shutil
 import imageio
 from IPython.display import Image,display
+import nmc_met_io.retrieve_cimiss_server as CIMISS_IO
+import warnings
+
+def autolabel(rects,axes):
+    for rect in rects:
+        height = rect.get_height()
+        if(height > 0):
+            axes.annotate('%.2f'%height,
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+
+def cimiss_model_ana_grids(data_code, filenames, fcst_ele, fcst_level,
+                      varname='data', units=None, scale_off=None, cache=True,
+                      levattrs={'long_name':'height_above_ground', 'units':'m', '_CoordinateAxisType':'Height'},allExists=True):
+
+    dataset=[]
+    for filename in filenames:
+        data=CIMISS_IO.cimiss_model_grid(data_code=data_code,init_time_str=filename[0:10],valid_time=int(filename[11:14]),fcst_ele=fcst_ele,fcst_level=fcst_level,
+                                        varname=varname,units=units,scale_off=scale_off,cache=cache,
+                                        levattrs=levattrs)
+        if data:
+            dataset.append(data)
+        else:
+            if allExists:
+                warnings.warn("{} doese not exists.".format(data_code+'/'+filename))
+                return None
+    return xr.concat(dataset, dim='time')
 
 def save_animation(pic_all=None,temp_path=None, output_dir=None, gif_name=None,keep_temp=False):
     '''
@@ -979,6 +1008,13 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'T2m':'NWFD_SMERGE/TMP/2M_ABOVE_GROUND/',  
                     'rh2m':'NWFD_SMERGE/RH/2M_ABOVE_GROUND/'               
                     },
+            '中央气象台滚动更新':{
+                    'u10m':'GMOSRR/ROLLING_UPDATE/UGRD/10M_ABOVE_GROUND/',
+                    'v10m':'GMOSRR/ROLLING_UPDATE/VGRD/10M_ABOVE_GROUND/',
+                    'RAIN01':'GMOSRR/ROLLING_UPDATE/RAIN01/',
+                    'T2m':'GMOSRR/ROLLING_UPDATE/TMP/2M_ABOVE_GROUND/',  
+                    'rh2m':'GMOSRR/ROLLING_UPDATE/RH/2M_ABOVE_GROUND/'
+                    },
             'CLDAS':{
                     'Tmx_2m':"CLDAS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/",
                     'Tmn_2m':"CLDAS/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/",
@@ -1047,12 +1083,6 @@ class SCMOC(object):
                             self.data[site_id].update({line_item[0]: line_item[1:]})
         except FileNotFoundError:
             print('----%s not exists!!!' % file)
-
-
-if __name__ == '__main__':
-    s = SCMOC(r'D:\forecast_glb\data\sta\N_SEVP_NMC_RFFC_SFER_EME_AGLB_L88_P9_20190728120014412.txt')
-    data = s.data
-    print(data)
 
 
 def get_model_points_gy(directory, filenames, points, allExists=True,fill_null=False,Null_value=0):
@@ -1497,13 +1527,15 @@ def get_map_regions():
     return map_region
 
 def mask_terrian(prs_lev,psfc,xr_input):
-    psfc_new=psfc.interp(lon =xr_input['lon'].values, 
-                        lat = xr_input['lat'].values, 
-                        kwargs={"fill_value": "extrapolate"})
-    idx_terrian=np.expand_dims((psfc_new['data'].values-prs_lev)<0,axis=0)
-    if(idx_terrian.any()):
-        xr_input['data'].values[idx_terrian]=np.nan
-    return xr_input
+    # psfc_new=psfc.interp(lon =xr_input['lon'].values, 
+    #                     lat = xr_input['lat'].values, 
+    #                     kwargs={"fill_value": "extrapolate"})
+    # idx_terrian=np.expand_dims((psfc_new['data'].values-prs_lev)<0,axis=0)
+    # if(idx_terrian.any()):
+    #     xr_input['data'].values[idx_terrian]=np.nan
+    # return xr_input
+    xr_output=xr_input.where((psfc-prs_lev) > 0)
+    return xr_output
 
 def cut_xrdata(map_extent,xr_input,delt_x=0,delt_y=0):
             

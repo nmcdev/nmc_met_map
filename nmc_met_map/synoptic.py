@@ -16,6 +16,128 @@ import xarray as xr
 import pkg_resources
 import pandas as pd
 from datetime import datetime, timedelta
+
+def periodmean_gh_uv_pwat_ulj(initTimes=None, fhours=[0], day_back=0,model='ECMWF',
+    gh_lev=500,uv_lev=850,ulj_lev=200,
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],
+    south_China_sea=True,area =None,city=False,output_dir=None,data_source='MICAPS',
+    Global=False,**kwargs):
+
+    if(area != None):
+        south_China_sea=False
+
+    # micaps data directory
+    if(data_source =='MICAPS'):       
+        try:
+            data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl=gh_lev),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=uv_lev),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=uv_lev),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=ulj_lev),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=ulj_lev),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='TCWV'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
+        except KeyError:
+            raise ValueError('Can not find all directories needed')
+
+        filenames=[]
+        # get filename
+        if(initTimes != None):
+            for initTime in initTimes:
+                for fhour in fhours:
+                    filenames.append(utl.model_filename(initTime, fhour))
+        else:
+            filenames = utl.filename_day_back_model(day_back=day_back,fhour=fhour)
+
+        # retrieve data from micaps server
+        gh = MICAPS_IO.get_model_grids(data_dir[0], filenames=filenames)
+        u = MICAPS_IO.get_model_grids(data_dir[1], filenames=filenames)
+        v = MICAPS_IO.get_model_grids(data_dir[2], filenames=filenames)
+        u2 = MICAPS_IO.get_model_grids(data_dir[3], filenames=filenames)
+        v2 = MICAPS_IO.get_model_grids(data_dir[4], filenames=filenames)
+        pwat = MICAPS_IO.get_model_grids(data_dir[5], filenames=filenames)
+        psfc = MICAPS_IO.get_model_grids(data_dir[6], filenames=filenames)
+         
+    if(data_source =='CIMISS'):
+        # get filename
+        filenames=[]
+        if(initTimes != None):
+            for initTime in initTimes:
+                for fhour in fhours:
+                    filenames.append('20'+utl.model_filename(initTime, fhour,UTC=True))
+        else:
+            filenames=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
+        try:
+            # retrieve data from CIMISS server        
+            gh=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),filenames=filenames,
+                        fcst_level=gh_lev, fcst_ele="GPH", units='gpm')
+            gh['data'].values=gh['data'].values/10.
+
+            u=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),filenames=filenames,
+                        fcst_level=uv_lev, fcst_ele="WIU", units='m/s')
+                
+            v=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),filenames=filenames,
+                        fcst_level=uv_lev, fcst_ele="WIV", units='m/s')
+
+            u2=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),filenames=filenames,
+                        fcst_level=ulj_lev, fcst_ele="WIU", units='m/s')
+                
+            v2=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),filenames=filenames,
+                        fcst_level=ulj_lev, fcst_ele="WIV", units='m/s')
+
+            if(model == 'ECMWF'):
+                pwat=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='TCWV'),filenames=filenames,
+                            fcst_level=0, fcst_ele="TCWV", units='kg m-2')
+            else:
+                pwat=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='TIWV'),filenames=filenames,
+                            fcst_level=0, fcst_ele="TIWV", units='kg m-2')
+
+            psfc=utl.cimiss_model_ana_grids(data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),filenames=filenames,
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
+
+        except KeyError:
+            raise ValueError('Can not find all data needed')        
+    # prepare data
+
+    if(area != None):
+        cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
+
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt=cntr_pnt,zoom_ratio=zoom_ratio,map_ratio=map_ratio)
+
+    gh=utl.cut_xrdata(map_extent, gh, delt_x=delt_x, delt_y=delt_y)
+    u=utl.cut_xrdata(map_extent, u, delt_x=delt_x, delt_y=delt_y)
+    v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
+    u2=utl.cut_xrdata(map_extent, u2, delt_x=delt_x, delt_y=delt_y)
+    v2=utl.cut_xrdata(map_extent, v2, delt_x=delt_x, delt_y=delt_y)
+    pwat=utl.cut_xrdata(map_extent, pwat, delt_x=delt_x, delt_y=delt_y)
+
+    gh=utl.mask_terrian(gh_lev,psfc,gh)
+    u=utl.mask_terrian(uv_lev,psfc,u)
+    v=utl.mask_terrian(uv_lev,psfc,v)
+    u2=utl.mask_terrian(ulj_lev,psfc,u2)
+    v2=utl.mask_terrian(ulj_lev,psfc,v2)
+
+
+    uv=xr.merge([u.rename({'data': 'u'}),v.rename({'data': 'v'})])
+    ulj=mpcalc.wind_speed(u2['data'].values*units('m/s'),v2['data'].values*units('m/s'))
+    ulj_xr=u2.copy(deep=True)
+    ulj_xr['data'].values=ulj.magnitude
+
+    pwat_mean=pwat.mean('time')
+    gh_mean=gh.mean('time')
+    ulj_mean=ulj_xr.mean('time')
+    uv_mean=uv.mean('time')
+
+    gh_mean.attrs['model']=model
+    gh_mean.attrs['st_time']=gh['time'].values[0]
+    gh_mean.attrs['ed_time']=gh['time'].values[-1]
+
+    synoptic_graphics.draw_gh_uv_pwat_ulj(
+        pwat=pwat_mean, gh=gh_mean, uv=uv_mean,ulj=ulj_mean,
+        map_extent=map_extent, regrid_shape=20,
+        city=city,south_China_sea=south_China_sea,
+        output_dir=output_dir)
+
 def gh500_anomaly_uv(initTime=None, fhour=240, day_back=0,model='ECMWF',
     gh_lev=500,uv_lev=500,
     map_ratio=13/9,zoom_ratio=20,cntr_pnt=[102,34],

@@ -19,6 +19,42 @@ import nmc_met_map.lib.gy_ctables as gy_ctables
 import nmc_met_map.graphics2 as GF
 import os
 
+def draw_gh_uv_tadv(gh=None, uv=None, tadv=None,
+                    map_extent=(50, 150, 0, 65),
+                    regrid_shape=20,
+                    add_china=True,city=True,south_China_sea=True,
+                    output_dir=None,Global=False):
+
+    initTime = pd.to_datetime(gh.coords['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime()
+    fhour = int(gh['forecast_period'].values[0])
+    fcstTime = initTime + timedelta(hours=fhour)
+    title = '['+gh.attrs['model']+'] '+str(int(uv['level'].values[0]))+'hPa 风场, '+str(int(gh['level'].values[0]))+'hPa 高度场 '+str(int(tadv['level'].values[0]))+'hPa 温度平流'
+    forcast_info = '起报时间: {0:%Y}年{0:%m}月{0:%d}日{0:%H}时\n预报时间: {1:%Y}年{1:%m}月{1:%d}日{1:%H}时\n预报时效: {2}小时\nwww.nmc.cn'.format(initTime, fcstTime, fhour)
+    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete((18, 9),map_extent=map_extent, title=title, forcast_info=forcast_info,info_zorder=4,
+                                             add_china=True, add_city=city, add_background=True, south_China_sea=south_China_sea)
+
+    tadv_pcolormesh=GF.draw_method.tadv_pcolormesh(ax, tadv['lon'].values, tadv['lat'].values, np.squeeze((tadv['data'].values)*1e4),vmin=-10,vmax=10,zorder=1)
+    barb_uv=GF.draw_method.wind_barbs(ax,uv['lon'].values,uv['lat'].values,uv['u'].values.squeeze(),uv['v'].values.squeeze(),zorder=2,regrid_shape=regrid_shape)
+    contour_gh=GF.draw_method.gh_contour(ax, gh['lon'].values, gh['lat'].values, np.squeeze(gh['data'].values),zorder=3)
+
+    l, b, w, h = ax.get_position().bounds
+    # add color bar
+    cax=plt.axes([l,b-0.04,w,.02])
+    cb = plt.colorbar(tadv_pcolormesh, cax=cax, orientation='horizontal',extend='both')
+    cb.ax.tick_params(labelsize='x-large')                      
+    cb.set_label(u'10$^{-4}$ $^\circ$C s$^{-1}$',size=20)
+    
+
+# show figure
+    if(output_dir != None):
+        plt.savefig(output_dir+'高度场_风场_温度平流_预报_'+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(gh.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
+    
+    if(output_dir == None):
+        plt.show()                        
+
 def draw_gh_uv_thetae(gh=None, uv=None, thetae=None,
                     map_extent=(50, 150, 0, 65),
                     regrid_shape=20,

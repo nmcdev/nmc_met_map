@@ -745,14 +745,17 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
                             +timedelta(hours=ifhour)))
     mask = (rn['data'] < 999)
     rn=rn['data'].where(mask)
-    ax_rn.bar(rn_t,np.squeeze(rn.values),width=0.1,color='#00008B',
-        label=str(int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0]))+'小时降水',alpha=0.5)
+    bars_rn=ax_rn.bar(rn_t,np.squeeze(rn.values),width=((0.1/3.)*int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0])),
+        color='#00008B',label=str(int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0]))+'小时降水',alpha=0.5)
     #curve_rn=ax_rn.plot(rn_t, np.squeeze(rn['data'].values), c='#40C4FF',linewidth=3)
-    
+    utl.autolabel(bars_rn,ax_rn)
     ax_rn.set_ylim(0,np.nanmax(np.append(10,np.squeeze(rn.values)+1)))
     ###
-
-    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    if((rn['forecast_period'].values[-1]-rn['forecast_period'].values[0]) > 36):
+        xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    else:
+        xaxis_intaval=mpl.dates.HourLocator(byhour=(2,8,14,20)) #单位是小时
+    
     ax_t2m.xaxis.set_major_locator(xaxis_intaval)
     # add legend
     ax_t2m.legend(fontsize=15,loc='upper right')
@@ -807,7 +810,11 @@ def draw_point_fcst(t2m=None,u10m=None,v10m=None,rn=None,
     utl.add_logo_extra_in_axes(pos=[0.87,0.00,.1,.1],which='nmc', size='Xlarge')
 
     #开启自适应
-    xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    # xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    if((rn['forecast_period'].values[-1]-rn['forecast_period'].values[0]) > 36):
+        xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
+    else:
+        xaxis_intaval=mpl.dates.HourLocator(byhour=(2,8,14,20)) #单位是小时
     ax_uv.xaxis.set_major_locator(xaxis_intaval)
     ax_uv.tick_params(length=5,axis='x')
     ax_uv.tick_params(length=0,axis='y')
@@ -925,17 +932,7 @@ def draw_point_uv_tmp_rh_rn_fcst(
     bars_rn=ax_t2m.bar(rn_t,np.squeeze(rn.values),width=0.1,color='#1E78B4',
         label=str(int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0]))+'小时降水')
 
-    def autolabel(rects):
-        for rect in rects:
-            height = rect.get_height()
-            if(height > 0):
-                ax_t2m.annotate('%.2f'%height,
-                            xy=(rect.get_x() + rect.get_width() / 2, height),
-                            xytext=(0, 3),  # 3 points vertical offset
-                            textcoords="offset points",
-                            ha='center', va='bottom')
-
-    autolabel(bars_rn)
+    utl.autolabel(bars_rn,ax_t2m)
     ###
 
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时
@@ -1112,17 +1109,7 @@ def draw_point_uv_tmp_rh_rn_gust_fcst(
     bars_rn=ax_t2m.bar(rn_t,np.squeeze(rn.values),width=0.1,color='#1E78B4',
         label=str(int(rn['forecast_period'].values[1]-rn['forecast_period'].values[0]))+'小时降水')
 
-    def autolabel(rects):
-        for rect in rects:
-            height = rect.get_height()
-            if(height > 0):
-                ax_t2m.annotate('%.2f'%height,
-                            xy=(rect.get_x() + rect.get_width() / 2, height),
-                            xytext=(0, 3),  # 3 points vertical offset
-                            textcoords="offset points",
-                            ha='center', va='bottom')
-
-    autolabel(bars_rn)
+    utl.autolabel(bars_rn,ax_t2m)
     ###
 
     xaxis_intaval=mpl.dates.HourLocator(byhour=(8,20)) #单位是小时

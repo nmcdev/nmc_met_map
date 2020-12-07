@@ -38,7 +38,7 @@ from matplotlib.font_manager import FontProperties
 import matplotlib.patches as mpatches
 
 def Horizontal_Pallete(figsize=(16, 9), plotcrs=ccrs.PlateCarree(), datacrs=ccrs.PlateCarree(),map_extent=(60, 145, 15, 55), title='', forcast_info='',
-                       add_china=True, add_city=False, add_background=True, south_China_sea=True,info_zorder=10):
+                       add_china=True, add_city=False, add_background=True, south_China_sea=True,info_zorder=10,title_fontsize=30):
     
     plt.rcParams['font.sans-serif'] = ['SimHei']  # 步骤一（替换sans-serif字体）
     plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
@@ -56,7 +56,7 @@ def Horizontal_Pallete(figsize=(16, 9), plotcrs=ccrs.PlateCarree(), datacrs=ccrs
     ax = plt.axes([0.01, 0.1, .98, .84], projection=plotcrs)
     #ax.set_extent(map_extent, crs=crs)
     map_extent=adjust_map_ratio(ax,map_extent=map_extent,datacrs=datacrs)
-    plt.title(title, loc='left', fontsize=30)
+    plt.title(title, loc='left', fontsize=title_fontsize)
     # add grid lines
     gl = ax.gridlines(crs=datacrs, linewidth=2, color='gray', alpha=0.5, linestyle='--', zorder=info_zorder)
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))

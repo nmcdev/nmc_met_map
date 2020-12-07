@@ -21,6 +21,51 @@ from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
 import nmc_met_graphics.cmap.cm as dk_ctables2
 import matplotlib.patheffects as path_effects
+import nmc_met_map.graphics2 as GF
+
+def draw_gh_uv_pwat_ulj(gh=None, uv=None, pwat=None,ulj=None,
+                    map_extent=(50, 150, 0, 65),
+                    regrid_shape=20,
+                    add_china=True,city=True,south_China_sea=True,add_background=False,
+                    output_dir=None):
+
+    st_time = pd.to_datetime(gh.attrs['st_time']).replace(tzinfo=None).to_pydatetime()
+    ed_time = pd.to_datetime(gh.attrs['ed_time']).replace(tzinfo=None).to_pydatetime()
+
+    title = '[{}] 时段平均 {}hPa位势高度 {}hPa风 {}hPa急流 整层可降水量'.format(gh.attrs['model'],gh['level'].values[0],uv['level'].values[0],ulj['level'].values[0])
+
+    forcast_info = '起始时间: {} \n截至时间:{}\nwww.nmc.cn'.format(st_time.strftime('%Y年%m月%d日'),ed_time.strftime('%Y年%m月%d日'))
+
+    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete((18, 9),map_extent=map_extent, title=title,title_fontsize=22, forcast_info=forcast_info,info_zorder=4,
+                                             add_china=add_china, add_city=city, add_background=add_background, south_China_sea=south_China_sea)
+    plots = {}
+    pwat_contourf=GF.draw_method.wet_area_contourf(ax, pwat['lon'].values, pwat['lat'].values, np.squeeze(pwat['data'].values),zorder=1)
+    ulj_contourf=GF.draw_method.ulj_contourf(ax, ulj['lon'].values, ulj['lat'].values, np.squeeze(ulj['data'].values),zorder=1)
+    contour_gh=GF.draw_method.gh_contour(ax, gh['lon'].values, gh['lat'].values, np.squeeze(gh['data'].values),zorder=3)
+    ax.clabel(contour_gh, inline=1, fontsize=20, fmt='%.0f',colors='black')
+    barb_uv=GF.draw_method.wind_barbs(ax,uv['lon'].values,uv['lat'].values,uv['u'].values.squeeze(),uv['v'].values.squeeze(),zorder=3,regrid_shape=regrid_shape)
+    
+    l, b, w, h = ax.get_position().bounds
+    cax=plt.axes([l,b-0.04,w/2.-0.04,.02])
+    cb = plt.colorbar(ulj_contourf, cax=cax, orientation='horizontal',
+                      extend='max',extendrect=False)
+    cb.ax.tick_params(labelsize='x-large')                      
+    cb.set_label('ULJ (m/s)',size=20)
+
+    cax=plt.axes([l+w/2+0.04,b-0.04,w/2.-0.04,.02])
+    cb = plt.colorbar(pwat_contourf, cax=cax, orientation='horizontal',
+                      extend='max',extendrect=False)
+    cb.ax.tick_params(labelsize='x-large')                      
+    cb.set_label('PWAT (mm)',size=20)
+    # show figure
+    if(output_dir != None):
+        plt.savefig(output_dir+'位势高度场_风场_整层可降水量_急流_平均场_'+
+        '起始时间_'+st_time.strftime('%y年%m月%d日')+
+        '截至时间_'+ed_time.strftime('%y年%m月%d日')+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
+    
+    if(output_dir == None):
+        plt.show()
 
 def draw_gh_uv_mslp(gh=None, uv=None, mslp=None,
                     map_extent=(50, 150, 0, 65),
