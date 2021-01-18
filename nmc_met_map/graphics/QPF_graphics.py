@@ -102,7 +102,7 @@ def draw_gh_rain(gh=None, rain=None,
         x, y = np.meshgrid(gh['lon'], gh['lat'])
         clevs_gh = np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 584, 8), np.arange(580, 604, 4))), np.arange(604, 2000, 8))
         plots['gh'] = ax.contour(
-            x, y, np.squeeze(gh['data']), clevs_gh, colors='black',
+            x, y, np.squeeze(gh['data'].values), clevs_gh, colors='black',
             linewidths=2, transform=datacrs, zorder=3)
         plt.clabel(plots['gh'], inline=2, fontsize=20, fmt='%.0f',colors='black')
 #additional information

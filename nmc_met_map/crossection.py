@@ -14,6 +14,171 @@ import math
 import os
 import sys
 
+def Crosssection_Wind_Theta_e_mpv(
+    initTime=None, fhour=24,lw_ratio=[16,9],
+    levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
+    day_back=0,model='GRAPES_GFS',data_source='MICAPS',
+    output_dir=None,
+    st_point = [20, 120.0],
+    ed_point = [50, 130.0],
+    map_extent=[70,140,15,55],
+    h_pos=[0.125, 0.665, 0.25, 0.2],**kwargs):
+
+    # micaps data directory
+    if(data_source == 'MICAPS'):
+        try:
+            data_dir = [utl.Cassandra_dir(data_type='high',data_source=model,var_name='RH',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='UGRD',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='VGRD',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='TMP',lvl=''),
+                        utl.Cassandra_dir(data_type='high',data_source=model,var_name='HGT',lvl='500'),
+                        utl.Cassandra_dir(data_type='surface',data_source=model,var_name='PSFC')]
+        except KeyError:
+            raise ValueError('Can not find all directories needed')
+
+        # get filename
+        if(initTime != None):
+            filename = utl.model_filename(initTime, fhour)
+        else:
+            filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour)
+            
+        # retrieve data from micaps server
+        rh=MICAPS_IO.get_model_3D_grid(directory=data_dir[0][0:-1],filename=filename,levels=levels, allExists=False)
+        rh = rh.metpy.parse_cf().squeeze()
+        u=MICAPS_IO.get_model_3D_grid(directory=data_dir[1][0:-1],filename=filename,levels=levels, allExists=False)
+        u = u.metpy.parse_cf().squeeze()
+        v=MICAPS_IO.get_model_3D_grid(directory=data_dir[2][0:-1],filename=filename,levels=levels, allExists=False)
+        v = v.metpy.parse_cf().squeeze()
+        v2=MICAPS_IO.get_model_3D_grid(directory=data_dir[2][0:-1],filename=filename,levels=levels, allExists=False)
+        v2 = v2.metpy.parse_cf().squeeze()
+        t=MICAPS_IO.get_model_3D_grid(directory=data_dir[3][0:-1],filename=filename,levels=levels, allExists=False)
+        t = t.metpy.parse_cf().squeeze()
+        gh=MICAPS_IO.get_model_grid(data_dir[4], filename=filename)
+        psfc=get_model_grid(data_dir[5], filename=filename)
+
+    if(data_source == 'CIMISS'):
+        # get filename
+        if(initTime != None):
+            filename = utl.model_filename(initTime, fhour,UTC=True)
+        else:
+            filename=utl.filename_day_back_model(day_back=day_back,fhour=fhour,UTC=True)
+        try:
+            rh=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='RHU'),
+                        fcst_levels=levels, fcst_ele="RHU", units='%')
+            if rh is None:
+                return
+
+            u=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIU'),
+                        fcst_levels=levels, fcst_ele="WIU", units='m/s')
+            if u is None:
+                return
+                
+            v=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
+                        fcst_levels=levels, fcst_ele="WIV", units='m/s')
+            if v is None:
+                return
+
+            v2=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='WIV'),
+                        fcst_levels=levels, fcst_ele="WIV", units='m/s')
+            if v2 is None:
+                return            
+
+            t=CMISS_IO.cimiss_model_3D_grid(init_time_str='20'+filename[0:8],valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='TEM'),
+                        fcst_levels=levels, fcst_ele="TEM", units='K')
+            if t is None:
+                return
+            t['data'].values=t['data'].values-273.15
+
+            gh=CMISS_IO.cimiss_model_by_time('20'+filename[0:8],valid_time=fhour,
+                            data_code=utl.CMISS_data_code(data_source=model,var_name='GPH'),
+                            fcst_level=500, fcst_ele="GPH", units='gpm')
+            if gh is None:
+                return
+            gh['data'].values=gh['data'].values/10.
+
+            psfc=CMISS_IO.cimiss_model_by_time('20'+filename[0:8], valid_time=fhour,
+                        data_code=utl.CMISS_data_code(data_source=model,var_name='PRS'),
+                        fcst_level=0, fcst_ele="PRS", units='Pa')
+            psfc['data']=psfc['data']/100.
+
+        except KeyError:
+            raise ValueError('Can not find all data needed')   
+
+
+    rh = rh.metpy.parse_cf().squeeze()
+    u = u.metpy.parse_cf().squeeze()
+    v = v.metpy.parse_cf().squeeze()
+    v2 = v2.metpy.parse_cf().squeeze()
+    t = t.metpy.parse_cf().squeeze()
+    psfc=psfc.metpy.parse_cf().squeeze()
+    resolution=u['lon'][1]-u['lon'][0]
+    x,y=np.meshgrid(u['lon'], u['lat'])
+    lons, lats = np.meshgrid(u['lon'], v['lat'])
+    dx,dy=mpcalc.lat_lon_grid_deltas(u['lon'],u['lat'])
+    pressure3d=np.tile(np.array(levels)[:,np.newaxis,np.newaxis],gh['data'].values.squeeze().shape)*units('hPa')
+    td3d=mpcalc.dewpoint_from_relative_humidity(t['data'].values.squeeze()*units('degreeC'), rh['data'].values.squeeze()*units.percent)
+    Theta_e3d=mpcalc.equivalent_potential_temperature(pressure3d,t['data'].values.squeeze()*units('degreeC'),td3d)
+    mpv3d=mpcalc.potential_vorticity_baroclinic(Theta_e3d,pressure3d,u['data'].values*units('m/s'),v['data'].values*units('m/s'),dx[0,:],dy[:,0],lats*units('degree'))
+    mpv3d_xr=v2.copy(deep=True)
+    mpv3d_xr['data'].values=mpv3d
+    # +form 3D psfc
+    mask1 = (
+            (psfc['lon']>=t['lon'].values.min())&
+            (psfc['lon']<=t['lon'].values.max())&
+            (psfc['lat']>=t['lat'].values.min())&
+            (psfc['lat']<=t['lat'].values.max())
+            )
+
+    t2,psfc_bdcst=xr.broadcast(t['data'],psfc['data'].where(mask1, drop=True))
+    mask2=(psfc_bdcst > -10000)
+    psfc_bdcst=psfc_bdcst.where(mask2, drop=True)
+    # -form 3D psfc
+    #rh=rh.rename(dict(lat='latitude',lon='longitude'))
+    cross = cross_section(rh, st_point, ed_point)
+    cross_rh=cross.set_coords(('lat', 'lon'))
+    cross = cross_section(u, st_point, ed_point)
+    cross_u=cross.set_coords(('lat', 'lon'))
+    cross = cross_section(v, st_point, ed_point)
+    cross_v=cross.set_coords(('lat', 'lon'))
+    cross_psfc = cross_section(psfc_bdcst, st_point, ed_point)
+
+    cross_u['data'].attrs['units']=units.meter/units.second
+    cross_v['data'].attrs['units']=units.meter/units.second
+    cross_u['t_wind'], cross_v['n_wind'] = mpcalc.cross_section_components(cross_u['data'],cross_v['data'])
+    
+    cross = cross_section(t, st_point, ed_point)
+    cross_t=cross.set_coords(('lat', 'lon'))
+    cross = cross_section(mpv3d_xr, st_point, ed_point)
+    cross_mpv3d=cross.set_coords(('lat', 'lon'))
+
+    cross_Td = mpcalc.dewpoint_rh(cross_t['data'].values*units.celsius,
+                cross_rh['data'].values* units.percent)
+
+    rh,pressure = xr.broadcast(cross_rh['data'],cross_t['level'])
+    pressure.attrs['units']='hPa'
+    Theta_e=mpcalc.equivalent_potential_temperature(pressure,
+                                                cross_t['data'].values*units.celsius, 
+                                                cross_Td)
+
+    cross_terrain=pressure-cross_psfc
+
+    cross_Theta_e = xr.DataArray(np.array(Theta_e),
+                        coords=cross_rh['data'].coords,
+                        dims=cross_rh['data'].dims,
+                        attrs={'units': Theta_e.units})
+
+    crossection_graphics.draw_Crosssection_Wind_Theta_e_mpv(
+                    cross_mpv=cross_mpv3d, cross_Theta_e=cross_Theta_e, cross_u=cross_u,
+                    cross_v=cross_v,cross_terrain=cross_terrain,gh=gh,
+                    h_pos=h_pos,st_point=st_point,ed_point=ed_point,
+                    levels=levels,map_extent=map_extent,lw_ratio=lw_ratio,
+                    output_dir=output_dir)
+
 def Crosssection_Wind_Theta_e_div(
     initTime=None, fhour=24,lw_ratio=[16,9],
     levels=[1000, 950, 925, 900, 850, 800, 700,600,500,400,300,200],
@@ -309,8 +474,8 @@ def Crosssection_Wind_Theta_e_absv(
         u2d=u.sel(level=ilvl)
         v2d=v.sel(level=ilvl)
 
-        absv2d=mpcalc.absolute_vorticity(u2d['data'].values*units.meter/units.second,
-                v2d['data'].values*units.meter/units.second,dx,dy,y*units.degree)
+        absv2d=mpcalc.absolute_vorticity(u2d['data'].values*units('m/s'),
+                v2d['data'].values*units('m/s'),dx,dy,y*units.degree)
         
         if(ilvl == levels[0]):
             absv3d = v2.copy()

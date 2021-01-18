@@ -20,6 +20,7 @@ import nmc_met_graphics.cmap.cm as dk_ctables2
 from scipy.ndimage import gaussian_filter
 import matplotlib.patheffects as mpatheffects
 import nmc_met_graphics.cmap.cpt as cpt
+import matplotlib.colors as col
 
 def gh_contour(ax,x,y,z,colors='black',
     levels=np.append(np.append(np.arange(0, 480, 4),np.append(np.arange(480, 580, 4), np.arange(580, 604, 4))), np.arange(604, 2000, 8)),
@@ -116,4 +117,10 @@ def wet_area_contourf(ax,x,y,z,cmap=utl.linearized_ncl_cmap('MPL_Blues'),levels=
 def tadv_pcolormesh(ax,x,y,z,cmap=dk_ctables2.ncl_cmaps('cmp_b2r'),vmin=-50,vmax=50,alpha=0.8,transform=ccrs.PlateCarree(),**kwargs):
     img = ax.pcolormesh(x,y,z,
         cmap=cmap,transform=transform, vmin=vmin, vmax=vmax,**kwargs)
+    return img
+
+def rh_contourf(ax,x,y,z,cmap=None,levels=np.arange(30,80,2),alpha=0.8,transform=ccrs.PlateCarree(),**kwargs):
+    if(cmap == None):
+        cmap = col.LinearSegmentedColormap.from_list('own2',['#1E90FF','#94D8F6','#F1F1F1','#BFBFBF','#696969'])
+    img = ax.contourf(x,y,z,levels=np.arange(0, 101, 0.5), cmap=cmap,extend='max',transform=transform,**kwargs)
     return img

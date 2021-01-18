@@ -300,6 +300,12 @@ def evolution_ana(initTime=[], fhour=0,atime=6, data_source='CIMISS', model='GRA
 
 if __name__ == '__main__':
 
+    func=draw_elements.T2m_zero_heatwaves
+    evolution(func=func,initTime='21010708',fhours=list(np.arange(0,84,3)),show='animation',model='中央气象台中短期指导',func_other_args={'city':True},keep_temp=True,max_workers=6)
+
+    func=draw_elements.T2m_mn24
+    evolution(func=func,initTime='20122908',fhours=list(np.arange(0,84,3)),show='tab',model='中央气象台中短期指导',func_other_args={'city':True},keep_temp=True)
+
     #剖面时间
     time_cross=['20111808','20111814','20111820','20111902','20111908','20111914','20111920']
     #第一个剖面位置
@@ -328,6 +334,4 @@ if __name__ == '__main__':
     func=draw_QPF.gh_rain
     stability(func=func,target_time='20111720',latest_init_time='20111620',func_other_args={'data_source':'CIMISS'})
 
-    func=draw_crossection.Crosssection_Wind_Theta_e_div
-    evolution(func=func,fhours=list(np.arange(6,60,3)),show='animation',func_other_args={'data_source':'CIMISS'})
     vercompare(func=func,ninit=9,init_interval=6,func_other_args={},show='animation')

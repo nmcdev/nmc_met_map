@@ -114,12 +114,12 @@ def gh_uv_tadv(initTime=None, fhour=6, day_back=0,model='ECMWF',
     v=utl.cut_xrdata(map_extent, v, delt_x=delt_x, delt_y=delt_y)
     tmp=utl.cut_xrdata(map_extent, tmp, delt_x=delt_x, delt_y=delt_y)
     tadv_xr=tmp.copy(deep=True)
-    tadv=-1*mbd.advection(tmp['data'].values.squeeze(),u['data'].values.squeeze(),v['data'].values.squeeze(),tmp['lat'].values,tmp['lon'].values)
+    tadv=mbd.advection(tmp['data'].values.squeeze(),u['data'].values.squeeze(),v['data'].values.squeeze(),tmp['lat'].values,tmp['lon'].values)
     tadv_xr['data'].values=tadv[np.newaxis,np.newaxis,:,:]
     gh=utl.mask_terrian(gh_lev,psfc,gh)
     u=utl.mask_terrian(uv_lev,psfc,u)
     tadv_xr=utl.mask_terrian(uv_lev,psfc,tadv_xr)
-
+    tadv_xr=tadv_xr.rolling({'lon':3,'lat':3}).mean()
     gh.attrs['model']=model
     uv=xr.merge([u.rename({'data': 'u'}),v.rename({'data': 'v'})])
 

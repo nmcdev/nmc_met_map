@@ -18,6 +18,104 @@ import nmc_met_graphics.cmap.cm as dk_ctables2
 import matplotlib.colors as col
 import matplotlib.cm as cm
 
+def draw_Crosssection_Wind_Theta_e_mpv(
+                    cross_mpv=None, cross_Theta_e=None, cross_u=None,
+                    cross_v=None,cross_terrain=None,
+                    gh=None,
+                    h_pos=None,st_point=None,ed_point=None,
+                    levels=None,map_extent=(50, 150, 0, 65),lw_ratio=None,
+                    output_dir=None):
+
+    plt.rcParams['font.sans-serif'] = ['SimHei'] # 步骤一（替换sans-serif字体）
+    plt.rcParams['axes.unicode_minus'] = False  # 步骤二（解决坐标轴负数的负号显示问题）
+
+    initTime = pd.to_datetime(
+    str(cross_Theta_e['forecast_reference_time'].values)).replace(tzinfo=None).to_pydatetime()
+    fcst_time=initTime+timedelta(hours=gh['forecast_period'].values[0])
+    
+    fig = plt.figure(1, figsize=(lw_ratio[0], lw_ratio[1]))
+    ax = plt.axes()
+    absv_contour = ax.contourf(cross_mpv['lon'], cross_mpv['level'], -1*cross_mpv['data']*1e6,
+                        levels=range(-500, 500, 1), cmap=dk_ctables2.ncl_cmaps('cmp_flux'),extend='both')
+    absv_colorbar = fig.colorbar(absv_contour)
+
+    # Plot potential temperature using contour, with some custom labeling
+    Theta_e_contour = ax.contour(cross_Theta_e['lon'], cross_Theta_e['level'],cross_Theta_e.values,
+                            levels=np.arange(250, 450, 5), colors='k', linewidths=2)
+
+    Theta_e_contour.clabel(np.arange(250, 450, 5), fontsize=20, colors='k', inline=1,
+                        inline_spacing=8, fmt='%i', rightside_up=True, use_clabeltext=True)
+
+    wind_slc_vert = list(range(0, len(levels), 1))
+    wind_slc_horz = slice(5, 100, 5)
+    ax.barbs(cross_u['lon'][wind_slc_horz], cross_u['level'][wind_slc_vert],
+            cross_u['t_wind'][wind_slc_vert, wind_slc_horz]*2.5,    
+            cross_v['n_wind'][wind_slc_vert, wind_slc_horz]*2.5, color='k')
+
+    startcolor = '#8B4513'   #棕色
+    endcolor='#DAC2AD' #绿 
+    cmap2 = col.LinearSegmentedColormap.from_list('own3',[endcolor,startcolor])
+    # extra arguments are N=256, gamma=1.0
+    cm.register_cmap(cmap=cmap2)
+    terrain_contour = ax.contourf(cross_terrain['lon'], cross_terrain['level'], cross_terrain.values,
+                            levels=np.arange(0, 500, 1), cmap=cm.get_cmap('own3'),zorder=100)
+
+    # Adjust the y-axis to be logarithmic
+    ax.set_yscale('symlog')
+    ax.set_yticklabels(np.arange(levels[0], levels[-1], -100))
+    ax.set_ylim(levels[0], levels[-1])
+    ax.set_yticks(np.arange(levels[0], levels[-1], -100))
+
+    # Define the CRS and inset axes
+    data_crs = ccrs.PlateCarree()
+    ax_inset = fig.add_axes(h_pos, projection=data_crs)
+    ax_inset.set_extent(map_extent, crs=data_crs)
+    # Plot geopotential height at 500 hPa using xarray's contour wrapper
+    ax_inset.contour(gh['lon'], gh['lat'], np.squeeze(gh['data']),
+                    levels=np.arange(500, 600, 4), cmap='inferno')
+    # Plot the path of the cross section
+    endpoints = data_crs.transform_points(ccrs.Geodetic(),
+                                        *np.vstack([st_point, ed_point]).transpose()[::-1])
+    ax_inset.scatter(endpoints[:, 0], endpoints[:, 1], c='k', zorder=2)
+    ax_inset.plot(cross_u['lon'], cross_u['lat'], c='k', zorder=2)
+    # Add geographic features
+    ax_inset.coastlines()
+    utl.add_china_map_2cartopy_public(
+            ax_inset, name='province', edgecolor='black', lw=0.8, zorder=105)
+    # Set the titles and axes labels
+    ax_inset.set_title('')
+
+    ax.set_title('相当位温, 湿位涡, 沿剖面风', loc='right', fontsize=20)
+    ax.set_ylabel('Pressure (hPa)')
+    ax.set_xlabel('Longitude')
+    absv_colorbar.set_label('湿位涡 (10${^-6}$ K*m${^2}$*kg${^{-1}}$*s${^{-1}}$)')
+
+    if(sys.platform[0:3] == 'lin'):
+        locale.setlocale(locale.LC_CTYPE, 'zh_CN.utf8')
+    if(sys.platform[0:3] == 'win'):        
+        locale.setlocale(locale.LC_CTYPE, 'chinese')
+    bax=fig.add_axes([0.10,0.88,.25,.07],facecolor='#FFFFFFCC')
+    bax.axis('off')
+    #bax.set_yticks([])
+    #bax.set_xticks([])
+    bax.axis([0, 10, 0, 10])        
+    plt.text(2.5, 7.5,'起报时间: '+initTime.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 5,'预报时间: '+fcst_time.strftime("%Y年%m月%d日%H时"),size=11)
+    plt.text(2.5, 2.5,'预报时效: '+str(int(gh['forecast_period'].values[0]))+'小时',size=11)
+    plt.text(2.5, 0.5,'www.nmc.cn',size=11)
+
+    utl.add_logo_extra_in_axes(pos=[0.1,0.88,.07,.07],which='nmc', size='Xlarge')
+
+    # show figure
+    if(output_dir != None):
+        plt.savefig(output_dir+'相当位温_湿位涡_沿剖面风_预报_'+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(int(gh['forecast_period'].values[0]))+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
+    
+    if(output_dir == None):
+        plt.show() 
+
 def draw_Crosssection_Wind_Theta_e_div(
                     cross_div3d=None, cross_Theta_e=None, cross_u=None,
                     cross_v=None,cross_terrain=None,

@@ -129,6 +129,8 @@ def get_labels_dist(num):
         return (4, 4)
     if num > 16 and num <= 25:
         return (5, 5)
+    if num >= 25:
+        return (8, 8)
 
 def obs_radar_filename(time='none', product_name='CREF'):
     """
@@ -1015,6 +1017,12 @@ def Cassandra_dir(data_type=None,data_source=None,var_name=None,lvl=None
                     'T2m':'GMOSRR/ROLLING_UPDATE/TMP/2M_ABOVE_GROUND/',  
                     'rh2m':'GMOSRR/ROLLING_UPDATE/RH/2M_ABOVE_GROUND/'
                     },
+            '中央气象台智能网格延伸期预报':{
+                    'Tmx_2m':'NWFD_SCMOC/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'Tmn_2m':'NWFD_SCMOC/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/',
+                    'rh2m':'NWFD_SCMOC/RH_AVERAGE/2M_ABOVE_GROUND/',
+                    'wind10m':'NWFD_SCMOC/WIND_AVERAGE/10M_ABOVE_GROUND/',
+                    },
             'CLDAS':{
                     'Tmx_2m':"CLDAS/MAXIMUM_TEMPERATURE/2M_ABOVE_GROUND/",
                     'Tmn_2m':"CLDAS/MINIMUM_TEMPERATURE/2M_ABOVE_GROUND/",
@@ -1534,7 +1542,10 @@ def mask_terrian(prs_lev,psfc,xr_input):
     # if(idx_terrian.any()):
     #     xr_input['data'].values[idx_terrian]=np.nan
     # return xr_input
-    xr_output=xr_input.where((psfc-prs_lev) > 0)
+    psfc_new=psfc.interp(lon =xr_input['lon'].values, 
+                    lat = xr_input['lat'].values,
+                    kwargs={"fill_value": "extrapolate"})
+    xr_output=xr_input.where((psfc_new-prs_lev) > 0)
     return xr_output
 
 def cut_xrdata(map_extent,xr_input,delt_x=0,delt_y=0):

@@ -14,6 +14,49 @@ import xarray as xr
 import pkg_resources
 import nmc_met_map.product.diagnostic.elements.horizontal.SCMOC as draw_SCMOC
 
+def mean24_rh2m_wind10m(initTime=None, fhour=360, model='中央气象台智能网格延伸期预报',
+    map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
+    south_China_sea=True,area =None,city=False,output_dir=None,**kwargs):
+
+# prepare data
+    if(data_source =='MICAPS'):    
+        data_dir = [utl.Cassandra_dir(data_type='surface',data_source=model,var_name='rh2m'),
+                    utl.Cassandra_dir(data_type='surface',data_source=model,var_name='wind10m')]
+
+        if(initTime != None):
+            filename = utl.model_filename(initTime, fhour)
+        else:
+            filename=utl.filename_day_back_model(day_back=0,fhour=fhour)
+
+        rh2m = MICAPS_IO.get_model_grid(data_dir[0], filename=filename)
+        wind10m = MICAPS_IO.get_model_grid(data_dir[1], filename=filename)
+
+# set map extent
+    if(area != None):
+        south_China_sea=False
+
+    if(area != None):
+        cntr_pnt,zoom_ratio=utl.get_map_area(area_name=area)
+    map_extent,delt_x,delt_y=utl.get_map_extent(cntr_pnt=cntr_pnt,zoom_ratio=zoom_ratio,map_ratio=map_ratio)
+    rh2m=utl.cut_xrdata(map_extent,rh2m,delt_x=delt_x,delt_y=delt_y)
+    wind10m=utl.cut_xrdata(map_extent,wind10m,delt_x=delt_x,delt_y=delt_y)
+
+#- to solve the problem of labels on all the contours
+
+    rh2m.attrs['model']=model
+    rh2m.attrs['title']='过去24小时平均2米相对湿度及10米风'
+    u,v=mpcalc.wind_components(wind10m['speed'].values*units('m/s'),wind10m['angle'].values*units('degree'))
+    u10m=rh2m.copy(deep=True)
+    v10m=rh2m.copy(deep=True)
+    u10m['data'].values=u.magnitude
+    v10m['data'].values=v.magnitude
+    uv10m=xr.merge([u10m.rename({'data': 'u10m'}),v10m.rename({'data': 'v10m'})])
+    elements_graphics.draw_rh2m_wind10m(
+        rh2m,uv10m,#T_type='T_mn',
+        map_extent=map_extent, regrid_shape=20,
+        city=city,south_China_sea=south_China_sea,
+        output_dir=output_dir)
+
 def T2m_zero_heatwaves(initTime=None, fhour=24, day_back=0,model='中央气象台中短期指导',
     map_ratio=14/9,zoom_ratio=20,cntr_pnt=[104,34],data_source='MICAPS',
     south_China_sea=True,area =None,city=False,output_dir=None,
@@ -241,7 +284,7 @@ def T2m_mn24(initTime=None, fhour=24, day_back=0,model='中央气象台中短期
 #- to solve the problem of labels on all the contours
 
     Tmn_2m.attrs['model']=model
-    Tmn_2m.attrs['title']='2米最低温度'
+    Tmn_2m.attrs['title']='过去24小时2米最低温度'
 
     elements_graphics.draw_T_2m(
         T_2m=Tmn_2m,#T_type='T_mn',
@@ -301,7 +344,7 @@ def T2m_mean24(initTime=None, fhour=24, day_back=0,model='中央气象台中短�
 #- to solve the problem of labels on all the contours
 
     Tmean_2m.attrs['model']=model
-    Tmean_2m.attrs['title']='2米平均温度'
+    Tmean_2m.attrs['title']='过去24小时2米平均温度'
 
     if(return_data is True):
         return Tmean_2m

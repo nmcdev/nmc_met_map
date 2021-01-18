@@ -18,6 +18,40 @@ from matplotlib.colors import BoundaryNorm,ListedColormap
 import nmc_met_graphics.cmap.ctables as dk_ctables
 from scipy.ndimage import gaussian_filter
 import matplotlib.patheffects as path_effects
+import nmc_met_map.graphics2 as GF
+
+def draw_rh2m_wind10m(rh2m,uv10m,map_extent=(60, 150, 0, 65),
+                    add_china=True,city=True,south_China_sea=True,add_background=True,
+                    output_dir=None,**kargws):
+
+    initTime = pd.to_datetime(rh2m['forecast_reference_time'].values).replace(tzinfo=None).to_pydatetime()
+    fhour = int(rh2m['forecast_period'].values[0])
+    fcstTime = initTime + timedelta(hours=fhour)
+
+    title = '[{}] {}'.format(rh2m.attrs['model'],rh2m.attrs['title'])
+    
+    forcast_info = '起报时间: {0:%Y}年{0:%m}月{0:%d}日{0:%H}时\n预报时间: {1:%Y}年{1:%m}月{1:%d}日{1:%H}时\n预报时效: {2}小时\nwww.nmc.cn'.format(initTime, fcstTime, fhour)
+
+    fig, ax, map_extent = GF.pallete_set.Horizontal_Pallete_plain((18, 9),map_extent=map_extent, title=title, forcast_info=forcast_info,info_zorder=4,plotcrs=None,
+                                             add_china=add_china, add_city=city, add_background=add_background, south_China_sea=south_China_sea,title_fontsize=25)
+
+    contourf_rh=GF.draw_method.rh_contourf(ax, rh2m['lon'].values, rh2m['lat'].values, np.squeeze(rh2m['data'].values),zorder=1)
+    barbs_wind=GF.draw_method.wind_barbs(ax,uv10m['lon'].values,uv10m['lat'].values,
+                                        np.squeeze(uv10m['u10m'].values),np.squeeze(uv10m['v10m'].values),zorder=2)
+    l, b, w, h = ax.get_position().bounds
+    cax=plt.axes([l,b-0.04,w,.02])
+    cb = plt.colorbar(contourf_rh, cax=cax, orientation='horizontal',
+                      extend='max',ticks=[20,40,60,80,100])
+    cb.ax.tick_params(labelsize='x-large')
+    cb.set_label('%',size=20)
+
+    if output_dir:
+        plt.savefig(output_dir+'地面2m平均相对湿度和风速_预报_'+
+        '起报时间_'+initTime.strftime("%Y年%m月%d日%H时")+
+        '预报时效_'+str(rh2m.coords['forecast_period'].values[0])+'小时'+'.png', dpi=200,bbox_inches='tight')
+        plt.close()
+    else:
+        plt.show()
 
 def draw_T_2m(T_2m=None,
             map_extent=(50, 150, 0, 65),
@@ -90,7 +124,8 @@ def draw_T_2m(T_2m=None,
     gl.xlocator = mpl.ticker.FixedLocator(np.arange(0, 360, 15))
     gl.ylocator = mpl.ticker.FixedLocator(np.arange(-90, 90, 15))
 
-    utl.add_cartopy_background(ax,name='RD')
+    ax.add_feature(cfeature.LAND,color='#F5E19F')
+    ax.add_feature(cfeature.OCEAN)
 
     l, b, w, h = ax.get_position().bounds
 
