@@ -4,5 +4,5 @@ Including pyhsical parameter calculation and figure ploting.
 """
 
 __author__ = "The R & D Center for Weather Forecasting Technology in NMC, CMA"
-__version__ = '0.1.1'
+__version__ = '0.1.11'
 from . import MICAPS 
